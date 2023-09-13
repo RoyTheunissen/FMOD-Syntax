@@ -1,0 +1,16 @@
+{
+    "name": "RoyTheunissen.UnityPackage-Template.Editor",
+    "rootNamespace": "RoyTheunissen.UnityPackage-Template",
+    "references": [
+        "GUID:0043130421c927846854eb1182e09ddb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

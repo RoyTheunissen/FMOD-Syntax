@@ -1,0 +1,21 @@
+{
+  "name": "com.roytheunissen.unitypackage-template",
+  "displayName": "Unity Package Template",
+  "version": "0.0.1",
+  "unity": "2021.3",
+  "description": "TO DO",
+  "keywords": [
+    "TO DO",
+  ],
+  "author": {
+    "name": "Roy Theunissen",
+    "url": "https://www.roytheunissen.com"
+  },
+  "category": "TO DO",
+  "homepage": "https://github.com/RoyTheunissen/UnityPackage-Template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RoyTheunissen/UnityPackage-Template"
+  },
+  "bugs": "https://github.com/RoyTheunissen/UnityPackage-Template/issues"
+}
