@@ -1,6 +1,6 @@
 {
-    "name": "RoyTheunissen.UnityPackage-Template",
-    "rootNamespace": "RoyTheunissen.UnityPackage-Template",
+    "name": "RoyTheunissen.FMODWrapper",
+    "rootNamespace": "RoyTheunissen.FMODWrapper",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
