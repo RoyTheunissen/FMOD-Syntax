@@ -105,6 +105,9 @@ namespace RoyTheunissen.FMODWrapper
             
             settings.InitializeFromWizard(generatedScriptsFolderPath, namespaceForGeneratedCode);
             
+            EditorUtility.SetDirty(settings);
+            AssetDatabase.SaveAssets();
+            
             Close();
         }
 
