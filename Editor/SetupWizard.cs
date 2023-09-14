@@ -42,10 +42,13 @@ namespace RoyTheunissen.FMODWrapper
             string[] settingsAsset = AssetDatabase.FindAssets("t:FmodWrapperSettings");
             if (settingsAsset.Length > 0)
                 return;
-            
-            SetupWizard setupWizard = GetWindow<SetupWizard>(true, "FMOD Wrapper Setup Wizard");
-            setupWizard.minSize = setupWizard.maxSize = new Vector2(400, 248);
-            setupWizard.namespaceForGeneratedCode = $"{Application.companyName}.{Application.productName}.FMOD";
+
+            EditorApplication.delayCall += () =>
+            {
+                SetupWizard setupWizard = GetWindow<SetupWizard>(true, "FMOD Wrapper Setup Wizard");
+                setupWizard.minSize = setupWizard.maxSize = new Vector2(400, 248);
+                setupWizard.namespaceForGeneratedCode = $"{Application.companyName}.{Application.productName}.FMOD";
+            };
         }
 
         private void OnGUI()
