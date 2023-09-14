@@ -22,7 +22,9 @@ namespace RoyTheunissen.FMODWrapper
         private string defaultPath;
         private string contents;
 
-        private EditorAssetReference<TextAsset> textAsset;
+        private readonly EditorAssetReference<TextAsset> textAsset;
+
+        private bool isInitialized;
 
         public CodeGenerator(string templateFileName)
         {
@@ -30,9 +32,17 @@ namespace RoyTheunissen.FMODWrapper
             
             // By default, just write to the folder where the template is.
             defaultPath = templateFileName.RemoveSuffix(TemplateSuffix);
+        }
+
+        private void Initialize()
+        {
+            if (isInitialized)
+                return;
+
+            isInitialized = true;
             
-            Assert.IsNotNull(textAsset.Asset, $"Tried to load code template '{templateFileName}' which didn't exist.");
-            
+            Assert.IsNotNull(textAsset.Asset, $"Tried to load code template '{textAsset.Path}' which didn't exist.");
+
             Reset();
         }
 
@@ -48,6 +58,8 @@ namespace RoyTheunissen.FMODWrapper
 
         public void ReplaceKeyword(string keyword, string code, bool removeLineIfCodeIsEmpty = false)
         {
+            Initialize();
+            
             if (string.IsNullOrEmpty(keyword))
                 return;
 
@@ -103,6 +115,8 @@ namespace RoyTheunissen.FMODWrapper
 
         public void RemoveKeywordLines(string keyword)
         {
+            Initialize();
+            
             if (string.IsNullOrEmpty(keyword))
                 return;
             
@@ -120,11 +134,15 @@ namespace RoyTheunissen.FMODWrapper
 
         public string GetCode()
         {
+            Initialize();
+            
             return contents;
         }
 
         public void GenerateFile(string path = null)
         {
+            Initialize();
+            
             string pathAbsolute =
                 string.IsNullOrEmpty(path) ? defaultPath.GetAbsolutePath() : path.GetAbsolutePath();
             
