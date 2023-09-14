@@ -5,7 +5,7 @@ using UnityEditor;
 using System.Linq;
 using FMOD.Studio;
 using FMODUnity;
-using UnityEngine;
+using RoyTheunissen.FMODWrapper.Runtime;
 
 namespace RoyTheunissen.FMODWrapper
 {
@@ -14,17 +14,16 @@ namespace RoyTheunissen.FMODWrapper
     /// </summary>
     public static class FmodCodeGenerator
     {
-        private const string ScriptRelativePath = "Fmod/";
-        private const string ScriptPathBase = "Generated/" + ScriptRelativePath;
-        private const string TemplatePathBase = "Templates/" + ScriptRelativePath;
+        private static string ScriptPathBase => FmodWrapperSettings.Instance.GeneratedScriptsFolderPath;
+        private const string TemplatePathBase = "Templates/Fmod/";
         
-        private const string EventsScriptPath = ScriptPathBase + "FmodEvents.cs";
+        private static string EventsScriptPath => ScriptPathBase + "FmodEvents.cs";
         private const string EventsTemplatePath = TemplatePathBase + "Events/";
         
-        private const string BanksScriptPath = ScriptPathBase + "FmodBanks.cs";
+        private static string BanksScriptPath => ScriptPathBase + "FmodBanks.cs";
         private const string BanksTemplatePath = TemplatePathBase + "Banks/";
         
-        private const string BusesScriptPath = ScriptPathBase + "FmodBuses.cs";
+        private static string BusesScriptPath => ScriptPathBase + "FmodBuses.cs";
         private const string BusesTemplatePath = TemplatePathBase + "Buses/";
         
         private const string EventNameKeyword = "EventName";

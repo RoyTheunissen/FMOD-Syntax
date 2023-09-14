@@ -13,7 +13,7 @@ namespace RoyTheunissen.FMODWrapper
     public class SetupWizard : EditorWindow
     {
         private string settingsFolderPath = string.Empty;
-        private string generatedScriptsFolderPath = "Generated/FMOD";
+        private string generatedScriptsFolderPath = "Generated/Scripts/FMOD";
         
         private string namespaceForGeneratedCode;
         
