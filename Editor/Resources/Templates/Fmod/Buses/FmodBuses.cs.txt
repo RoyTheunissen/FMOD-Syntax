@@ -1,4 +1,4 @@
-namespace RoyTheunissen.WouldntYouLikeToKnow.Audio.Fmod
+namespace ##Namespace##
 {
     /// <summary>
     /// GENERATED: Contains FMOD buses so they can accessed in a strongly-typed manner.

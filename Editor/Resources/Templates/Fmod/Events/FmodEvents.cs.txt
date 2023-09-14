@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using FMOD.Studio;
 using UnityEngine;
 
-namespace RoyTheunissen.WouldntYouLikeToKnow.Audio.Fmod
+namespace ##Namespace##
 {
     /* ACTIVE EVENT GUIDS (We keep track of these to detect renames and keep old ones around with an Obsolete tag)
     ##ActiveEventGuids##

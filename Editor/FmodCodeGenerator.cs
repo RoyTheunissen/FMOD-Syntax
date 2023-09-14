@@ -56,6 +56,8 @@ namespace RoyTheunissen.FMODWrapper
         private static readonly CodeGenerator busFieldGenerator =
             new CodeGenerator(BusesTemplatePath + "FmodBusField.cs");
         
+        private static string Namespace => FmodWrapperSettings.Instance.NamespaceForGeneratedCode;
+        
         [NonSerialized] private static bool didSourceFilesChange;
 
         [InitializeOnLoadMethod]
@@ -301,12 +303,14 @@ namespace RoyTheunissen.FMODWrapper
         private static void GenerateCode()
         {
             GenerateEventsScript();
-            GenerateBanksScript();
+            GenerateBanksAndBusesScripts();
         }
 
         private static void GenerateEventsScript()
         {
             eventsScriptGenerator.Reset();
+            
+            eventsScriptGenerator.ReplaceKeyword("Namespace", Namespace);
 
             Dictionary<string, string> previousEventNamesByGuid = GetExistingEventNamesByGuid();
 
@@ -407,9 +411,12 @@ namespace RoyTheunissen.FMODWrapper
             eventsScriptGenerator.GenerateFile(EventsScriptPath);
         }
 
-        private static void GenerateBanksScript()
+        private static void GenerateBanksAndBusesScripts()
         {
             banksScriptGenerator.Reset();
+            
+            banksScriptGenerator.ReplaceKeyword("Namespace", Namespace);
+            
             string banksCode = string.Empty;
 
             // Need to access the banks this way, not via EventManager.Banks because EditorBankRef doesn't have info
@@ -445,6 +452,9 @@ namespace RoyTheunissen.FMODWrapper
             
             // Now that we know the buses, we can also generate a file for accessing those.
             busesScriptGenerator.Reset();
+            
+            busesScriptGenerator.ReplaceKeyword("Namespace", Namespace);
+            
             string busesCode = string.Empty;
             buses = buses.OrderBy(b => b.getPath()).ToList();
             foreach (FMOD.Studio.Bus bus in buses)
