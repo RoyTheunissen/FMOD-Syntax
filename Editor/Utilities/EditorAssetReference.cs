@@ -1,5 +1,5 @@
 using System;
-using UnityEditor;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace RoyTheunissen.FMODWrapper
@@ -15,23 +15,17 @@ namespace RoyTheunissen.FMODWrapper
             get
             {
                 if (cachedAsset == null)
-                {
-                    string[] candidates = AssetDatabase.FindAssets($"t:{typeof(T).Name} {searchQuery}");
-                    if (candidates.Length > 0)
-                    {
-                        string codeTemplatePath = AssetDatabase.GUIDToAssetPath(candidates[0]);
-                        cachedAsset = AssetDatabase.LoadAssetAtPath<T>(codeTemplatePath);
-                    }
-                }
+                    cachedAsset = Resources.Load<T>(path);
                 return cachedAsset;
             }
         }
 
-        [NonSerialized] private string searchQuery;
+        [NonSerialized] private readonly string path;
+        public string Path => path;
 
-        public EditorAssetReference(string searchQuery)
+        public EditorAssetReference(string path)
         {
-            this.searchQuery = searchQuery;
+            this.path = path;
         }
 
         public static implicit operator T(EditorAssetReference<T> editorAssetReference)

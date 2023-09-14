@@ -5,6 +5,7 @@ using UnityEditor;
 using System.Linq;
 using FMOD.Studio;
 using FMODUnity;
+using UnityEngine;
 
 namespace RoyTheunissen.FMODWrapper
 {
@@ -13,40 +14,48 @@ namespace RoyTheunissen.FMODWrapper
     /// </summary>
     public static class FmodCodeGenerator
     {
-        private const string ScriptRelativePath = "Audio/Fmod/";
+        private const string ScriptRelativePath = "Fmod/";
         private const string ScriptPathBase = "Generated/" + ScriptRelativePath;
-
+        private const string TemplatePathBase = "Templates/" + ScriptRelativePath;
+        
         private const string EventsScriptPath = ScriptPathBase + "FmodEvents.cs";
-
+        private const string EventsTemplatePath = TemplatePathBase + "Events/";
+        
         private const string BanksScriptPath = ScriptPathBase + "FmodBanks.cs";
-
+        private const string BanksTemplatePath = TemplatePathBase + "Banks/";
+        
         private const string BusesScriptPath = ScriptPathBase + "FmodBuses.cs";
-
+        private const string BusesTemplatePath = TemplatePathBase + "Buses/";
+        
         private const string EventNameKeyword = "EventName";
         private static readonly CodeGenerator eventsScriptGenerator =
-            new CodeGenerator("FmodEvents.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEvents.cs");
         private static readonly CodeGenerator eventTypesGenerator =
-            new CodeGenerator("FmodEventTypes.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventTypes.cs");
         private static readonly CodeGenerator eventFieldsGenerator =
-            new CodeGenerator("FmodEventFields.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventFields.cs");
         private static readonly CodeGenerator eventParameterGenerator =
-            new CodeGenerator("FmodEventParameter.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventParameter.cs");
         private static readonly CodeGenerator eventParametersInitializationGenerator =
-            new CodeGenerator("FmodEventParametersInitialization.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventParametersInitialization.cs");
         private static readonly CodeGenerator eventConfigPlayMethodWithParametersGenerator =
-            new CodeGenerator("FmodEventConfigPlayMethodWithParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventConfigPlayMethodWithParameters.cs");
         private static readonly CodeGenerator eventPlaybackPlayMethodWithParametersGenerator =
-            new CodeGenerator("FmodEventPlaybackPlayMethodWithParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventPlaybackPlayMethodWithParameters.cs");
 
-        private static readonly CodeGenerator enumGenerator = new CodeGenerator("FmodEnum.cs");
+        private static readonly CodeGenerator enumGenerator = new CodeGenerator(EventsTemplatePath + "FmodEnum.cs");
         private static readonly CodeGenerator globalParameterGenerator =
-            new CodeGenerator("FmodGlobalParameter.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameter.cs");
         
-        private static readonly CodeGenerator banksScriptGenerator = new CodeGenerator("FmodBanks.cs");
-        private static readonly CodeGenerator bankFieldGenerator = new CodeGenerator("FmodBankField.cs");
+        private static readonly CodeGenerator banksScriptGenerator =
+            new CodeGenerator(BanksTemplatePath + "FmodBanks.cs");
+        private static readonly CodeGenerator bankFieldGenerator =
+            new CodeGenerator(BanksTemplatePath + "FmodBankField.cs");
         
-        private static readonly CodeGenerator busesScriptGenerator = new CodeGenerator("FmodBuses.cs");
-        private static readonly CodeGenerator busFieldGenerator = new CodeGenerator("FmodBusField.cs");
+        private static readonly CodeGenerator busesScriptGenerator =
+            new CodeGenerator(BusesTemplatePath + "FmodBuses.cs");
+        private static readonly CodeGenerator busFieldGenerator =
+            new CodeGenerator(BusesTemplatePath + "FmodBusField.cs");
         
         [NonSerialized] private static bool didSourceFilesChange;
 
