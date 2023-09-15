@@ -21,22 +21,33 @@ This setup allows events and parameters to be renamed gracefully as you can do i
 
 Overall this system significantly speeds up your audio implementation workflow and makes it more robust, at the expense of a little bit of boilerplate code that you won't even have to maintain yourself.
 
+## Getting Started
+
+- Install the package to your Unity project
+- The Setup Wizard will pop up and allow you to specify where and how to create the settings file & save generated code files
+- Configure the system as desired and press Initialize
+- Use `FMOD > Generate FMOD Code` or `CTRL+ALT+G` to generate the FMOD code
+- Cull FMOD expired playback instances by calling `FmodWrapperSystem.CullPlaybacks();` in an `Update` loop somewhere. I recommend putting this in your audio service.
+- You can now fire your FMOD events in a strongly typed way
+
+## How to use
+
 ### One-offs
 ```cs
 // Parameterless one-off sound (global)
 FmodEvents.TestOneOff.Play();
 
 // Parameterless one-off sound (spatialized)
-FmodEvents.TestOneOff.Play(gameObject);
+FmodEvents.TestOneOff.Play(transform);
 
 // Spatialized one-off with parameters
-FmodEvents.Footstep.Play(gameObject, FootstepPlayback.SurfaceValues.Generic);
+FmodEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
 ```
 
 ### Loops
 ```cs
 // Looping sound
-TestContinuousPlayback testContinuousPlayback = FmodEvents.TestContinuous.Play(gameObject);
+TestContinuousPlayback testContinuousPlayback = FmodEvents.TestContinuous.Play(transform);
 
 float value = Mathf.Sin(Time.time * Mathf.PI * 1.0f).Map(-1, 1);
 testContinuousPlayback.Strength.Value = value;
@@ -52,15 +63,6 @@ testContinuousPlayback?.Cleanup();
 // Setting global parameters
 GlobalParameters.PlayerSpeed.Value = value;
 ```
-
-## Getting Started
-
-- Install the package to your Unity project
-- The Setup Wizard will pop up and allow you to specify where and how to create the settings file & save generated code files
-- Configure the system as desired and press Initialize
-- Use `FMOD > Generate FMOD Code` or `CTRL+ALT+G` to generate the FMOD code
-- Cull FMOD expired playback instances by calling `FmodWrapperSystem.CullPlaybacks();` in an `Update` loop somewhere. I recommend putting this in your audio service.
-- You can now fire your FMOD events in a strongly typed way
 
 ## Compatibility
 
