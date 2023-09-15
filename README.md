@@ -81,7 +81,8 @@ If you use an older version of Unity and are running into trouble, feel free to 
 
 ## Known Issues
 
-- Enums are automatically generated for label-type parameters. Currently these enums are per-event, so there is a little bit of duplication if you have multiple events with the same labeled parameter.
+- Enums are automatically generated for label-type parameters. Currently these enums are per-event, so there is a little bit of duplication if you have multiple events with the same labelled parameter.
+- Labelled parameter values are converted to enums, and therefore they can't have spaces in them. This is potentially solvable but it would be quite a hassle. Just use PascalCasing or underscores instead.
 - No support for snapshots yet, but this will be added soon
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
 
