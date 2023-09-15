@@ -2,25 +2,78 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE.md)
 ![GitHub Follow](https://img.shields.io/github/followers/RoyTheunissen?label=RoyTheunissen&style=social) ![Twitter](https://img.shields.io/twitter/follow/Roy_Theunissen?style=social)
 
-_🛑 <b><u>TO DO</u></b>_
+_Generates code to be able to invoke FMOD events in a strongly-typed manner_
 
 ## About the Project
 
-🛑 <b><u>TO DO</u></b>
+Out-of-the-box FMOD requires you to access events and parameters via inspector references or by name. Neither of these setups is ideal.
 
-[TO DO Video](https://www.youtube.com/watch?v=dQw4w9WgXcQ)    |    [TO DO Article](https://blog.roytheunissen.com)
+Dispatching an event this way requires you to define a bunch of fields, assign things in the inspector, and then the syntax for setting parameters is weakly-typed.
+You can skip some of this by dispatching events/setting parameters by name but that has the drawback that you need to look up what the name is and it's very hard and error-prone to rename anything as it'll break references.
 
-![Example](Documentation~/Example.gif)
+For ease of use it's preferable if FMOD events and parameters are accessed in a strongly-typed way such that they're known at compile-time.
+
+This requires a little bit of code generation, and that's where `FMOD-Wrapper` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching FMOD events with parameters in as little as one line of code.
+
+![Example](Documentation~/Generated%20Code%20Files.png)
+
+This setup allows events and parameters to be renamed gracefully as you can do it via your IDE, update your banks accordingly and then re-generate the code. If events are renamed in the banks and you still reference those events by their old names, warnings will be thrown to give you a chance to refactor without immediately getting compile errors.
+
+Overall this system significantly speeds up your audio implementation workflow and makes it more robust, at the expense of a little bit of boilerplate code that you won't even have to maintain yourself.
+
+### One-offs
+```cs
+// Parameterless one-off sound (global)
+FmodEvents.TestOneOff.Play();
+
+// Parameterless one-off sound (spatialized)
+FmodEvents.TestOneOff.Play(gameObject);
+
+// Spatialized one-off with parameters
+FmodEvents.Footstep.Play(gameObject, FootstepPlayback.SurfaceValues.Generic);
+```
+
+### Loops
+```cs
+// Looping sound
+TestContinuousPlayback testContinuousPlayback = FmodEvents.TestContinuous.Play(gameObject);
+
+float value = Mathf.Sin(Time.time * Mathf.PI * 1.0f).Map(-1, 1);
+testContinuousPlayback.Strength.Value = value;
+
+testContinuousPlayback?.Stop();
+
+// Cancelling loops in OnDestroy
+testContinuousPlayback?.Cleanup();
+```
+
+### Global Parameters
+```cs
+// Setting global parameters
+GlobalParameters.PlayerSpeed.Value = value;
+```
 
 ## Getting Started
 
-- 🛑 <b><u>TO DO</u></b>
+- Install the package to your Unity project
+- The Setup Wizard will pop up and allow you to specify where and how to create the settings file & save generated code files
+- Configure the system as desired and press Initialize
+- Use `FMOD > Generate FMOD Code` or `CTRL+ALT+G` to generate the FMOD code
+- Cull FMOD expired playback instances by calling `FmodWrapperSystem.CullPlaybacks();` in an `Update` loop somewhere. I recommend putting this in your audio service.
+- You can now fire your FMOD events in a strongly typed way
 
 ## Compatibility
 
 This system was developed for Unity 2021 and upwards, it's recommended that you use it for this version.
 
 If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
+
+## Known Issues
+
+- Enums are automatically generated for label-type parameters. Currently these enums are per-event, so there is a little bit of duplication if you have multiple events with the same labeled parameter.
+- No support for snapshots yet, but this will be added soon
+- There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
+
 
 ## Installation
 
