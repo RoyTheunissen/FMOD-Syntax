@@ -18,7 +18,7 @@ namespace RoyTheunissen.FMODWrapper
         {
         }
 
-        public override FmodParameterlessAudioPlayback Play(GameObject source = null)
+        public override FmodParameterlessAudioPlayback Play(Transform source = null)
         {
             FmodParameterlessAudioPlayback instance = new FmodParameterlessAudioPlayback();
             instance.Play(EventDescription, source);
@@ -28,7 +28,7 @@ namespace RoyTheunissen.FMODWrapper
         IAudioPlayback IAudioConfig.Play(Transform source)
         {
             FmodParameterlessAudioPlayback instance = new FmodParameterlessAudioPlayback();
-            instance.Play(EventDescription, source.gameObject);
+            instance.Play(EventDescription, source);
             return instance;
         }
     }

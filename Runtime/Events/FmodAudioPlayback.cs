@@ -73,7 +73,7 @@ namespace RoyTheunissen.FMODWrapper
             }
         }
 
-        public void Play(EventDescription eventDescription, GameObject source)
+        public void Play(EventDescription eventDescription, Transform source)
         {
             eventDescription.getPath(out string path);
             
@@ -96,7 +96,7 @@ namespace RoyTheunissen.FMODWrapper
             if (source != null)
             {
                 instance.set3DAttributes(RuntimeUtils.To3DAttributes(source));
-                RuntimeManager.AttachInstanceToGameObject(instance, source.transform);
+                RuntimeManager.AttachInstanceToGameObject(instance, source);
             }
             
             // Cache properties.

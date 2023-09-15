@@ -9,13 +9,13 @@ namespace RoyTheunissen.FMODWrapper
     /// Config for a playable FMOD audio event. Returns an instance of the specified AudioFmodPlayback type so you can
     /// modify its parameters. Configs are specified in FmodEvents.Events
     /// </summary>
-    public abstract class FmodAudioConfig<PlaybackType>
+    public abstract class FmodAudioConfig<PlaybackType> : IAudioConfig
         where PlaybackType : FmodAudioPlayback
     {
         private EventDescription eventDescription;
         protected EventDescription EventDescription => eventDescription;
 
-        public abstract PlaybackType Play(GameObject source = null);
+        public abstract PlaybackType Play(Transform source = null);
 
         public FmodAudioConfig(string guid)
         {
@@ -33,9 +33,9 @@ namespace RoyTheunissen.FMODWrapper
             eventDescription.unloadSampleData();
         }
 
-        public PlaybackType Play(Transform source)
+        IAudioPlayback IAudioConfig.Play(Transform source)
         {
-            return Play(source == null ? null : source.gameObject);
+            return Play(source);
         }
     }
 }

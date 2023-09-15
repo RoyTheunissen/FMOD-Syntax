@@ -1,5 +1,5 @@
 
-public ##EventName##Playback Play(GameObject source, ##ParameterArgumentsWithType##)
+public ##EventName##Playback Play(Transform source, ##ParameterArgumentsWithType##)
 {
     ##EventName##Playback instance = new ##EventName##Playback();
     instance.Play(EventDescription, source, ##ParameterArguments##);
