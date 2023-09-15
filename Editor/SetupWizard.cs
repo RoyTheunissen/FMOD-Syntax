@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using RoyTheunissen.FMODWrapper.Runtime;
+using RoyTheunissen.FMODWrapper;
 
 namespace RoyTheunissen.FMODWrapper
 {

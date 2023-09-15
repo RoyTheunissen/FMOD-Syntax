@@ -1,4 +1,4 @@
-namespace RoyTheunissen.FMODWrapper.Runtime.Callbacks
+namespace RoyTheunissen.FMODWrapper.Callbacks
 {
     /// <summary>
     /// Interface to use when you want a callback whenever an FMOD event playback is (un)registered.

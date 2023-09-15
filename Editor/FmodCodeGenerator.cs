@@ -5,7 +5,6 @@ using UnityEditor;
 using System.Linq;
 using FMOD.Studio;
 using FMODUnity;
-using RoyTheunissen.FMODWrapper.Runtime;
 
 namespace RoyTheunissen.FMODWrapper
 {

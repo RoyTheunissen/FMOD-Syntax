@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using RoyTheunissen.FMODWrapper.Runtime.Callbacks;
+using RoyTheunissen.FMODWrapper.Callbacks;
 
 namespace RoyTheunissen.FMODWrapper
 {

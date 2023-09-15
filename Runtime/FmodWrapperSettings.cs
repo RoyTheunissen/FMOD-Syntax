@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEditor;
 #endif // UNITY_EDITOR
 
-namespace RoyTheunissen.FMODWrapper.Runtime
+namespace RoyTheunissen.FMODWrapper
 {
     /// <summary>
     /// Scriptable object that holds all the settings for the FMOD wrapper system.

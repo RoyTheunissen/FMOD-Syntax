@@ -3,7 +3,7 @@ using System.IO;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
-using RoyTheunissen.FMODWrapper.Runtime.Callbacks;
+using RoyTheunissen.FMODWrapper.Callbacks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
