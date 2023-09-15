@@ -3,6 +3,7 @@ using System.IO;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
+using RoyTheunissen.FMODWrapper.Runtime.Callbacks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
@@ -72,9 +73,6 @@ namespace RoyTheunissen.FMODWrapper
             }
         }
 
-        // TODO
-        //private ServiceReference<AudioService> audioService = new ServiceReference<AudioService>();
-
         public void Play(EventDescription eventDescription, GameObject source)
         {
             eventDescription.getPath(out string path);
@@ -111,8 +109,7 @@ namespace RoyTheunissen.FMODWrapper
 
             instance.start();
 
-            // TODO
-            //audioService.Reference.RegisterPlayback(this);
+            FmodWrapperSystem.RegisterActivePlayback(this);
         }
 
         protected virtual void InitializeParameters()
@@ -138,9 +135,7 @@ namespace RoyTheunissen.FMODWrapper
                 }
             }
 
-            // TODO
-            //if (audioService.HasCachedReference)
-                //audioService.CachedReference.UnregisterPlayback(this);
+            FmodWrapperSystem.UnregisterActivePlayback(this);
         }
     }
 }
