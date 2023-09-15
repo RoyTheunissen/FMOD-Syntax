@@ -26,6 +26,9 @@ namespace RoyTheunissen.FMODWrapper
         private static string BusesScriptPath => ScriptPathBase + "FmodBuses.cs";
         private const string BusesTemplatePath = TemplatePathBase + "Buses/";
         
+        private static readonly CodeGenerator assemblyDefinitionGenerator =
+            new CodeGenerator(TemplatePathBase + "FMOD-Wrapper.asmdef");
+
         private const string EventNameKeyword = "EventName";
         private static readonly CodeGenerator eventsScriptGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEvents.cs");
@@ -302,8 +305,19 @@ namespace RoyTheunissen.FMODWrapper
         [MenuItem("Generate/Generate FMOD Code", false, 999999999)]
         private static void GenerateCode()
         {
+            GenerateAssemblyDefinition();
             GenerateEventsScript();
             GenerateBanksAndBusesScripts();
+        }
+
+        private static void GenerateAssemblyDefinition()
+        {
+            assemblyDefinitionGenerator.Reset();
+            
+            assemblyDefinitionGenerator.ReplaceKeyword("Name", Namespace);
+            assemblyDefinitionGenerator.ReplaceKeyword("Namespace", Namespace);
+            
+            assemblyDefinitionGenerator.GenerateFile(ScriptPathBase + $"{Namespace}.asmdef");
         }
 
         private static void GenerateEventsScript()
