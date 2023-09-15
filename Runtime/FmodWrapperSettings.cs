@@ -19,6 +19,9 @@ namespace RoyTheunissen.FMODWrapper.Runtime
         [SerializeField] private string namespaceForGeneratedCode;
         public string NamespaceForGeneratedCode => namespaceForGeneratedCode;
         
+        [SerializeField] private bool shouldGenerateAssemblyDefinition;
+        public bool ShouldGenerateAssemblyDefinition => shouldGenerateAssemblyDefinition;
+
         [NonSerialized] private static FmodWrapperSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;
         public static FmodWrapperSettings Instance
@@ -41,7 +44,8 @@ namespace RoyTheunissen.FMODWrapper.Runtime
             }
         }
 
-        public void InitializeFromWizard(string generatedScriptsFolderPath, string namespaceForGeneratedCode)
+        public void InitializeFromWizard(
+            string generatedScriptsFolderPath, string namespaceForGeneratedCode, bool shouldGenerateAssemblyDefinition)
         {
             // Sanitize the generated scripts folder path.
             this.generatedScriptsFolderPath = generatedScriptsFolderPath.Replace(
@@ -50,6 +54,8 @@ namespace RoyTheunissen.FMODWrapper.Runtime
                 this.generatedScriptsFolderPath += Path.AltDirectorySeparatorChar;
             
             this.namespaceForGeneratedCode = namespaceForGeneratedCode;
+
+            this.shouldGenerateAssemblyDefinition = shouldGenerateAssemblyDefinition;
         }
     }
 }

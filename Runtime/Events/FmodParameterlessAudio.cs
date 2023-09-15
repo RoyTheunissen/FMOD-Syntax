@@ -25,7 +25,7 @@ namespace RoyTheunissen.FMODWrapper
             return instance;
         }
 
-        IAudioPlayback IAudioConfig.Play(Transform source = null)
+        IAudioPlayback IAudioConfig.Play(Transform source)
         {
             FmodParameterlessAudioPlayback instance = new FmodParameterlessAudioPlayback();
             instance.Play(EventDescription, source.gameObject);

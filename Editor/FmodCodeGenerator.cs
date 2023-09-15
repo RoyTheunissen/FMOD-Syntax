@@ -59,8 +59,8 @@ namespace RoyTheunissen.FMODWrapper
         private static readonly CodeGenerator busFieldGenerator =
             new CodeGenerator(BusesTemplatePath + "FmodBusField.cs");
         
-        private static string Namespace => FmodWrapperSettings.Instance.NamespaceForGeneratedCode;
-        
+        private static FmodWrapperSettings Settings => FmodWrapperSettings.Instance;
+
         [NonSerialized] private static bool didSourceFilesChange;
 
         [InitializeOnLoadMethod]
@@ -305,7 +305,9 @@ namespace RoyTheunissen.FMODWrapper
         [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
         private static void GenerateCode()
         {
-            GenerateAssemblyDefinition();
+            if (Settings.ShouldGenerateAssemblyDefinition)
+                GenerateAssemblyDefinition();
+            
             GenerateEventsScript();
             GenerateBanksAndBusesScripts();
         }
@@ -314,17 +316,17 @@ namespace RoyTheunissen.FMODWrapper
         {
             assemblyDefinitionGenerator.Reset();
             
-            assemblyDefinitionGenerator.ReplaceKeyword("Name", Namespace);
-            assemblyDefinitionGenerator.ReplaceKeyword("Namespace", Namespace);
+            assemblyDefinitionGenerator.ReplaceKeyword("Name", Settings.NamespaceForGeneratedCode);
+            assemblyDefinitionGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
             
-            assemblyDefinitionGenerator.GenerateFile(ScriptPathBase + $"{Namespace}.asmdef");
+            assemblyDefinitionGenerator.GenerateFile(ScriptPathBase + $"{Settings.NamespaceForGeneratedCode}.asmdef");
         }
 
         private static void GenerateEventsScript()
         {
             eventsScriptGenerator.Reset();
             
-            eventsScriptGenerator.ReplaceKeyword("Namespace", Namespace);
+            eventsScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
 
             Dictionary<string, string> previousEventNamesByGuid = GetExistingEventNamesByGuid();
 
@@ -429,7 +431,7 @@ namespace RoyTheunissen.FMODWrapper
         {
             banksScriptGenerator.Reset();
             
-            banksScriptGenerator.ReplaceKeyword("Namespace", Namespace);
+            banksScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
             
             string banksCode = string.Empty;
 
@@ -467,7 +469,7 @@ namespace RoyTheunissen.FMODWrapper
             // Now that we know the buses, we can also generate a file for accessing those.
             busesScriptGenerator.Reset();
             
-            busesScriptGenerator.ReplaceKeyword("Namespace", Namespace);
+            busesScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
             
             string busesCode = string.Empty;
             buses = buses.OrderBy(b => b.getPath()).ToList();

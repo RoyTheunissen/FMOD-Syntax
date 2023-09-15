@@ -16,6 +16,7 @@ namespace RoyTheunissen.FMODWrapper
         private string generatedScriptsFolderPath = "Generated/Scripts/FMOD";
         
         private string namespaceForGeneratedCode;
+        private bool shouldGenerateAssemblyDefinition = true;
         
         [NonSerialized] private GUIContent cachedFolderIcon;
         [NonSerialized] private bool didCacheFolderIcon;
@@ -46,7 +47,7 @@ namespace RoyTheunissen.FMODWrapper
             EditorApplication.delayCall += () =>
             {
                 SetupWizard setupWizard = GetWindow<SetupWizard>(true, "FMOD Wrapper Setup Wizard");
-                setupWizard.minSize = setupWizard.maxSize = new Vector2(400, 248);
+                setupWizard.minSize = setupWizard.maxSize = new Vector2(500, 270);
                 setupWizard.namespaceForGeneratedCode = $"{Application.companyName}.{Application.productName}.FMOD";
             };
         }
@@ -79,6 +80,14 @@ namespace RoyTheunissen.FMODWrapper
             EditorGUILayout.LabelField("Code Formatting", EditorStyles.boldLabel);
             namespaceForGeneratedCode = EditorGUILayout.TextField(
                 new GUIContent("Namespace", "The namespace to use for all generated code."), namespaceForGeneratedCode);
+
+            GUIContent generateAsmdefLabel = new GUIContent(
+                "Make Assembly Definition",
+                "Whether to generate an assembly definition file for the generated FMOD code. " +
+                "If the code is to be generated within one central runtime assembly definition for your game, " +
+                "you may want to turn this off.");
+            shouldGenerateAssemblyDefinition = EditorGUILayout.Toggle(
+                generateAsmdefLabel, shouldGenerateAssemblyDefinition);
             
             EditorGUILayout.Space();
             EditorGUILayout.EndVertical();
@@ -103,7 +112,8 @@ namespace RoyTheunissen.FMODWrapper
             FmodWrapperSettings settings = CreateScriptableObject<FmodWrapperSettings>(
                 settingsFolderPath, nameof(FmodWrapperSettings));
             
-            settings.InitializeFromWizard(generatedScriptsFolderPath, namespaceForGeneratedCode);
+            settings.InitializeFromWizard(
+                generatedScriptsFolderPath, namespaceForGeneratedCode, shouldGenerateAssemblyDefinition);
             
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
