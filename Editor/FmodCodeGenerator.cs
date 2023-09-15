@@ -5,6 +5,7 @@ using UnityEditor;
 using System.Linq;
 using FMOD.Studio;
 using FMODUnity;
+using UnityEngine;
 
 namespace RoyTheunissen.FMODWrapper
 {
@@ -59,14 +60,27 @@ namespace RoyTheunissen.FMODWrapper
             new CodeGenerator(BusesTemplatePath + "FmodBusField.cs");
         
         private static FmodWrapperSettings Settings => FmodWrapperSettings.Instance;
+        
+        [NonSerialized] private static List<string> eventUsingDirectives = new List<string>();
+        [NonSerialized] private static string[] eventUsingDirectivesDefault =
+        {
+            "System.Collections.Generic",
+            "FMOD.Studio",
+            "RoyTheunissen.FMODWrapper",
+            "UnityEngine",
+            "UnityEngine.Scripting",
+        };
 
         [NonSerialized] private static bool didSourceFilesChange;
 
-// NOTE: For this to work, SourceFilesChangedEvent and BankRefreshEvent events need to be added to FMOD.
-#if FMOD_AUTO_REGENERATE_CODE
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
+            labelParameterNameToUserSpecifiedEnumType.Clear();
+            didCacheUserSpecifiedEnums = false;
+
+            // NOTE: For this to work, SourceFilesChangedEvent and BankRefreshEvent events need to be added to FMOD.
+#if FMOD_AUTO_REGENERATE_CODE
             // Need to both keep track of when the source files have changed and when a refresh occurs, because
             // bank refreshes happen a lot even when nothing's changed, but we can't directly respond to source file
             // changes because it's too soon. Banks are only refreshed after a delay.
@@ -75,8 +89,10 @@ namespace RoyTheunissen.FMODWrapper
             
             BankRefresher.BankRefreshEvent -= HandleBankRefreshEvent;
             BankRefresher.BankRefreshEvent += HandleBankRefreshEvent;
+#endif // FMOD_AUTO_REGENERATE_CODE
         }
 
+#if FMOD_AUTO_REGENERATE_CODE
         private static void HandleSourceFilesChangedEvent()
         {
             didSourceFilesChange = true;
@@ -98,6 +114,55 @@ namespace RoyTheunissen.FMODWrapper
         }
 #endif // FMOD_AUTO_REGENERATE_CODE
 
+        private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
+            = new Dictionary<string, Type>();
+
+        private static bool didCacheUserSpecifiedEnums;
+
+        [MenuItem("FMOD/Cache Enums")]
+        private static void CacheUserSpecifiedLabelParameterEnums()
+        {
+            if (didCacheUserSpecifiedEnums)
+                return;
+
+            didCacheUserSpecifiedEnums = true;
+            
+            labelParameterNameToUserSpecifiedEnumType.Clear();
+            Type[] enums = TypeExtensions.GetAllTypesWithAttribute<FmodLabelEnumAttribute>();
+            for (int i = 0; i < enums.Length; i++)
+            {
+                Type enumType = enums[i];
+                FmodLabelEnumAttribute attribute = enumType.GetAttribute<FmodLabelEnumAttribute>();
+
+                for (int j = 0; j < attribute.LabelledParameterNames.Length; j++)
+                {
+                    string parameterName = attribute.LabelledParameterNames[j];
+                    bool succeeded = labelParameterNameToUserSpecifiedEnumType.TryAdd(parameterName, enumType);
+                    if (!succeeded)
+                    {
+                        Type existingEnumType = labelParameterNameToUserSpecifiedEnumType[parameterName];
+                        Debug.LogError($"Enum '{enumType.Name}' tried to map labelled parameters with name " +
+                                         $"'{parameterName}' via [FmodLabelEnum], but that was already mapped to " +
+                                         $"enum '{existingEnumType.Name}'. Make sure there is only one such mapping.");
+                    }
+                }
+            }
+        }
+
+        public static bool HasUserSpecifiedLabelParameterEnum(string name)
+        {
+            CacheUserSpecifiedLabelParameterEnums();
+            
+            return labelParameterNameToUserSpecifiedEnumType.ContainsKey(name);
+        }
+
+        public static bool GetUserSpecifiedLabelParameterEnum(string name, out Type enumType)
+        {
+            CacheUserSpecifiedLabelParameterEnums();
+            
+            return labelParameterNameToUserSpecifiedEnumType.TryGetValue(name, out enumType);
+        }
+
         private static string GetParameterCode(CodeGenerator codeGenerator, EditorParamRef parameter)
         {
             // Generate a public static readonly field for this parameter with the specified GUID. Note that this is
@@ -114,21 +179,35 @@ namespace RoyTheunissen.FMODWrapper
             const string enumKeyword = "ParameterEnum";
             if (parameter.Type == ParameterType.Labeled)
             {
-                string enumValues = string.Empty;
-                for (int i = 0; i < parameter.Labels.Length; i++)
+                bool hasUserSpecifiedEnum = GetUserSpecifiedLabelParameterEnum(parameter.Name, out Type enumType);
+                if (hasUserSpecifiedEnum)
                 {
-                    enumValues += $"{parameter.Labels[i]}";
-                    if (i < parameter.Labels.Length - 1)
-                        enumValues += ",";
-                    enumValues += "\r\n";
-                }
-
-                enumGenerator.Reset();
-                enumGenerator.ReplaceKeyword("Name", $"{name}Values");
-                enumGenerator.ReplaceKeyword("Values", enumValues);
-                string enumCode = enumGenerator.GetCode();
+                    // Make sure we have an appropriate using directive.
+                    string usingDirectiveForEnum = enumType.Namespace;
+                    if (!eventUsingDirectives.Contains(usingDirectiveForEnum))
+                        eventUsingDirectives.Add(usingDirectiveForEnum);
                     
-                codeGenerator.ReplaceKeyword(enumKeyword, enumCode);
+                    // Not generating a new enum.
+                    codeGenerator.RemoveKeywordLines(enumKeyword);
+                }
+                else
+                {
+                    string enumValues = string.Empty;
+                    for (int i = 0; i < parameter.Labels.Length; i++)
+                    {
+                        enumValues += $"{parameter.Labels[i]}";
+                        if (i < parameter.Labels.Length - 1)
+                            enumValues += ",";
+                        enumValues += "\r\n";
+                    }
+
+                    enumGenerator.Reset();
+                    enumGenerator.ReplaceKeyword("Name", $"{name}Values");
+                    enumGenerator.ReplaceKeyword("Values", enumValues);
+                    string enumCode = enumGenerator.GetCode();
+                    
+                    codeGenerator.ReplaceKeyword(enumKeyword, enumCode);
+                }
             }
             else
             {
@@ -326,6 +405,9 @@ namespace RoyTheunissen.FMODWrapper
 
         private static void GenerateEventsScript()
         {
+            eventUsingDirectives.Clear();
+            eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
+
             eventsScriptGenerator.Reset();
             
             eventsScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
@@ -425,6 +507,15 @@ namespace RoyTheunissen.FMODWrapper
             }
 
             eventsScriptGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
+
+            // Also allow custom using directives to be specified.
+            string usingDirectives = string.Empty;
+            for (int i = 0; i < eventUsingDirectives.Count; i++)
+            {
+                string usingDirective = eventUsingDirectives[i];
+                usingDirectives += $"using {usingDirective};\r\n";
+            }
+            eventsScriptGenerator.ReplaceKeyword("UsingDirectives", usingDirectives);
 
             eventsScriptGenerator.GenerateFile(EventsScriptPath);
         }

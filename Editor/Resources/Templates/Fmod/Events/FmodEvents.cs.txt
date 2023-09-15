@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using FMOD.Studio;
-using RoyTheunissen.FMODWrapper;
-using UnityEngine;
-using UnityEngine.Scripting;
+##UsingDirectives##
 
 namespace ##Namespace##
 {
