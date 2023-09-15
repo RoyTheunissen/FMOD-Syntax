@@ -74,7 +74,7 @@ namespace RoyTheunissen.FMODWrapper
             
             parameterlessEventsByGuid.Clear();
             
-            const string containerClassName = "ParameterlessFmodEvents";
+            const string containerClassName = "AudioParameterlessEvents";
             IEnumerable<Type> containerTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes()).Where(t => t.Name == containerClassName);
 

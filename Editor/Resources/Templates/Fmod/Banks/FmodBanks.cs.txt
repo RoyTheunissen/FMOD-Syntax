@@ -3,7 +3,7 @@ namespace ##Namespace##
     /// <summary>
     /// GENERATED: Contains FMOD banks so they can accessed in a strongly-typed manner.
     /// </summary>
-    public static class Banks
+    public static class AudioBanks
     {
         ##Banks##
     }

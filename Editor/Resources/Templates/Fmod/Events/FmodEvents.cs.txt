@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using FMOD.Studio;
 using RoyTheunissen.FMODWrapper;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace ##Namespace##
 {
@@ -18,13 +19,14 @@ namespace ##Namespace##
     /// <summary>
     /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.
     /// </summary>
-    public static class FmodEvents 
+    public static class AudioEvents 
     {
         ##Events##
         ##EventAliases##
     }
     
-    public static class ParameterlessFmodEvents 
+    [Preserve]
+    public static class AudioParameterlessEvents 
     {
         public static readonly Dictionary<string, FmodParameterlessAudioConfig> EventsByGuid =
             new Dictionary<string, FmodParameterlessAudioConfig>
@@ -36,7 +38,7 @@ namespace ##Namespace##
     /// <summary>
     /// GENERATED: Contains FMOD global parameters so they can be called in a strongly-typed manner.
     /// </summary>
-    public static class GlobalParameters 
+    public static class AudioGlobalParameters 
     {
         ##GlobalParameters##
     }
