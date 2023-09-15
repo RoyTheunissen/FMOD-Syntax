@@ -1,3 +1,5 @@
+using RoyTheunissen.FMODWrapper;
+
 namespace ##Namespace##
 {
     /// <summary>
