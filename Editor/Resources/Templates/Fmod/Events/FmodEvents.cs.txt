@@ -18,13 +18,13 @@ namespace ##Namespace##
     /// <summary>
     /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.
     /// </summary>
-    public static class Events 
+    public static class FmodEvents 
     {
         ##Events##
         ##EventAliases##
     }
     
-    public static class ParameterlessEvents 
+    public static class ParameterlessFmodEvents 
     {
         public static readonly Dictionary<string, FmodParameterlessAudioConfig> EventsByGuid =
             new Dictionary<string, FmodParameterlessAudioConfig>
