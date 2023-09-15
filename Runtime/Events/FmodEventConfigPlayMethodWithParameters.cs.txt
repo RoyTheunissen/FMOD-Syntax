@@ -1,0 +1,13 @@
+
+public ##EventName##Playback Play(GameObject source, ##ParameterArgumentsWithType##)
+{
+    ##EventName##Playback instance = new ##EventName##Playback();
+    instance.Play(EventDescription, source, ##ParameterArguments##);
+    return instance;
+}
+
+public ##EventName##Playback Play(##ParameterArgumentsWithType##)
+{
+    return Play(null, ##ParameterArguments##);
+}
+

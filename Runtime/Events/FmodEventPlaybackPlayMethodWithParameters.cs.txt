@@ -1,0 +1,7 @@
+public void Play(EventDescription eventDescription, GameObject source, ##ParameterArgumentsWithType##)
+{
+    Play(eventDescription, source);
+    
+    ##ParameterInitializationsFromArguments##
+}
+

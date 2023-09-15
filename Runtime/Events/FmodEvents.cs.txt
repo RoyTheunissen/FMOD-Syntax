@@ -1,0 +1,43 @@
+using System;
+using System.Collections.Generic;
+using FMOD.Studio;
+using UnityEngine;
+
+namespace RoyTheunissen.WouldntYouLikeToKnow.Audio.Fmod
+{
+    /* ACTIVE EVENT GUIDS (We keep track of these to detect renames and keep old ones around with an Obsolete tag)
+    ##ActiveEventGuids##
+    ACTIVE EVENT GUIDS */
+
+    /// <summary>
+    /// GENERATED: Contains classes generated based on FMOD events so they can be called in a strongly-typed manner.
+    /// </summary>
+    ##EventTypes##
+    ##EventTypeAliases##
+    
+    /// <summary>
+    /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.
+    /// </summary>
+    public static class Events 
+    {
+        ##Events##
+        ##EventAliases##
+    }
+    
+    public static class ParameterlessEvents 
+    {
+        public static readonly Dictionary<string, FmodParameterlessAudioConfig> EventsByGuid =
+            new Dictionary<string, FmodParameterlessAudioConfig>
+        {
+            ##ParameterlessEventIds##
+        };
+    }
+
+    /// <summary>
+    /// GENERATED: Contains FMOD global parameters so they can be called in a strongly-typed manner.
+    /// </summary>
+    public static class GlobalParameters 
+    {
+        ##GlobalParameters##
+    }
+}

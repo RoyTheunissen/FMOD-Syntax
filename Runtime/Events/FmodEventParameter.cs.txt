@@ -1,0 +1,3 @@
+##ParameterEnum##
+public readonly ##ParameterType## ##ParameterName## = new ##ParameterType##(new PARAMETER_ID { data1 = ##ID1##, data2 = ##ID2## }, false);
+

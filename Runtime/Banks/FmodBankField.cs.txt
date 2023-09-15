@@ -1,0 +1,2 @@
+public static readonly string ##BankName## = "##BankPath##";
+
