@@ -35,19 +35,19 @@ Overall this system significantly speeds up your audio implementation workflow a
 ### One-offs
 ```cs
 // Parameterless one-off sound (global)
-FmodEvents.TestOneOff.Play();
+AudioEvents.TestOneOff.Play();
 
 // Parameterless one-off sound (spatialized)
-FmodEvents.TestOneOff.Play(transform);
+AudioEvents.TestOneOff.Play(transform);
 
 // Spatialized one-off with parameters
-FmodEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
+AudioEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
 ```
 
 ### Loops
 ```cs
 // Looping sound
-TestContinuousPlayback testContinuousPlayback = FmodEvents.TestContinuous.Play(transform);
+TestContinuousPlayback testContinuousPlayback = AudioEvents.TestContinuous.Play(transform);
 
 float value = Mathf.Sin(Time.time * Mathf.PI * 1.0f).Map(-1, 1);
 testContinuousPlayback.Strength.Value = value;
@@ -61,7 +61,16 @@ testContinuousPlayback?.Cleanup();
 ### Global Parameters
 ```cs
 // Setting global parameters
-GlobalParameters.PlayerSpeed.Value = value;
+AudioGlobalParameters.PlayerSpeed.Value = value;
+```
+
+### Dispatching a parameterless event that is chosen via the inspector
+```cs
+// Get a reference to the event that you can assign via the inspector
+[SerializeField] private AudioConfigReference parameterlessAudio;
+
+// Dispatch as per usual
+parameterlessAudio.Play(transform);
 ```
 
 ## Compatibility
