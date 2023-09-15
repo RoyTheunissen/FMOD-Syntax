@@ -21,6 +21,9 @@ namespace RoyTheunissen.FMODWrapper
         
         [SerializeField] private bool shouldGenerateAssemblyDefinition;
         public bool ShouldGenerateAssemblyDefinition => shouldGenerateAssemblyDefinition;
+        
+        [SerializeField] private bool generateFallbacksForMissingEvents = true;
+        public bool GenerateFallbacksForMissingEvents => generateFallbacksForMissingEvents;
 
         [NonSerialized] private static FmodWrapperSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;

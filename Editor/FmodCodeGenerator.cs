@@ -64,6 +64,7 @@ namespace RoyTheunissen.FMODWrapper
         [NonSerialized] private static List<string> eventUsingDirectives = new List<string>();
         [NonSerialized] private static string[] eventUsingDirectivesDefault =
         {
+            "System",
             "System.Collections.Generic",
             "FMOD.Studio",
             "RoyTheunissen.FMODWrapper",
@@ -466,7 +467,7 @@ namespace RoyTheunissen.FMODWrapper
 
             // Also add a section for any event type aliases, if needed.
             const string eventTypeAliasesKeyword = "EventTypeAliases";
-            if (string.IsNullOrEmpty(eventTypeAliasesCode))
+            if (string.IsNullOrEmpty(eventTypeAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
             {
                 eventsScriptGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
             }
@@ -489,7 +490,7 @@ namespace RoyTheunissen.FMODWrapper
 
             // Also add a section for any event aliases, if needed.
             const string eventAliasesKeyword = "EventAliases";
-            if (string.IsNullOrEmpty(eventAliasesCode))
+            if (string.IsNullOrEmpty(eventAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
             {
                 eventsScriptGenerator.RemoveKeywordLines(eventAliasesKeyword);
             }
