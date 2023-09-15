@@ -12,6 +12,15 @@ namespace RoyTheunissen.FMODWrapper
         public static List<FmodAudioPlayback> ActivePlaybacks => activePlaybacks;
 
         private static readonly List<IOnFmodPlayback> onPlaybackCallbackReceivers = new List<IOnFmodPlayback>();
+        
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        private static void Initialize()
+        {
+            activePlaybacks.Clear();
+            onPlaybackCallbackReceivers.Clear();
+        }
+#endif // UNITY_EDITOR
 
         public static void RegisterActivePlayback(FmodAudioPlayback playback)
         {
