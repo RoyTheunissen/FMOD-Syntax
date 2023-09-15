@@ -62,6 +62,8 @@ namespace RoyTheunissen.FMODWrapper
 
         [NonSerialized] private static bool didSourceFilesChange;
 
+// NOTE: For this to work, SourceFilesChangedEvent and BankRefreshEvent events need to be added to FMOD.
+#if FMOD_AUTO_REGENERATE_CODE
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
@@ -94,6 +96,7 @@ namespace RoyTheunissen.FMODWrapper
 
             GenerateCode();
         }
+#endif // FMOD_AUTO_REGENERATE_CODE
 
         private static string GetParameterCode(CodeGenerator codeGenerator, EditorParamRef parameter)
         {
