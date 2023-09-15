@@ -1,21 +1,23 @@
 {
-  "name": "com.roytheunissen.unitypackage-template",
-  "displayName": "Unity Package Template",
+  "name": "com.roytheunissen.fmod-wrapper",
+  "displayName": "FMOD Wrapper",
   "version": "0.0.1",
   "unity": "2021.3",
-  "description": "TO DO",
+  "description": "Generates code to be able to invoke FMOD events in a strongly-typed manner",
   "keywords": [
-    "TO DO",
+    "FMOD",
+    "Audio",
+    "Code Generation"
   ],
   "author": {
     "name": "Roy Theunissen",
     "url": "https://www.roytheunissen.com"
   },
-  "category": "TO DO",
-  "homepage": "https://github.com/RoyTheunissen/UnityPackage-Template",
+  "category": "audio",
+  "homepage": "https://github.com/RoyTheunissen/FMOD-Wrapper",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RoyTheunissen/UnityPackage-Template"
+    "url": "https://github.com/RoyTheunissen/FMOD-Wrapper"
   },
-  "bugs": "https://github.com/RoyTheunissen/UnityPackage-Template/issues"
+  "bugs": "https://github.com/RoyTheunissen/FMOD-Wrapper/issues"
 }
