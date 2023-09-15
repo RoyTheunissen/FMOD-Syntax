@@ -18,7 +18,9 @@ _🛑 <b><u>TO DO</u></b>_
 
 ## Compatibility
 
-🛑 <b><u>TO DO</u></b>
+This system was developed for Unity 2021 and upwards, it's recommended that you use it for this version.
+
+If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
 
 ## Installation
 
@@ -48,23 +50,20 @@ You can check out this repository as a submodule into your project's Assets fold
 ### OpenUPM
 The package is available on the [openupm registry](https://openupm.com). It's recommended to install it via [openupm-cli](https://github.com/openupm/openupm-cli).
 
-🛑 <b><u>TO DO</u></b>
 ```
-openupm add com.roytheunissen.assetpalette
+openupm add com.roytheunissen.fmod-wrapper
 ```
 
 ### Manifest
 You can also install via git URL by adding this entry in your **manifest.json**
 
-🛑 <b><u>TO DO</u></b>
 ```
-"com.roytheunissen.assetpalette": "https://github.com/RoyTheunissen/Asset-Palette.git"
+"com.roytheunissen.fmod-wrapper": "https://github.com/RoyTheunissen/FMOD-Wrapper.git"
 ```
 
 ### Unity Package Manager
-🛑 <b><u>TO DO</u></b>
 ```
-from Window->Package Manager, click on the + sign and Add from git: https://github.com/RoyTheunissen/Asset-Palette.git
+from Window->Package Manager, click on the + sign and Add from git: https://github.com/RoyTheunissen/FMOD-Wrapper.git
 ```
 
 
