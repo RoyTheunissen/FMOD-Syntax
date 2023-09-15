@@ -302,7 +302,7 @@ namespace RoyTheunissen.FMODWrapper
             return eventFieldsGenerator.GetCode();
         }
 
-        [MenuItem("Generate/Generate FMOD Code", false, 999999999)]
+        [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
         private static void GenerateCode()
         {
             GenerateAssemblyDefinition();
