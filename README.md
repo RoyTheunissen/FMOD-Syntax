@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE.md)
 ![GitHub Follow](https://img.shields.io/github/followers/RoyTheunissen?label=RoyTheunissen&style=social) ![Twitter](https://img.shields.io/twitter/follow/Roy_Theunissen?style=social)
 
-_Generates code to be able to invoke FMOD events in a strongly-typed manner_
+_Generates code to allow invoking FMOD events with a strongly-typed syntax._
 
 ## About the Project
 
