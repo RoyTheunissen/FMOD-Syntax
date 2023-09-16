@@ -6,7 +6,8 @@ _Generates code to allow invoking FMOD events with a strongly-typed syntax._
 
 ## About the Project
 
-Out-of-the-box FMOD requires you to access events and parameters via inspector references or by name. Neither of these setups is ideal.
+Out-of-the-box FMOD requires you to access events and parameters via inspector references or by name.
+Neither of these setups is ideal.
 
 Dispatching an event this way requires you to define a bunch of fields, assign things in the inspector, and then the syntax for setting parameters is weakly-typed.
 You can skip some of this by dispatching events/setting parameters by name but that has the drawback that you need to look up what the name is and it's very hard and error-prone to rename anything as it'll break references.
