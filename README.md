@@ -113,6 +113,10 @@ public enum SurfaceTypes
     Rock,
 }
 ```
+```cs
+AudioEvents.Footstep.Play(transform, SurfaceTypes.Generic);
+AudioEvents.Jump.Play(transform, SurfaceTypes.Generic);
+```
 
 ## Compatibility
 
