@@ -120,7 +120,7 @@ AudioEvents.Jump.Play(transform, SurfaceTypes.Generic);
 
 ## Compatibility
 
-This system was developed for Unity 2021 and upwards, it's recommended that you use it for this version.
+This system was developed for Unity 2021 and upwards, it's recommended that you use it for these versions.
 
 If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
 
