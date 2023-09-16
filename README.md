@@ -73,6 +73,44 @@ AudioGlobalParameters.PlayerSpeed.Value = value;
 parameterlessAudio.Play(transform);
 ```
 
+### Labeled parameter enums
+In FMOD there are three types of parameters: "Continuous" (`int`), "Discrete" (`float`) and "Labeled" (`enum`).
+
+Labeled parameters are sent and received as integers, but they are associated with a name for convenience, exactly like enums in C#.
+
+![image](https://github.com/RoyTheunissen/FMOD-Wrapper/assets/3997055/1effbe29-d228-40b9-852e-96741396f0b4)
+
+For convenience, FMOD Wrapper generates an enum for every event with a labeled parameter, so auto-complete conveniently suggests all valid values when you are invoking the event.
+
+```cs
+AudioEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
+```
+
+But let's say you have several events that share the same "Surface" parameter, for instance a Jump and a Footstep event.
+It could be inconvenient if you just want to determine the current surface type, and then fire jump and footstep events with that type,
+because you would have to cast it to the appropriate event-specific enum.
+
+```cs
+AudioEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
+AudioEvents.Jump.Play(transform, JumpPlayback.SurfaceValues.Generic);
+```
+
+Furthermore, the enums in FMOD may actually represent an enum in your game. So it's inconvenient to have to map from that game enum to the FMOD enum. But luckily there's a solution for that: **User-specified labeled parameter enums**.
+
+Simply tag your game enum with `[FmodLabelEnum]` and specify the names of the labeled parameters that it represents, and then when code is generated instead of generating event-specific enums, it uses the game enum you specified for those events.
+
+No more duplication, no more mapping.
+
+```cs
+[FmodLabelEnum("Surface")]
+public enum SurfaceTypes
+{
+    Generic,
+    Dirt,
+    Rock,
+}
+```
+
 ## Compatibility
 
 This system was developed for Unity 2021 and upwards, it's recommended that you use it for this version.
@@ -80,9 +118,6 @@ This system was developed for Unity 2021 and upwards, it's recommended that you 
 If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
 
 ## Known Issues
-
-- Enums are automatically generated for label-type parameters. Currently these enums are per-event, so there is a little bit of duplication if you have multiple events with the same labelled parameter.
-- Labelled parameter values are converted to enums, and therefore they can't have spaces in them. This is potentially solvable but it would be quite a hassle. Just use PascalCasing or underscores instead.
 - No support for snapshots yet, but this will be added soon
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
 
