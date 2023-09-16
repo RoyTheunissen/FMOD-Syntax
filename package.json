@@ -3,7 +3,7 @@
   "displayName": "FMOD Syntax",
   "version": "0.0.1",
   "unity": "2021.3",
-  "description": "Generates code to be able to invoke FMOD events in a strongly-typed manner",
+  "description": "Generates code to allow invoking FMOD events with a strongly-typed syntax.",
   "keywords": [
     "FMOD",
     "Audio",
