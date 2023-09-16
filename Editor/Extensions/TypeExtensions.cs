@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Useful extension methods for EditorParamRef.

@@ -3,7 +3,7 @@ using UnityEditor.IMGUI.Controls;
 using FMODUnity;
 using System.Linq;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Dropdown to pick audio references from a list in a searchable way / with subfolders.

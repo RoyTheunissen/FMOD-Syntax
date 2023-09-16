@@ -1,4 +1,4 @@
-using RoyTheunissen.FMODWrapper;
+using RoyTheunissen.FMODSyntax;
 
 namespace FMOD.Studio
 {
@@ -9,7 +9,7 @@ namespace FMOD.Studio
     {
         public static string GetName(this Bank bank)
         {
-            return FmodWrapperUtilities.GetFilteredNameFromPath(bank.getPath());
+            return FmodSyntaxUtilities.GetFilteredNameFromPath(bank.getPath());
         }
     }
 }

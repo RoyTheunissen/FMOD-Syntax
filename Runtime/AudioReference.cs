@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Inspector reference to FMOD audio config. Can be used to get a simple parameterless audio config.

@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     public static class StringExtensions
     {

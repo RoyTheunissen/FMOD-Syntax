@@ -7,14 +7,14 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Generates code for FMOD events & parameters.
     /// </summary>
     public static class FmodCodeGenerator
     {
-        private static string ScriptPathBase => FmodWrapperSettings.Instance.GeneratedScriptsFolderPath;
+        private static string ScriptPathBase => FmodSyntaxSettings.Instance.GeneratedScriptsFolderPath;
         private const string TemplatePathBase = "Templates/Fmod/";
         
         private static string EventsScriptPath => ScriptPathBase + "FmodEvents.cs";
@@ -27,7 +27,7 @@ namespace RoyTheunissen.FMODWrapper
         private const string BusesTemplatePath = TemplatePathBase + "Buses/";
         
         private static readonly CodeGenerator assemblyDefinitionGenerator =
-            new CodeGenerator(TemplatePathBase + "FMOD-Wrapper.asmdef");
+            new CodeGenerator(TemplatePathBase + "FMOD-Syntax.asmdef");
 
         private const string EventNameKeyword = "EventName";
         private static readonly CodeGenerator eventsScriptGenerator =
@@ -59,7 +59,7 @@ namespace RoyTheunissen.FMODWrapper
         private static readonly CodeGenerator busFieldGenerator =
             new CodeGenerator(BusesTemplatePath + "FmodBusField.cs");
         
-        private static FmodWrapperSettings Settings => FmodWrapperSettings.Instance;
+        private static FmodSyntaxSettings Settings => FmodSyntaxSettings.Instance;
         
         [NonSerialized] private static List<string> eventUsingDirectives = new List<string>();
         [NonSerialized] private static string[] eventUsingDirectivesDefault =
@@ -67,7 +67,7 @@ namespace RoyTheunissen.FMODWrapper
             "System",
             "System.Collections.Generic",
             "FMOD.Studio",
-            "RoyTheunissen.FMODWrapper",
+            "RoyTheunissen.FMODSyntax",
             "UnityEngine",
             "UnityEngine.Scripting",
         };
@@ -196,7 +196,7 @@ namespace RoyTheunissen.FMODWrapper
                     string enumValues = string.Empty;
                     for (int i = 0; i < parameter.Labels.Length; i++)
                     {
-                        enumValues += $"{FmodWrapperUtilities.GetFilteredNameFromPath(parameter.Labels[i])}";
+                        enumValues += $"{FmodSyntaxUtilities.GetFilteredNameFromPath(parameter.Labels[i])}";
                         if (i < parameter.Labels.Length - 1)
                             enumValues += ",";
                         enumValues += "\r\n";
@@ -368,7 +368,7 @@ namespace RoyTheunissen.FMODWrapper
             // be able to specify a different name in that use case.
             if (string.IsNullOrEmpty(eventName))
                 eventName = e.GetFilteredName();
-            string fieldName = FmodWrapperUtilities.GetFilteredNameFromPathLowerCase(eventName);
+            string fieldName = FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(eventName);
             
             eventFieldsGenerator.Reset();
             eventFieldsGenerator.ReplaceKeyword(EventNameKeyword, eventName);

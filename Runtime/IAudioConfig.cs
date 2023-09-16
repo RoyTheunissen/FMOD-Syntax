@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     public interface IAudioConfig 
     {

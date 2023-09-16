@@ -1,6 +1,6 @@
 using FMODUnity;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Useful extension methods for EditorEventRef.
@@ -11,22 +11,22 @@ namespace RoyTheunissen.FMODWrapper
         
         public static string GetDisplayName(this EditorEventRef @event)
         {
-            return FmodWrapperUtilities.GetDisplayNameFromPath(@event.name);
+            return FmodSyntaxUtilities.GetDisplayNameFromPath(@event.name);
         }
         
         public static string GetFilteredName(this EditorEventRef @event)
         {
-            return FmodWrapperUtilities.GetFilteredNameFromPath(@event.name);
+            return FmodSyntaxUtilities.GetFilteredNameFromPath(@event.name);
         }
         
         public static string GetFieldName(this EditorEventRef @event)
         {
-            return FmodWrapperUtilities.GetFilteredNameFromPathLowerCase(@event.name);
+            return FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(@event.name);
         }
         
         public static string GetFilteredPath(this EditorEventRef @event)
         {
-            return FmodWrapperUtilities.GetFilteredPath(@event.Path, false);
+            return FmodSyntaxUtilities.GetFilteredPath(@event.Path, false);
         }
     }
 }

@@ -2,7 +2,7 @@ using System;
 using FMODUnity;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Useful extension methods for EditorParamRef.
@@ -11,12 +11,12 @@ namespace RoyTheunissen.FMODWrapper
     {
         public static string GetFilteredName(this EditorParamRef parameter)
         {
-            return FmodWrapperUtilities.GetFilteredNameFromPath(parameter.Name);
+            return FmodSyntaxUtilities.GetFilteredNameFromPath(parameter.Name);
         }
         
         public static string GetArgumentName(this EditorParamRef parameter)
         {
-            return FmodWrapperUtilities.GetFilteredNameFromPathLowerCase(parameter.Name);
+            return FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(parameter.Name);
         }
 
         public static bool HasNormalizedRange(this EditorParamRef parameter) =>

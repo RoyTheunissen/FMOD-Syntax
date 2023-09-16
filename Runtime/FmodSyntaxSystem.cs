@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using RoyTheunissen.FMODWrapper.Callbacks;
+using RoyTheunissen.FMODSyntax.Callbacks;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Class to use to expose information, help manage playback instances, that sort of thing.
     /// </summary>
-    public static class FmodWrapperSystem
+    public static class FmodSyntaxSystem
     {
         private static readonly List<FmodAudioPlayback> activePlaybacks = new List<FmodAudioPlayback>();
         public static List<FmodAudioPlayback> ActivePlaybacks => activePlaybacks;

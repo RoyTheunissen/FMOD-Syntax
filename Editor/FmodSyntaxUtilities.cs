@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
-    /// Useful utility methods for our FMOD wrapper.
+    /// Useful utility methods for the FMOD Syntax.
     /// </summary>
-    public static class FmodWrapperUtilities
+    public static class FmodSyntaxUtilities
     {
         private static readonly Dictionary<string, string> replacements = new Dictionary<string, string>()
         {

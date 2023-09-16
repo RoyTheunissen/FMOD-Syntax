@@ -6,12 +6,12 @@ using UnityEngine;
 using UnityEditor;
 #endif // UNITY_EDITOR
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
-    /// Scriptable object that holds all the settings for the FMOD wrapper system.
+    /// Scriptable object that holds all the settings for the FMOD Syntax system.
     /// </summary>
-    public sealed class FmodWrapperSettings : ScriptableObject 
+    public sealed class FmodSyntaxSettings : ScriptableObject 
     {
         [SerializeField] private string generatedScriptsFolderPath;
         public string GeneratedScriptsFolderPath => generatedScriptsFolderPath;
@@ -25,20 +25,20 @@ namespace RoyTheunissen.FMODWrapper
         [SerializeField] private bool generateFallbacksForMissingEvents = true;
         public bool GenerateFallbacksForMissingEvents => generateFallbacksForMissingEvents;
 
-        [NonSerialized] private static FmodWrapperSettings cachedInstance;
+        [NonSerialized] private static FmodSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;
-        public static FmodWrapperSettings Instance
+        public static FmodSyntaxSettings Instance
         {
             get
             {
 #if UNITY_EDITOR
                 if (!didCacheInstance)
                 {
-                    string[] guids = AssetDatabase.FindAssets($"t:{nameof(FmodWrapperSettings)}");
+                    string[] guids = AssetDatabase.FindAssets($"t:{nameof(FmodSyntaxSettings)}");
                     if (guids.Length > 0)
                     {
                         string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                        cachedInstance = AssetDatabase.LoadAssetAtPath<FmodWrapperSettings>(path);
+                        cachedInstance = AssetDatabase.LoadAssetAtPath<FmodSyntaxSettings>(path);
                         didCacheInstance = cachedInstance != null;
                     }
                 }

@@ -3,12 +3,12 @@ using System.IO;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
-using RoyTheunissen.FMODWrapper.Callbacks;
+using RoyTheunissen.FMODSyntax.Callbacks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Non-generic base class for AudioFmodPlayback to apply as a type constraint.
@@ -109,7 +109,7 @@ namespace RoyTheunissen.FMODWrapper
 
             instance.start();
 
-            FmodWrapperSystem.RegisterActivePlayback(this);
+            FmodSyntaxSystem.RegisterActivePlayback(this);
         }
 
         protected virtual void InitializeParameters()
@@ -135,7 +135,7 @@ namespace RoyTheunissen.FMODWrapper
                 }
             }
 
-            FmodWrapperSystem.UnregisterActivePlayback(this);
+            FmodSyntaxSystem.UnregisterActivePlayback(this);
         }
     }
 }

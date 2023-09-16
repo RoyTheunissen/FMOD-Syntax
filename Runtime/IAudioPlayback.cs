@@ -1,4 +1,4 @@
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     public interface IAudioPlayback
     {

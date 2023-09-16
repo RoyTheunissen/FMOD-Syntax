@@ -1,7 +1,7 @@
 using System;
 using FMODUnity;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Utility for accessing the buses more conveniently.

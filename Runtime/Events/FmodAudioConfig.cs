@@ -3,7 +3,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Config for a playable FMOD audio event. Returns an instance of the specified AudioFmodPlayback type so you can

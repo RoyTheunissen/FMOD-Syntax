@@ -1,6 +1,6 @@
 {
-  "name": "com.roytheunissen.fmod-wrapper",
-  "displayName": "FMOD Wrapper",
+  "name": "com.roytheunissen.fmod-syntax",
+  "displayName": "FMOD Syntax",
   "version": "0.0.1",
   "unity": "2021.3",
   "description": "Generates code to be able to invoke FMOD events in a strongly-typed manner",
@@ -14,10 +14,10 @@
     "url": "https://www.roytheunissen.com"
   },
   "category": "audio",
-  "homepage": "https://github.com/RoyTheunissen/FMOD-Wrapper",
+  "homepage": "https://github.com/RoyTheunissen/FMOD-Syntax",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RoyTheunissen/FMOD-Wrapper"
+    "url": "https://github.com/RoyTheunissen/FMOD-Syntax"
   },
-  "bugs": "https://github.com/RoyTheunissen/FMOD-Wrapper/issues"
+  "bugs": "https://github.com/RoyTheunissen/FMOD-Syntax/issues"
 }

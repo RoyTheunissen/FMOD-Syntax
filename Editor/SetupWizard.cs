@@ -2,12 +2,11 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using RoyTheunissen.FMODWrapper;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
-    /// Window to show to users when they haven't set up the FMOD Wrapper system yet to let them conveniently
+    /// Window to show to users when they haven't set up the FMOD Syntax system yet to let them conveniently
     /// initialize it with appropriate settings.
     /// </summary>
     public class SetupWizard : EditorWindow
@@ -40,13 +39,13 @@ namespace RoyTheunissen.FMODWrapper
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
-            string[] settingsAsset = AssetDatabase.FindAssets("t:FmodWrapperSettings");
+            string[] settingsAsset = AssetDatabase.FindAssets($"t:{nameof(FmodSyntaxSettings)}");
             if (settingsAsset.Length > 0)
                 return;
 
             EditorApplication.delayCall += () =>
             {
-                SetupWizard setupWizard = GetWindow<SetupWizard>(true, "FMOD Wrapper Setup Wizard");
+                SetupWizard setupWizard = GetWindow<SetupWizard>(true, "FMOD Syntax Setup Wizard");
                 setupWizard.minSize = setupWizard.maxSize = new Vector2(500, 270);
                 setupWizard.namespaceForGeneratedCode = $"{Application.companyName}.{Application.productName}.FMOD";
             };
@@ -60,7 +59,7 @@ namespace RoyTheunissen.FMODWrapper
             
             EditorGUILayout.Space();
             
-            EditorGUILayout.LabelField("Welcome! You've installed the FMOD Wrapper package.");
+            EditorGUILayout.LabelField("Welcome! You've installed the FMOD Syntax package.");
             
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Let's initialize the system with some default settings.");
@@ -96,7 +95,7 @@ namespace RoyTheunissen.FMODWrapper
 
             bool shouldInitialize = GUILayout.Button("Initialize", GUILayout.Height(40));
             if (shouldInitialize)
-                InitializeFmodWrapperSystem();
+                InitializeFmodSyntaxSystem();
             
             EditorGUILayout.Space();
             
@@ -107,10 +106,10 @@ namespace RoyTheunissen.FMODWrapper
             EditorGUILayout.EndHorizontal();
         }
         
-        private void InitializeFmodWrapperSystem()
+        private void InitializeFmodSyntaxSystem()
         {
-            FmodWrapperSettings settings = CreateScriptableObject<FmodWrapperSettings>(
-                settingsFolderPath, nameof(FmodWrapperSettings));
+            FmodSyntaxSettings settings = CreateScriptableObject<FmodSyntaxSettings>(
+                settingsFolderPath, nameof(FmodSyntaxSettings));
             
             settings.InitializeFromWizard(
                 generatedScriptsFolderPath, namespaceForGeneratedCode, shouldGenerateAssemblyDefinition);

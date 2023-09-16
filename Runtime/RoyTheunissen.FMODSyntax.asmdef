@@ -1,10 +1,8 @@
 {
-    "name": "RoyTheunissen.FMODWrapper.Editor",
-    "rootNamespace": "RoyTheunissen.FMODWrapper",
+    "name": "RoyTheunissen.FMODSyntax",
+    "rootNamespace": "RoyTheunissen.FMODSyntax",
     "references": [
-        "GUID:f28b76e6ba53ea24ca2daf55c1581312",
-        "GUID:0c752da273b17c547ae705acf0f2adf2",
-        "GUID:aab3caaf43456d6449a3e035348ff798"
+        "GUID:0c752da273b17c547ae705acf0f2adf2"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

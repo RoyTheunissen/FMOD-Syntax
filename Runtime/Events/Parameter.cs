@@ -2,7 +2,7 @@ using System;
 using FMOD.Studio;
 using FMODUnity;
 
-namespace RoyTheunissen.FMODWrapper
+namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
     /// Utility for setting FMOD parameters from code.
