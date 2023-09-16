@@ -47,15 +47,17 @@ AudioEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
 
 ### Loops
 ```cs
-// Looping sound
+// Start a looping sound
 TestContinuousPlayback testContinuousPlayback = AudioEvents.TestContinuous.Play(transform);
 
+// Set the parameter on a looping sound
 float value = Mathf.Sin(Time.time * Mathf.PI * 1.0f).Map(-1, 1);
 testContinuousPlayback.Strength.Value = value;
 
+// Stop a looping sound
 testContinuousPlayback?.Stop();
 
-// Cancelling loops in OnDestroy
+// Cancel a looping sound in OnDestroy
 testContinuousPlayback?.Cleanup();
 ```
 
