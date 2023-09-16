@@ -196,7 +196,7 @@ namespace RoyTheunissen.FMODWrapper
                     string enumValues = string.Empty;
                     for (int i = 0; i < parameter.Labels.Length; i++)
                     {
-                        enumValues += $"{parameter.Labels[i]}";
+                        enumValues += $"{FmodWrapperUtilities.GetFilteredNameFromPath(parameter.Labels[i])}";
                         if (i < parameter.Labels.Length - 1)
                             enumValues += ",";
                         enumValues += "\r\n";
