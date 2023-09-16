@@ -13,7 +13,7 @@ You can skip some of this by dispatching events/setting parameters by name but t
 
 For ease of use it's preferable if FMOD events and parameters are accessed in a strongly-typed way such that they're known at compile-time.
 
-This requires a little bit of code generation, and that's where `FMOD-Wrapper` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching FMOD events with parameters in as little as one line of code.
+This requires a little bit of code generation, and that's where `FMOD-Syntax` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching FMOD events with parameters in as little as one line of code.
 
 ![Example](Documentation~/Generated%20Code%20Files.png)
 
@@ -27,7 +27,7 @@ Overall this system significantly speeds up your audio implementation workflow a
 - The Setup Wizard will pop up and allow you to specify where and how to create the settings file & save generated code files
 - Configure the system as desired and press Initialize
 - Use `FMOD > Generate FMOD Code` or `CTRL+ALT+G` to generate the FMOD code
-- Cull FMOD expired playback instances by calling `FmodWrapperSystem.CullPlaybacks();` in an `Update` loop somewhere. I recommend putting this in your audio service.
+- Cull FMOD expired playback instances by calling `FmodSyntaxSystem.CullPlaybacks();` in an `Update` loop somewhere. I recommend putting this in your audio service.
 - You can now fire your FMOD events in a strongly typed way
 
 ## How to use
@@ -78,9 +78,9 @@ In FMOD there are three types of parameters: "Continuous" (`int`), "Discrete" (`
 
 Labeled parameters are sent and received as integers, but they are associated with a name for convenience, exactly like enums in C#.
 
-![image](https://github.com/RoyTheunissen/FMOD-Wrapper/assets/3997055/1effbe29-d228-40b9-852e-96741396f0b4)
+![image](https://github.com/RoyTheunissen/FMOD-Syntax/assets/3997055/1effbe29-d228-40b9-852e-96741396f0b4)
 
-For convenience, FMOD Wrapper generates an enum for every event with a labeled parameter, so auto-complete conveniently suggests all valid values when you are invoking the event.
+For convenience, FMOD Syntax generates an enum for every event with a labeled parameter, so auto-complete conveniently suggests all valid values when you are invoking the event.
 
 ```cs
 AudioEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
@@ -151,19 +151,19 @@ You can check out this repository as a submodule into your project's Assets fold
 The package is available on the [openupm registry](https://openupm.com). It's recommended to install it via [openupm-cli](https://github.com/openupm/openupm-cli).
 
 ```
-openupm add com.roytheunissen.fmod-wrapper
+openupm add com.roytheunissen.fmod-syntax
 ```
 
 ### Manifest
 You can also install via git URL by adding this entry in your **manifest.json**
 
 ```
-"com.roytheunissen.fmod-wrapper": "https://github.com/RoyTheunissen/FMOD-Wrapper.git"
+"com.roytheunissen.fmod-syntax": "https://github.com/RoyTheunissen/FMOD-Syntax.git"
 ```
 
 ### Unity Package Manager
 ```
-from Window->Package Manager, click on the + sign and Add from git: https://github.com/RoyTheunissen/FMOD-Wrapper.git
+from Window->Package Manager, click on the + sign and Add from git: https://github.com/RoyTheunissen/FMOD-Syntax.git
 ```
 
 
