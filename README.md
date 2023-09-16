@@ -28,7 +28,7 @@ Overall this system significantly speeds up your audio implementation workflow a
 - The Setup Wizard will pop up and allow you to specify where and how to create the settings file & save generated code files
 - Configure the system as desired and press Initialize
 - Use `FMOD > Generate FMOD Code` or `CTRL+ALT+G` to generate the FMOD code
-- Cull FMOD expired playback instances by calling `FmodSyntaxSystem.CullPlaybacks();` in an `Update` loop somewhere. I recommend putting this in your audio service.
+- Cull expired FMOD playback instances by calling `FmodSyntaxSystem.CullPlaybacks();` in an `Update` loop somewhere. I recommend putting this in your audio service.
 - You can now fire your FMOD events in a strongly typed way
 
 ## How to use
