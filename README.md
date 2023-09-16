@@ -98,7 +98,7 @@ AudioEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
 AudioEvents.Jump.Play(transform, JumpPlayback.SurfaceValues.Generic);
 ```
 
-Furthermore, the enums in FMOD may actually represent an enum in your game. So it's inconvenient to have to map from that game enum to the FMOD enum. But luckily there's a solution for that: **User-specified labeled parameter enums**.
+Furthermore, the enums in FMOD may actually represent an enum in your game. So it's inconvenient to have to map from that game enum to the FMOD enum. But there's a solution for that: **User-specified labeled parameter enums**.
 
 Simply tag your game enum with `[FmodLabelEnum]` and specify the names of the labeled parameters that it represents, and then when code is generated instead of generating event-specific enums, it uses the game enum you specified for those events.
 
