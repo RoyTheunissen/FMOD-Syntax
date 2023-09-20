@@ -1,3 +1,4 @@
+using System;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
@@ -12,25 +13,28 @@ namespace RoyTheunissen.FMODSyntax
     public abstract class FmodAudioConfig<PlaybackType> : IAudioConfig
         where PlaybackType : FmodAudioPlayback
     {
-        private EventDescription eventDescription;
-        protected EventDescription EventDescription => eventDescription;
+        [NonSerialized] private GUID id;
+        
+        /// <summary>
+        /// NOTE: Seems like we can't cache this for some reason that's related to domain reloading. Not sure yet why.
+        /// </summary>
+        protected EventDescription EventDescription => RuntimeManager.GetEventDescription(id);
 
         public abstract PlaybackType Play(Transform source = null);
 
         public FmodAudioConfig(string guid)
         {
-            GUID id = GUID.Parse(guid);
-            eventDescription = RuntimeManager.GetEventDescription(id);
+            id = GUID.Parse(guid);
         }
 
         public void Preload()
         {
-            eventDescription.loadSampleData();
+            EventDescription.loadSampleData();
         }
         
         public void Unload()
         {
-            eventDescription.unloadSampleData();
+            EventDescription.unloadSampleData();
         }
 
         IAudioPlayback IAudioConfig.Play(Transform source)
