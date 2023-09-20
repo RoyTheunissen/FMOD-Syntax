@@ -167,6 +167,8 @@ namespace RoyTheunissen.FMODSyntax
                     }
 
                     currentPath = selectedFolder;
+                    
+                    EditorApplication.delayCall += Repaint;
                 }
             }
             
