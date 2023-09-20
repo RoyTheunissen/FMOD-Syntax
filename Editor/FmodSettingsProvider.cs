@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 
+#if FMOD_AUTO_REGENERATE_CODE
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
@@ -43,3 +44,4 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
 }
+#endif // FMOD_AUTO_REGENERATE_CODE
