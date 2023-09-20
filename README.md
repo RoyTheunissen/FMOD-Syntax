@@ -81,7 +81,7 @@ In FMOD there are three types of parameters: "Continuous" (`int`), "Discrete" (`
 
 Labeled parameters are sent and received as integers, but they are associated with a name for convenience, exactly like enums in C#.
 
-![image](https://github.com/RoyTheunissen/FMOD-Syntax/assets/3997055/1effbe29-d228-40b9-852e-96741396f0b4)
+![image](https://github.com/RoyTheunissen/FMOD-Syntax/assets/3997055/280da27d-abde-4faf-b260-0a2591ea4d29)
 
 For convenience, FMOD Syntax generates an enum for every event with a labeled parameter, so auto-complete conveniently suggests all valid values when you are invoking the event.
 
