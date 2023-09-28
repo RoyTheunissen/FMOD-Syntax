@@ -27,7 +27,7 @@ namespace RoyTheunissen.FMODSyntax
             string name = parameter.GetFilteredName();
             bool hasUserEnum = FmodCodeGenerator.GetUserSpecifiedLabelParameterEnum(name, out Type userEnum);
             if (hasUserEnum)
-                return userEnum.Name;
+                return userEnum.FullName;
 
             string type = $"{name}Values";
             

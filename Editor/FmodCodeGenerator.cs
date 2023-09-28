@@ -150,13 +150,6 @@ namespace RoyTheunissen.FMODSyntax
             }
         }
 
-        public static bool HasUserSpecifiedLabelParameterEnum(string name)
-        {
-            CacheUserSpecifiedLabelParameterEnums();
-            
-            return labelParameterNameToUserSpecifiedEnumType.ContainsKey(name);
-        }
-
         public static bool GetUserSpecifiedLabelParameterEnum(string name, out Type enumType)
         {
             CacheUserSpecifiedLabelParameterEnums();
@@ -183,11 +176,6 @@ namespace RoyTheunissen.FMODSyntax
                 bool hasUserSpecifiedEnum = GetUserSpecifiedLabelParameterEnum(parameter.Name, out Type enumType);
                 if (hasUserSpecifiedEnum)
                 {
-                    // Make sure we have an appropriate using directive.
-                    string usingDirectiveForEnum = enumType.Namespace;
-                    if (!eventUsingDirectives.Contains(usingDirectiveForEnum))
-                        eventUsingDirectives.Add(usingDirectiveForEnum);
-                    
                     // Not generating a new enum.
                     codeGenerator.RemoveKeywordLines(enumKeyword);
                 }
