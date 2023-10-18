@@ -29,6 +29,8 @@ namespace RoyTheunissen.FMODSyntax
                 .ToArray();
             string[] paths = new string[parameterlessEvents.Length];
             string[] guids = new string[parameterlessEvents.Length];
+            
+            root.AddChildByPath("None", "None");
 
             for (int i = 0; i < parameterlessEvents.Length; i++)
             {
@@ -55,7 +57,7 @@ namespace RoyTheunissen.FMODSyntax
             AudioConfigDropdownItem dropdownItem = (AudioConfigDropdownItem)item;
             
             serializedProperty.serializedObject.Update();
-            serializedProperty.stringValue = dropdownItem.Guid;
+            serializedProperty.stringValue = dropdownItem.Guid == "None" ? string.Empty : dropdownItem.Guid;
             serializedProperty.serializedObject.ApplyModifiedProperties();
         }
     }
