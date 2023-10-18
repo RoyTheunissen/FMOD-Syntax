@@ -20,6 +20,17 @@ namespace RoyTheunissen.FMODSyntax
         /// </summary>
         protected EventDescription EventDescription => RuntimeManager.GetEventDescription(id);
 
+        public string Path
+        {
+            get
+            {
+                EventDescription.getPath(out string path);
+                return path;
+            }
+        }
+
+        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+
         public abstract PlaybackType Play(Transform source = null);
 
         public FmodAudioConfig(string guid)
@@ -40,6 +51,11 @@ namespace RoyTheunissen.FMODSyntax
         IAudioPlayback IAudioConfig.Play(Transform source)
         {
             return Play(source);
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }

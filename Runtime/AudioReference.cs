@@ -93,5 +93,11 @@ namespace RoyTheunissen.FMODSyntax
                 }
             }
         }
+
+        public override string ToString()
+        {
+            FmodParameterlessAudioConfig config = FmodAudioConfig;
+            return config == null ? "" : config.ToString();
+        }
     }
 }
