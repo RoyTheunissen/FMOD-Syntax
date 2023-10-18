@@ -31,6 +31,9 @@ namespace RoyTheunissen.FMODSyntax
 
         public bool IsAssigned => FmodAudioConfig != null;
 
+        public string Name => IsAssigned ? FmodAudioConfig.Name : "";
+        public string Path => IsAssigned ? FmodAudioConfig.Path : "";
+
         [NonSerialized] private static bool didCacheParameterlessEvents;
         private static readonly Dictionary<string, FmodParameterlessAudioConfig> parameterlessEventsByGuid =
             new Dictionary<string, FmodParameterlessAudioConfig>();
