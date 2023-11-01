@@ -1,0 +1,12 @@
+##UsingDirectives##
+
+namespace ##Namespace##
+{
+    /// <summary>
+    /// GENERATED: Contains classes generated based on FMOD snapshots so they can be called in a strongly-typed manner.
+    /// </summary>
+    public static class AudioSnapshots 
+    {
+        ##SnapshotTypes##
+    }
+}

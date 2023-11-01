@@ -8,6 +8,7 @@ namespace RoyTheunissen.FMODSyntax
     public static class EditorEventRefExtensions
     {
         public const string EventPrefix = "event:/";
+        public const string SnapshotPrefix = "snapshot:/";
         
         public static string GetDisplayName(this EditorEventRef @event)
         {

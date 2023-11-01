@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using RoyTheunissen.FMODSyntax.Callbacks;
 
@@ -8,38 +9,51 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public static class FmodSyntaxSystem
     {
-        private static readonly List<FmodAudioPlayback> activePlaybacks = new List<FmodAudioPlayback>();
-        public static List<FmodAudioPlayback> ActivePlaybacks => activePlaybacks;
+        private static readonly List<FmodAudioPlayback> activeEventPlaybacks = new List<FmodAudioPlayback>();
+        public static List<FmodAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
 
-        private static readonly List<IOnFmodPlayback> onPlaybackCallbackReceivers = new List<IOnFmodPlayback>();
+        private static readonly List<IOnFmodPlayback> onEventPlaybackCallbackReceivers = new List<IOnFmodPlayback>();
         
+        private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new List<FmodSnapshotPlayback>();
+        public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
+
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
         private static void Initialize()
         {
-            activePlaybacks.Clear();
-            onPlaybackCallbackReceivers.Clear();
+            activeEventPlaybacks.Clear();
+            onEventPlaybackCallbackReceivers.Clear();
         }
 #endif // UNITY_EDITOR
 
-        public static void RegisterActivePlayback(FmodAudioPlayback playback)
+        public static void RegisterActiveEventPlayback(FmodAudioPlayback playback)
         {
-            activePlaybacks.Add(playback);
+            activeEventPlaybacks.Add(playback);
             
-            for (int i = 0; i < onPlaybackCallbackReceivers.Count; i++)
+            for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
             {
-                onPlaybackCallbackReceivers[i].OnFmodPlaybackRegistered(playback);
+                onEventPlaybackCallbackReceivers[i].OnFmodPlaybackRegistered(playback);
             }
         }
         
-        public static void UnregisterActivePlayback(FmodAudioPlayback playback)
+        public static void UnregisterActiveEventPlayback(FmodAudioPlayback playback)
         {
-            activePlaybacks.Remove(playback);
+            activeEventPlaybacks.Remove(playback);
             
-            for (int i = 0; i < onPlaybackCallbackReceivers.Count; i++)
+            for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
             {
-                onPlaybackCallbackReceivers[i].OnFmodPlaybackUnregistered(playback);
+                onEventPlaybackCallbackReceivers[i].OnFmodPlaybackUnregistered(playback);
             }
+        }
+        
+        public static void RegisterActiveSnapshotPlayback(FmodSnapshotPlayback playback)
+        {
+            activeSnapshotPlaybacks.Add(playback);
+        }
+        
+        public static void UnregisterActiveSnapshotPlayback(FmodSnapshotPlayback playback)
+        {
+            activeSnapshotPlaybacks.Remove(playback);
         }
 
         /// <summary>
@@ -48,22 +62,45 @@ namespace RoyTheunissen.FMODSyntax
         /// </summary>
         public static void CullPlaybacks()
         {
-            for (int i = activePlaybacks.Count - 1; i >= 0; i--)
+            // Cull any events that are ready to be cleaned up.
+            for (int i = activeEventPlaybacks.Count - 1; i >= 0; i--)
             {
-                IAudioPlayback activePlayback = activePlaybacks[i];
-                if (activePlayback.CanBeCleanedUp)
-                    activePlayback.Cleanup();
+                IFmodPlayback activeEvent = activeEventPlaybacks[i];
+                if (activeEvent.CanBeCleanedUp)
+                    activeEvent.Cleanup();
+            }
+            
+            // Cull any snapshots that are ready to be cleaned up.
+            for (int i = activeSnapshotPlaybacks.Count - 1; i >= 0; i--)
+            {
+                IFmodPlayback activeSnapshot = activeSnapshotPlaybacks[i];
+                if (activeSnapshot.CanBeCleanedUp)
+                    activeSnapshot.Cleanup();
             }
         }
         
+        [Obsolete("This method is being renamed for disambiguation. " +
+                  "Please use RegisterEventPlaybackCallbackReceiver instead.")]
         public static void RegisterPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
         {
-            onPlaybackCallbackReceivers.Add(callbackReceiver);
+            RegisterEventPlaybackCallbackReceiver(callbackReceiver);
         }
         
+        [Obsolete("This method is being renamed for disambiguation. " +
+                  "Please use UnregisterEventPlaybackCallbackReceiver instead.")]
         public static void UnregisterPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
         {
-            onPlaybackCallbackReceivers.Remove(callbackReceiver);
+            UnregisterEventPlaybackCallbackReceiver(callbackReceiver);
+        }
+        
+        public static void RegisterEventPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
+        {
+            onEventPlaybackCallbackReceivers.Add(callbackReceiver);
+        }
+        
+        public static void UnregisterEventPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
+        {
+            onEventPlaybackCallbackReceivers.Remove(callbackReceiver);
         }
     }
 }

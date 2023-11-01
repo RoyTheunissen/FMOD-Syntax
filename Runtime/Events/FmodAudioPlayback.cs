@@ -109,7 +109,7 @@ namespace RoyTheunissen.FMODSyntax
 
             instance.start();
 
-            FmodSyntaxSystem.RegisterActivePlayback(this);
+            FmodSyntaxSystem.RegisterActiveEventPlayback(this);
         }
 
         protected virtual void InitializeParameters()
@@ -135,7 +135,7 @@ namespace RoyTheunissen.FMODSyntax
                 }
             }
 
-            FmodSyntaxSystem.UnregisterActivePlayback(this);
+            FmodSyntaxSystem.UnregisterActiveEventPlayback(this);
         }
     }
 }
