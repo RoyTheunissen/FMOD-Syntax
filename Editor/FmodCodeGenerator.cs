@@ -26,6 +26,9 @@ namespace RoyTheunissen.FMODSyntax
         private static string BusesScriptPath => ScriptPathBase + "FmodBuses.cs";
         private const string BusesTemplatePath = TemplatePathBase + "Buses/";
         
+        private static string SnapshotsScriptPath => ScriptPathBase + "FmodSnapshots.cs";
+        private const string SnapshotsTemplatePath = TemplatePathBase + "Snapshots/";
+        
         private static readonly CodeGenerator assemblyDefinitionGenerator =
             new CodeGenerator(TemplatePathBase + "FMOD-Syntax.asmdef");
 
@@ -58,6 +61,11 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(BusesTemplatePath + "FmodBuses.cs");
         private static readonly CodeGenerator busFieldGenerator =
             new CodeGenerator(BusesTemplatePath + "FmodBusField.cs");
+        
+        private static readonly CodeGenerator snapshotsScriptGenerator =
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshots.cs");
+        private static readonly CodeGenerator snapshotFieldsGenerator =
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.cs");
         
         private static FmodSyntaxSettings Settings => FmodSyntaxSettings.Instance;
         
@@ -379,7 +387,7 @@ namespace RoyTheunissen.FMODSyntax
                 GenerateAssemblyDefinition();
             
             GenerateEventsScript();
-            GenerateBanksAndBusesScripts();
+            GenerateMiscellaneousScripts();
         }
 
         private static void GenerateAssemblyDefinition()
@@ -509,7 +517,7 @@ namespace RoyTheunissen.FMODSyntax
             eventsScriptGenerator.GenerateFile(EventsScriptPath);
         }
 
-        private static void GenerateBanksAndBusesScripts()
+        private static void GenerateMiscellaneousScripts()
         {
             banksScriptGenerator.Reset();
             
@@ -571,6 +579,39 @@ namespace RoyTheunissen.FMODSyntax
             
             busesScriptGenerator.ReplaceKeyword("Buses", busesCode);
             busesScriptGenerator.GenerateFile(BusesScriptPath);
+            
+            // Generate a file for accessing the snapshots.
+            snapshotsScriptGenerator.Reset();
+            
+            snapshotsScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
+            
+            string snapshotsCode = string.Empty;
+            EditorEventRef[] snapshots = EventManager.Events
+                .Where(e => e.Path.StartsWith(EditorEventRefExtensions.SnapshotPrefix))
+                .OrderBy(e => e.Path).ToArray();
+            foreach (EditorEventRef snapshot in snapshots)
+            {
+                string snapshotName = snapshot.GetFilteredName();
+                string snapshotPath = snapshot.Path;
+                
+                snapshotFieldsGenerator.Reset();
+                snapshotFieldsGenerator.ReplaceKeyword("SnapshotName", snapshotName);
+                snapshotFieldsGenerator.ReplaceKeyword("GUID", snapshot.Guid.ToString());
+                
+                snapshotsCode += snapshotFieldsGenerator.GetCode();
+            }
+            
+            // Also allow custom using directives to be specified.
+            string usingDirectives = string.Empty;
+            for (int i = 0; i < eventUsingDirectives.Count; i++)
+            {
+                string usingDirective = eventUsingDirectives[i];
+                usingDirectives += $"using {usingDirective};\r\n";
+            }
+            snapshotsScriptGenerator.ReplaceKeyword("UsingDirectives", usingDirectives);
+            
+            snapshotsScriptGenerator.ReplaceKeyword("SnapshotTypes", snapshotsCode);
+            snapshotsScriptGenerator.GenerateFile(SnapshotsScriptPath);
         }
     }
 }
