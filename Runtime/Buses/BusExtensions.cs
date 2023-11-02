@@ -1,7 +1,7 @@
 namespace FMOD.Studio
 {
     /// <summary>
-    /// Extensions for bus to get the path without an out parameter because to make lambda functions easy to write.
+    /// Extensions for bus to get the path without an out parameter to make lambda functions easy to write.
     /// </summary>
     public static class BusExtensions 
     {
