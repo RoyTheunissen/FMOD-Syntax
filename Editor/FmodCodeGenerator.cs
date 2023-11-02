@@ -29,6 +29,9 @@ namespace RoyTheunissen.FMODSyntax
         private static string SnapshotsScriptPath => ScriptPathBase + "FmodSnapshots.cs";
         private const string SnapshotsTemplatePath = TemplatePathBase + "Snapshots/";
         
+        private static string VCAsScriptPath => ScriptPathBase + "FmodVCAs.cs";
+        private const string VCAsTemplatePath = TemplatePathBase + "VCAs/";
+
         private static readonly CodeGenerator assemblyDefinitionGenerator =
             new CodeGenerator(TemplatePathBase + "FMOD-Syntax.asmdef");
 
@@ -66,6 +69,11 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshots.cs");
         private static readonly CodeGenerator snapshotFieldsGenerator =
             new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.cs");
+        
+        private static readonly CodeGenerator vcasScriptGenerator =
+            new CodeGenerator(VCAsTemplatePath + "FmodVCAs.cs");
+        private static readonly CodeGenerator vcaFieldGenerator =
+            new CodeGenerator(VCAsTemplatePath + "FmodVCAField.cs");
         
         private static FmodSyntaxSettings Settings => FmodSyntaxSettings.Instance;
         
@@ -532,6 +540,7 @@ namespace RoyTheunissen.FMODSyntax
             
             banks = banks.OrderBy(b => b.getPath()).ToArray();
             List<FMOD.Studio.Bus> buses = new List<FMOD.Studio.Bus>();
+            List<FMOD.Studio.VCA> VCAs = new List<FMOD.Studio.VCA>();
             foreach (Bank bank in banks)
             {
                 bankFieldGenerator.Reset();
@@ -550,6 +559,13 @@ namespace RoyTheunissen.FMODSyntax
                 {
                     if (!buses.Contains(bankBus))
                         buses.Add(bankBus);
+                }
+
+                bank.getVCAList(out FMOD.Studio.VCA[] bankVCAs);
+                foreach (FMOD.Studio.VCA bankVCA in bankVCAs)
+                {
+                    if (!VCAs.Contains(bankVCA))
+                        VCAs.Add(bankVCA);
                 }
             }
             
@@ -612,6 +628,30 @@ namespace RoyTheunissen.FMODSyntax
             
             snapshotsScriptGenerator.ReplaceKeyword("SnapshotTypes", snapshotsCode);
             snapshotsScriptGenerator.GenerateFile(SnapshotsScriptPath);
+            
+            // Now that we know the VCAs, we can also generate a file for accessing those.
+            vcasScriptGenerator.Reset();
+            
+            vcasScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
+            
+            string VCAsCode = string.Empty;
+            VCAs = VCAs.OrderBy(b => b.getPath()).ToList();
+            foreach (FMOD.Studio.VCA VCA in VCAs)
+            {
+                string vcaPath = VCA.getPath();
+                string vcaName = VCA.GetName();
+                    
+                if (string.IsNullOrWhiteSpace(vcaName))
+                    continue;
+
+                vcaFieldGenerator.Reset();
+                vcaFieldGenerator.ReplaceKeyword("VCAName", vcaName);
+                vcaFieldGenerator.ReplaceKeyword("VCAPath", vcaPath);
+                VCAsCode += vcaFieldGenerator.GetCode();
+            }
+            
+            vcasScriptGenerator.ReplaceKeyword("VCAs", VCAsCode);
+            vcasScriptGenerator.GenerateFile(VCAsScriptPath);
         }
     }
 }
