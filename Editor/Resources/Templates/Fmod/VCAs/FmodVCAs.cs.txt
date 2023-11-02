@@ -1,0 +1,12 @@
+using RoyTheunissen.FMODSyntax;
+
+namespace ##Namespace##
+{
+    /// <summary>
+    /// GENERATED: Contains FMOD VCAs so they can be accessed in a strongly-typed manner.
+    /// </summary>
+    public static class AudioVCAs
+    {
+        ##VCAs##
+    }
+}
