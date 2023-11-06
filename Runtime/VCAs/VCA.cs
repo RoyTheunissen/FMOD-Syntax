@@ -1,4 +1,3 @@
-using System;
 using FMOD.Studio;
 using FMODUnity;
 
@@ -11,20 +10,10 @@ namespace RoyTheunissen.FMODSyntax
     {
         private readonly string path;
         
-        [NonSerialized] private FMOD.Studio.VCA cachedFmodVCA;
-        [NonSerialized] private bool didCacheFmodVCA;
-        private FMOD.Studio.VCA FmodVca
-        {
-            get
-            {
-                if (!didCacheFmodVCA)
-                {
-                    didCacheFmodVCA = true;
-                    cachedFmodVCA = RuntimeManager.GetVCA(path);
-                }
-                return cachedFmodVCA;
-            }
-        }
+        /// <summary>
+        /// NOTE: Seems like we can't cache this for some reason that's related to domain reloading. Not sure yet why.
+        /// </summary>
+        private FMOD.Studio.VCA FmodVca => RuntimeManager.GetVCA(path);
 
         public float VolumeLinear
         {
