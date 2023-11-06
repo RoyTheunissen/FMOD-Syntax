@@ -12,9 +12,13 @@ Neither of these setups is ideal.
 Dispatching an event this way requires you to define a bunch of fields, assign things in the inspector, and then the syntax for setting parameters is weakly-typed.
 You can skip some of this by dispatching events/setting parameters by name but that has the drawback that you need to look up what the name is and it's very hard and error-prone to rename anything as it'll break references.
 
-For ease of use it's preferable if FMOD events and parameters are accessed in a strongly-typed way such that they're known at compile-time.
+For ease of use it's preferable if FMOD events and parameters are accessed in a strongly-typed way such that they're known at compile-time. Maybe something like this:
 
-This requires a little bit of code generation, and that's where `FMOD-Syntax` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching FMOD events with parameters in as little as one line of code.
+```cs
+AudioEvents.PlayerJump.Play(transform);
+```
+
+This would require a little bit of code generation, and that's where `FMOD-Syntax` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching FMOD events with parameters in as little as one line of code.
 
 ![Example](Documentation~/Generated%20Code%20Files.png)
 
