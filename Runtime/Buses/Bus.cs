@@ -12,7 +12,8 @@ namespace RoyTheunissen.FMODSyntax
         
         [NonSerialized] private FMOD.Studio.Bus cachedFmodBus;
         [NonSerialized] private bool didCacheFmodBus;
-        private FMOD.Studio.Bus FmodBus
+
+        public FMOD.Studio.Bus FmodBus
         {
             get
             {
