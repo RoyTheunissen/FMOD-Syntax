@@ -13,6 +13,13 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public sealed class FmodSyntaxSettings : ScriptableObject 
     {
+        public enum EventNameClashPreventionTypes
+        {
+            None,
+            GenerateSeparateClassesPerFolder,
+            IncludePath,
+        }
+        
         [SerializeField] private string generatedScriptsFolderPath;
         public string GeneratedScriptsFolderPath => generatedScriptsFolderPath;
 
@@ -24,6 +31,10 @@ namespace RoyTheunissen.FMODSyntax
         
         [SerializeField] private bool generateFallbacksForMissingEvents = true;
         public bool GenerateFallbacksForMissingEvents => generateFallbacksForMissingEvents;
+
+        [SerializeField] private EventNameClashPreventionTypes eventNameClashPreventionType
+            = EventNameClashPreventionTypes.None;
+        public EventNameClashPreventionTypes EventNameClashPreventionType => eventNameClashPreventionType;
 
         [NonSerialized] private static FmodSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;

@@ -335,7 +335,7 @@ namespace RoyTheunissen.FMODSyntax
             EditorEventRef e, bool isStub, string eventName = "", string attribute = "")
         {
             if (string.IsNullOrEmpty(eventName))
-                eventName = e.GetFilteredName();
+                eventName = GetEventName(e);
 
             if (isStub)
             {
@@ -447,13 +447,22 @@ namespace RoyTheunissen.FMODSyntax
             eventTypesGenerator.ReplaceKeyword(eventParametersKeyword, eventParametersCode);
         }
 
+        private static string GetEventName(EditorEventRef e)
+        {
+            // If specified, include the entire path as a prefix.
+            if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes.IncludePath)
+                return e.GetFilteredPath(true).Replace("_", "").Replace("/", "_");
+            
+            return e.GetFilteredName();
+        }
+
         private static string GetEventCode(EditorEventRef e, string eventName = "", string attribute = "")
         {
             // By default we use the event's own name, but when we're generating aliases we actually want to generate
             // a Config/Playback that has an old name but points to the GUID of the newly named event, so we want to 
             // be able to specify a different name in that use case.
             if (string.IsNullOrEmpty(eventName))
-                eventName = e.GetFilteredName();
+                eventName = GetEventName(e);
             string fieldName = FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(eventName);
             
             eventFieldsGenerator.Reset();
@@ -517,15 +526,35 @@ namespace RoyTheunissen.FMODSyntax
             {
                 string path = e.GetFilteredPath(true);
 
-                EventFolder folder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(path);
+                EventFolder folder = rootEventFolder;
                 
+                if (Settings.EventNameClashPreventionType ==
+                    FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                {
+                    folder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(path);
+                }
+
                 folder.ChildEvents.Add(e);
             }
             
             // Generate code for the events per folder.
             parameterlessEventsCode = "";
             activeEventGuidsCode = "";
-            string eventsCode = GenerateFolderCode(rootEventFolder, isStub);
+            string eventsCode;
+            if (!isStub && Settings.EventNameClashPreventionType != 
+                FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+            {
+                // If we don't separate events with folders then we define the event types outside of the root folder,
+                // which is how it used to work and prevents you from having to type
+                // 'AudioEvents.NameOfEventPlayback playback;' and lets you type
+                // 'NameOfEventPlayback playback;' instead (without the 'AudioEvents.')
+                eventsCode = GenerateFolderCode(rootEventFolder, isStub, out string eventTypesCode);
+                eventsCode = eventTypesCode + eventsCode;
+            }
+            else
+            {
+                eventsCode = GenerateFolderCode(rootEventFolder, isStub);
+            }
             codeGenerator.ReplaceKeyword("Events", eventsCode, true);
 
             // Also generate a field for every FMOD global parameter.
@@ -554,7 +583,7 @@ namespace RoyTheunissen.FMODSyntax
             codeGenerator.GenerateFile(eventsScriptPath);
         }
 
-        private static string GenerateFolderCode(EventFolder eventFolder, bool isStub)
+        private static string GenerateFolderCode(EventFolder eventFolder, bool isStub, out string eventTypesCode)
         {
             string childFoldersCode = "";
             for (int i = 0; i < eventFolder.ChildFolders.Count; i++)
@@ -574,7 +603,7 @@ namespace RoyTheunissen.FMODSyntax
             
             string eventTypeAliasesCode = "";
             string eventAliasesCode = "";
-            string eventTypesCode = string.Empty;
+            eventTypesCode = string.Empty;
             string eventsCode = string.Empty;
             foreach (EditorEventRef e in eventFolder.ChildEvents)
             {
@@ -636,7 +665,16 @@ namespace RoyTheunissen.FMODSyntax
                 eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
             }
             
-            eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
+            // If we separate events with folders then we define the types inside the folder in question. Otherwise we
+            // only have one root folder, and we define the types outside of that, which is how it used to work and
+            // prevents you from having to type 'AudioEvents.NameOfEventPlayback playback;' and lets you type
+            // 'NameOfEventPlayback playback;' instead, without the 'AudioEvents.'
+            if (Settings.EventNameClashPreventionType 
+                == FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
+            else
+                eventFolderGenerator.RemoveKeywordLines("EventTypes");
+            
             eventFolderGenerator.ReplaceKeyword("Events", eventsCode, true);
 
             // Also add a section for any event aliases, if needed.
@@ -655,6 +693,11 @@ namespace RoyTheunissen.FMODSyntax
             eventFolderGenerator.ReplaceKeyword("BaseType", baseType);
             
             return eventFolderGenerator.GetCode();
+        }
+
+        private static string GenerateFolderCode(EventFolder eventFolder, bool isStub)
+        {
+            return GenerateFolderCode(eventFolder, isStub, out string _);
         }
 
         private static void GenerateMiscellaneousScripts()
