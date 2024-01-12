@@ -572,8 +572,12 @@ namespace RoyTheunissen.FMODSyntax
             {
                 EventFolder childFolder = eventFolder.ChildFolders[i];
                 string childFolderCode = GenerateFolderCode(childFolder, isDeclaration);
-                childFoldersCode += childFolderCode + "\n";
+                childFoldersCode += childFolderCode + "\r\n";
             }
+            
+            // Add an extra linebreak if there's subfolders.
+            if (!string.IsNullOrEmpty(childFoldersCode))
+                childFoldersCode += "\r\n";
             
             // NOTE: Do this AFTER we have gathered code from child folders because there is recursion there. Otherwise
             // our children would reset the event folder generator that we're using.
@@ -656,6 +660,13 @@ namespace RoyTheunissen.FMODSyntax
                 eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
             else
                 eventFolderGenerator.RemoveKeywordLines("EventTypes");
+            
+            // Add an extra linebreak if there's event types or event aliases.
+            if (!string.IsNullOrEmpty(eventsCode) &&
+                (!string.IsNullOrEmpty(eventTypesCode) || !string.IsNullOrEmpty(eventTypeAliasesCode)))
+            {
+                eventsCode += "\r\n";
+            }
             
             eventFolderGenerator.ReplaceKeyword("Events", eventsCode, true);
 
