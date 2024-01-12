@@ -25,6 +25,9 @@ namespace RoyTheunissen.FMODSyntax
             private readonly List<EditorEventRef> childEvents = new List<EditorEventRef>();
             public List<EditorEventRef> ChildEvents => childEvents;
 
+            private Dictionary<EditorEventRef, string> childEventToAliasPath = new Dictionary<EditorEventRef, string>();
+            public Dictionary<EditorEventRef, string> ChildEventToAliasPath => childEventToAliasPath;
+
             public EventFolder(string name)
             {
                 this.name = name;
@@ -546,6 +549,18 @@ namespace RoyTheunissen.FMODSyntax
                 }
 
                 folder.ChildEvents.Add(e);
+                
+                string currentPath = e.GetFilteredPath();
+                bool shouldGenerateAlias = previousEventPathsByGuid.TryGetValue(
+                    e.Guid.ToString(), out string previousPath) && previousPath != currentPath;
+                
+                // Also generate aliases for this event if it has been renamed so you have a chance to update the
+                // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
+                if (shouldGenerateAlias)
+                {
+                    EventFolder previousFolder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(previousPath);
+                    previousFolder.ChildEventToAliasPath[e] = previousPath;
+                }
             }
             
             // Generate code for the events per folder.
@@ -616,8 +631,6 @@ namespace RoyTheunissen.FMODSyntax
             {
                 // Check if this event used to have a different path.
                 string currentPath = e.GetFilteredPath();
-                bool shouldGenerateAlias = previousEventPathsByGuid.TryGetValue(
-                                            e.Guid.ToString(), out string previousPath) && previousPath != currentPath;
 
                 // Log it in the active event GUIDs. This way we can keep track of which events we had previously and
                 // which paths / GUIDs they had. Then we can figure out if they were renamed/moved, then add those
@@ -640,14 +653,22 @@ namespace RoyTheunissen.FMODSyntax
                 {
                     parameterlessEventsCode += $"{{ \"{e.Guid}\", new FmodParameterlessAudioConfig(\"{e.Guid}\") }},\r\n";
                 }
+            }
 
-                // Also generate aliases for this event if it has been renamed so you have a chance to update the
-                // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
-                if (shouldGenerateAlias)
+            // Generate code for event aliases.
+            if (Settings.GenerateFallbacksForMissingEvents)
+            {
+                foreach (KeyValuePair<EditorEventRef, string> eventPreviousPathPair in
+                         eventFolder.ChildEventToAliasPath)
                 {
-                    string attribute = $"[Obsolete(\"FMOD Event '{previousPath}' has been renamed to '{currentPath}'\")]";
+                    EditorEventRef e = eventPreviousPathPair.Key;
+                    string currentPath = e.GetFilteredPath();
+                    string previousPath = eventPreviousPathPair.Value;
 
                     string previousName = FmodSyntaxUtilities.GetFilteredNameFromPath(previousPath);
+
+                    string attribute =
+                        $"[Obsolete(\"FMOD Event '{previousPath}' has been changed to '{currentPath}'\")]";
 
                     if (isDeclaration)
                         eventAliasesCode += GetEventCode(e, previousName, attribute);
@@ -658,7 +679,7 @@ namespace RoyTheunissen.FMODSyntax
 
             // Also add a section for any event type aliases, if needed.
             const string eventTypeAliasesKeyword = "EventTypeAliases";
-            if (string.IsNullOrEmpty(eventTypeAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
+            if (string.IsNullOrEmpty(eventTypeAliasesCode))
             {
                 eventTypeAliasesCode = string.Empty;
             }
