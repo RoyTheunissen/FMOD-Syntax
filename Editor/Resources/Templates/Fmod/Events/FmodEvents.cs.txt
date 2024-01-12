@@ -22,12 +22,4 @@ namespace ##Namespace##
             ##ParameterlessEventIds##
         };
     }
-
-    /// <summary>
-    /// GENERATED: Contains FMOD global parameters so they can be called in a strongly-typed manner.
-    /// </summary>
-    public static class AudioGlobalParameters 
-    {
-        ##GlobalParameters##
-    }
 }

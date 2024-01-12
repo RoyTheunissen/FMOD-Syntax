@@ -108,6 +108,10 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(EventsTemplatePath + "FmodEventFolder.cs");
 
         private static readonly CodeGenerator enumGenerator = new CodeGenerator(EventsTemplatePath + "FmodEnum.cs");
+        
+        private static string GlobalParametersScriptPath => ScriptPathBase + "FmodGlobalParameters.cs";
+        private static readonly CodeGenerator globalParametersGenerator =
+            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameters.cs");
         private static readonly CodeGenerator globalParameterGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodGlobalParameter.cs");
         
@@ -136,6 +140,7 @@ namespace RoyTheunissen.FMODSyntax
         private static FmodSyntaxSettings Settings => FmodSyntaxSettings.Instance;
         
         [NonSerialized] private static List<string> eventUsingDirectives = new List<string>();
+        [NonSerialized] private static string eventUsingDirectivesCode;
         [NonSerialized] private static string[] eventUsingDirectivesDefault =
         {
             "System",
@@ -468,6 +473,10 @@ namespace RoyTheunissen.FMODSyntax
             GenerateEventsScript(true, EventsScriptPath);
             GenerateEventsScript(false, EventsScriptTypesPath);
             
+            // NOTE: This re-uses the using directives from the generated events. Therefore this should be called after
+            // the events are generated.
+            GenerateGlobalParametersScript();
+            
             GenerateMiscellaneousScripts();
         }
 
@@ -479,6 +488,26 @@ namespace RoyTheunissen.FMODSyntax
             assemblyDefinitionGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
             
             assemblyDefinitionGenerator.GenerateFile(ScriptPathBase + $"{Settings.NamespaceForGeneratedCode}.asmdef");
+        }
+
+        private static void GenerateGlobalParametersScript()
+        {
+            // Also generate a field for every FMOD global parameter.
+            string globalParametersCode = string.Empty;
+            foreach (EditorParamRef parameter in EventManager.Parameters)
+            {
+                globalParametersCode += GetParameterCode(globalParameterGenerator, parameter);
+            }
+            
+            globalParametersGenerator.Reset();
+            globalParametersGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
+            
+            // NOTE: This re-uses the using directives from the generated events. Therefore this should be called after
+            // the events are generated.
+            globalParametersGenerator.ReplaceKeyword("UsingDirectives", eventUsingDirectivesCode);
+            
+            globalParametersGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
+            globalParametersGenerator.GenerateFile(GlobalParametersScriptPath);
         }
 
         private static void GenerateEventsScript(bool isDeclaration, string eventsScriptPath)
@@ -538,29 +567,21 @@ namespace RoyTheunissen.FMODSyntax
                 eventsCode = GenerateFolderCode(rootEventFolder, isDeclaration);
             }
             codeGenerator.ReplaceKeyword("Events", eventsCode, true);
-
-            // Also generate a field for every FMOD global parameter.
-            string globalParametersCode = string.Empty;
-            foreach (EditorParamRef parameter in EventManager.Parameters)
-            {
-                globalParametersCode += GetParameterCode(globalParameterGenerator, parameter);
-            }
             
             if (isDeclaration)
             {
                 codeGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
                 codeGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode);
-                codeGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
             }
 
             // Also allow custom using directives to be specified.
-            string usingDirectives = string.Empty;
+            eventUsingDirectivesCode = string.Empty;
             for (int i = 0; i < eventUsingDirectives.Count; i++)
             {
                 string usingDirective = eventUsingDirectives[i];
-                usingDirectives += $"using {usingDirective};\r\n";
+                eventUsingDirectivesCode += $"using {usingDirective};\r\n";
             }
-            codeGenerator.ReplaceKeyword("UsingDirectives", usingDirectives);
+            codeGenerator.ReplaceKeyword("UsingDirectives", eventUsingDirectivesCode);
 
             codeGenerator.GenerateFile(eventsScriptPath);
         }
@@ -695,6 +716,8 @@ namespace RoyTheunissen.FMODSyntax
 
         private static void GenerateMiscellaneousScripts()
         {
+            // NOTE: These are all together because that way data can be cached more easily.
+            
             banksScriptGenerator.Reset();
             
             banksScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
