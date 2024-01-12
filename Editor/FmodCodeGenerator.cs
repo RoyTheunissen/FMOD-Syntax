@@ -470,6 +470,8 @@ namespace RoyTheunissen.FMODSyntax
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
             
+            previousEventNamesByGuid = GetExistingEventNamesByGuid();
+            
             GenerateEventsScript(true, EventsScriptPath);
             GenerateEventsScript(false, EventsScriptTypesPath);
             
@@ -521,8 +523,6 @@ namespace RoyTheunissen.FMODSyntax
             codeGenerator.Reset();
             
             codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
-
-            previousEventNamesByGuid = GetExistingEventNamesByGuid();
 
             // Generate a config & playback class for every FMOD event.
             EditorEventRef[] events = EventManager.Events
@@ -645,12 +645,14 @@ namespace RoyTheunissen.FMODSyntax
 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
-                if (isDeclaration && wasRenamed)
+                if (wasRenamed)
                 {
                     string attribute = $"[Obsolete(\"FMOD Event '{previousName}' has been renamed to '{currentName}'\")]";
 
-                    eventTypeAliasesCode += GetEventTypeCode(e, previousName, attribute);
-                    eventAliasesCode += GetEventCode(e, previousName, attribute);
+                    if (isDeclaration)
+                        eventAliasesCode += GetEventCode(e, previousName, attribute);
+                    else
+                        eventTypeAliasesCode += GetEventTypeCode(e, previousName, attribute);
                 }
             }
 
@@ -658,7 +660,7 @@ namespace RoyTheunissen.FMODSyntax
             const string eventTypeAliasesKeyword = "EventTypeAliases";
             if (string.IsNullOrEmpty(eventTypeAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
             {
-                eventFolderGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
+                eventTypeAliasesCode = string.Empty;
             }
             else
             {
@@ -669,7 +671,6 @@ namespace RoyTheunissen.FMODSyntax
                                        + "#pragma warning disable 618\r\n"
                                        + eventTypeAliasesCode
                                        + "#pragma warning restore 618\r\n";
-                eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
             }
             
             // If we separate events with folders then we define the types inside the folder in question. Otherwise we
@@ -678,19 +679,23 @@ namespace RoyTheunissen.FMODSyntax
             // 'NameOfEventPlayback playback;' instead, without the 'AudioEvents.'
             if (Settings.EventNameClashPreventionType 
                 == FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
-                eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
-            else
-                eventFolderGenerator.RemoveKeywordLines("EventTypes");
-            
-            // Add an extra linebreak if there's event types or event aliases.
-            if (!string.IsNullOrEmpty(eventsCode) &&
-                (!string.IsNullOrEmpty(eventTypesCode) || !string.IsNullOrEmpty(eventTypeAliasesCode)))
             {
-                eventsCode += "\r\n";
+                eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
+                eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
+            }
+            else
+            {
+                eventFolderGenerator.RemoveKeywordLines("EventTypes");
+                eventFolderGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
+
+                // We actually want to have the event type aliases below the other event types *next* to the AudioEvents
+                // class for consistency.
+                if (!string.IsNullOrEmpty(eventTypeAliasesCode))
+                    eventTypesCode += "\r\n" + eventTypeAliasesCode + "\r\n";
             }
             
             eventFolderGenerator.ReplaceKeyword("Events", eventsCode, true);
-
+            
             // Also add a section for any event aliases, if needed.
             const string eventAliasesKeyword = "EventAliases";
             if (string.IsNullOrEmpty(eventAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
