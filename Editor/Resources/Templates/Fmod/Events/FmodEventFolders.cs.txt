@@ -1,4 +1,4 @@
-public sealed class ##FolderName## : FmodAudioFolder 
+public sealed partial class ##FolderName####BaseType## 
 {
     ##Subfolders##
     

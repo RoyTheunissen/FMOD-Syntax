@@ -67,6 +67,7 @@ namespace RoyTheunissen.FMODSyntax
         private const string TemplatePathBase = "Templates/Fmod/";
         
         private static string EventsScriptPath => ScriptPathBase + "FmodEvents.cs";
+        private static string EventsScriptTypesPath => ScriptPathBase + "FmodEventsTypes.cs";
         private const string EventsTemplatePath = TemplatePathBase + "Events/";
         
         private static string BanksScriptPath => ScriptPathBase + "FmodBanks.cs";
@@ -87,8 +88,12 @@ namespace RoyTheunissen.FMODSyntax
         private const string EventNameKeyword = "EventName";
         private static readonly CodeGenerator eventsScriptGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEvents.cs");
+        private static readonly CodeGenerator eventsStubScriptGenerator =
+            new CodeGenerator(EventsTemplatePath + "FmodEventsStub.cs");
         private static readonly CodeGenerator eventTypesGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventTypes.cs");
+        private static readonly CodeGenerator eventTypesStubGenerator =
+            new CodeGenerator(EventsTemplatePath + "FmodEventTypesStub.cs");
         private static readonly CodeGenerator eventFieldsGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventFields.cs");
         private static readonly CodeGenerator eventParameterGenerator =
@@ -315,10 +320,29 @@ namespace RoyTheunissen.FMODSyntax
             return existingEventNamesByGuid;
         }
         
-        private static string GetEventTypeCode(EditorEventRef e, string eventName = "", string attribute = "")
+        private static string GetEventTypeStubCode(EditorEventRef e, string eventName = "", string attribute = "")
         {
             if (string.IsNullOrEmpty(eventName))
                 eventName = e.GetFilteredName();
+            
+            eventTypesStubGenerator.Reset();
+            eventTypesStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+            
+            return eventTypesStubGenerator.GetCode();
+        }
+        
+        private static string GetEventTypeCode(
+            EditorEventRef e, bool isStub, string eventName = "", string attribute = "")
+        {
+            if (string.IsNullOrEmpty(eventName))
+                eventName = e.GetFilteredName();
+
+            if (isStub)
+            {
+                eventTypesStubGenerator.Reset();
+                eventTypesStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+                return eventTypesStubGenerator.GetCode();
+            }
             
             eventTypesGenerator.Reset();
             eventTypesGenerator.ReplaceKeyword(EventNameKeyword, eventName);
@@ -452,7 +476,9 @@ namespace RoyTheunissen.FMODSyntax
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
             
-            GenerateEventsScript();
+            GenerateEventsScript(true, EventsScriptPath);
+            GenerateEventsScript(false, EventsScriptTypesPath);
+            
             GenerateMiscellaneousScripts();
         }
 
@@ -466,14 +492,15 @@ namespace RoyTheunissen.FMODSyntax
             assemblyDefinitionGenerator.GenerateFile(ScriptPathBase + $"{Settings.NamespaceForGeneratedCode}.asmdef");
         }
 
-        private static void GenerateEventsScript()
+        private static void GenerateEventsScript(bool isStub, string eventsScriptPath)
         {
             eventUsingDirectives.Clear();
             eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
 
-            eventsScriptGenerator.Reset();
+            CodeGenerator codeGenerator = isStub ? eventsStubScriptGenerator : eventsScriptGenerator;
+            codeGenerator.Reset();
             
-            eventsScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
+            codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
 
             previousEventNamesByGuid = GetExistingEventNamesByGuid();
 
@@ -482,7 +509,6 @@ namespace RoyTheunissen.FMODSyntax
                 .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix))
                 .OrderBy(e => e.Path).ToArray();
             
-            string foldersCode = "";
             Debug.Log($"GENERATING EVENTS SCRIPT NOW!");
 
             // Organize the events in a folder hierarchy.
@@ -499,8 +525,8 @@ namespace RoyTheunissen.FMODSyntax
             // Generate code for the events per folder.
             parameterlessEventsCode = "";
             activeEventGuidsCode = "";
-            string eventsCode = GenerateFolderCode(rootEventFolder);
-            eventsScriptGenerator.ReplaceKeyword("Events", eventsCode, true);
+            string eventsCode = GenerateFolderCode(rootEventFolder, isStub);
+            codeGenerator.ReplaceKeyword("Events", eventsCode, true);
 
             // Also generate a field for every FMOD global parameter.
             string globalParametersCode = string.Empty;
@@ -509,10 +535,12 @@ namespace RoyTheunissen.FMODSyntax
                 globalParametersCode += GetParameterCode(globalParameterGenerator, parameter);
             }
             
-            eventsScriptGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
-            eventsScriptGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode);
-
-            eventsScriptGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
+            if (isStub)
+            {
+                codeGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
+                codeGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode);
+                codeGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
+            }
 
             // Also allow custom using directives to be specified.
             string usingDirectives = string.Empty;
@@ -521,18 +549,18 @@ namespace RoyTheunissen.FMODSyntax
                 string usingDirective = eventUsingDirectives[i];
                 usingDirectives += $"using {usingDirective};\r\n";
             }
-            eventsScriptGenerator.ReplaceKeyword("UsingDirectives", usingDirectives);
+            codeGenerator.ReplaceKeyword("UsingDirectives", usingDirectives);
 
-            eventsScriptGenerator.GenerateFile(EventsScriptPath);
+            codeGenerator.GenerateFile(eventsScriptPath);
         }
 
-        private static string GenerateFolderCode(EventFolder eventFolder)
+        private static string GenerateFolderCode(EventFolder eventFolder, bool isStub)
         {
             string childFoldersCode = "";
             for (int i = 0; i < eventFolder.ChildFolders.Count; i++)
             {
                 EventFolder childFolder = eventFolder.ChildFolders[i];
-                string childFolderCode = GenerateFolderCode(childFolder);
+                string childFolderCode = GenerateFolderCode(childFolder, isStub);
                 childFoldersCode += childFolderCode + "\n";
             }
             
@@ -567,10 +595,12 @@ namespace RoyTheunissen.FMODSyntax
                 activeEventGuidsCode += $"{eventName}={e.Guid}\r\n";
 
                 // Types
-                eventTypesCode += GetEventTypeCode(e);
+                if (!isStub)
+                    eventTypesCode += GetEventTypeCode(e, isStub);
 
                 // Fields
-                eventsCode += GetEventCode(e);
+                if (isStub)
+                    eventsCode += GetEventCode(e);
 
                 if (e.LocalParameters.Count == 0)
                 {
@@ -579,11 +609,11 @@ namespace RoyTheunissen.FMODSyntax
 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
-                if (wasRenamed)
+                if (isStub && wasRenamed)
                 {
                     string attribute = $"[Obsolete(\"FMOD Event '{previousName}' has been renamed to '{currentName}'\")]";
 
-                    eventTypeAliasesCode += GetEventTypeCode(e, previousName, attribute);
+                    eventTypeAliasesCode += GetEventTypeCode(e, isStub, previousName, attribute);
                     eventAliasesCode += GetEventCode(e, previousName, attribute);
                 }
             }
@@ -606,8 +636,8 @@ namespace RoyTheunissen.FMODSyntax
                 eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
             }
             
-            eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode);
-            eventFolderGenerator.ReplaceKeyword("Events", eventsCode);
+            eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
+            eventFolderGenerator.ReplaceKeyword("Events", eventsCode, true);
 
             // Also add a section for any event aliases, if needed.
             const string eventAliasesKeyword = "EventAliases";
@@ -621,6 +651,9 @@ namespace RoyTheunissen.FMODSyntax
                 eventFolderGenerator.ReplaceKeyword(eventAliasesKeyword, eventAliasesCode);
             }
 
+            string baseType = isStub ? "" : " : FmodAudioFolder";
+            eventFolderGenerator.ReplaceKeyword("BaseType", baseType);
+            
             return eventFolderGenerator.GetCode();
         }
 

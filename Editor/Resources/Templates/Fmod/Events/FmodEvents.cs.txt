@@ -2,30 +2,9 @@
 
 namespace ##Namespace##
 {
-    /* ACTIVE EVENT GUIDS (We keep track of these to detect renames and keep old ones around with an Obsolete tag)
-    ##ActiveEventGuids##
-    ACTIVE EVENT GUIDS */
-    
     /// <summary>
-    /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.
+    /// GENERATED: Contains definition of FMOD events which is separated out from the declaration for readability.
+    /// To get an overview of which folders and events exist see 'FmodEvents.cs'
     /// </summary>
     ##Events##
-    
-    [Preserve]
-    public static class AudioParameterlessEvents 
-    {
-        public static readonly Dictionary<string, FmodParameterlessAudioConfig> EventsByGuid =
-            new Dictionary<string, FmodParameterlessAudioConfig>
-        {
-            ##ParameterlessEventIds##
-        };
-    }
-
-    /// <summary>
-    /// GENERATED: Contains FMOD global parameters so they can be called in a strongly-typed manner.
-    /// </summary>
-    public static class AudioGlobalParameters 
-    {
-        ##GlobalParameters##
-    }
 }
