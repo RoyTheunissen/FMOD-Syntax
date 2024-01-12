@@ -86,16 +86,17 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(TemplatePathBase + "FMOD-Syntax.asmdef");
 
         private const string EventNameKeyword = "EventName";
+
         private static readonly CodeGenerator eventsScriptGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEvents.cs");
-        private static readonly CodeGenerator eventsStubScriptGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventsStub.cs");
-        private static readonly CodeGenerator eventTypesGenerator =
+        private static readonly CodeGenerator eventTypesScriptGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventTypes.cs");
-        private static readonly CodeGenerator eventTypesStubGenerator =
+        private static readonly CodeGenerator eventTypeGenerator =
+            new CodeGenerator(EventsTemplatePath + "FmodEventType.cs");
+        private static readonly CodeGenerator eventTypeStubGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventTypesStub.cs");
-        private static readonly CodeGenerator eventFieldsGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventFields.cs");
+        private static readonly CodeGenerator eventFieldGenerator =
+            new CodeGenerator(EventsTemplatePath + "FmodEventField.cs");
         private static readonly CodeGenerator eventParameterGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventParameter.cs");
         private static readonly CodeGenerator eventParametersInitializationGenerator =
@@ -106,7 +107,7 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(EventsTemplatePath + "FmodEventPlaybackPlayMethodWithParameters.cs");
         
         private static readonly CodeGenerator eventFolderGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventFolders.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventFolder.cs");
 
         private static readonly CodeGenerator enumGenerator = new CodeGenerator(EventsTemplatePath + "FmodEnum.cs");
         private static readonly CodeGenerator globalParameterGenerator =
@@ -325,10 +326,10 @@ namespace RoyTheunissen.FMODSyntax
             if (string.IsNullOrEmpty(eventName))
                 eventName = e.GetFilteredName();
             
-            eventTypesStubGenerator.Reset();
-            eventTypesStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+            eventTypeStubGenerator.Reset();
+            eventTypeStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
             
-            return eventTypesStubGenerator.GetCode();
+            return eventTypeStubGenerator.GetCode();
         }
         
         private static string GetEventTypeCode(
@@ -339,24 +340,24 @@ namespace RoyTheunissen.FMODSyntax
 
             if (isStub)
             {
-                eventTypesStubGenerator.Reset();
-                eventTypesStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
-                return eventTypesStubGenerator.GetCode();
+                eventTypeStubGenerator.Reset();
+                eventTypeStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+                return eventTypeStubGenerator.GetCode();
             }
             
-            eventTypesGenerator.Reset();
-            eventTypesGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+            eventTypeGenerator.Reset();
+            eventTypeGenerator.ReplaceKeyword(EventNameKeyword, eventName);
             
             // Parameters
             GetEventTypeParametersCode(e, eventName);
 
             const string attributesKeyword = "Attributes";
             if (string.IsNullOrEmpty(attribute))
-                eventTypesGenerator.RemoveKeywordLines(attributesKeyword);
+                eventTypeGenerator.RemoveKeywordLines(attributesKeyword);
             else
-                eventTypesGenerator.ReplaceKeyword(attributesKeyword, attribute);
+                eventTypeGenerator.ReplaceKeyword(attributesKeyword, attribute);
             
-            return eventTypesGenerator.GetCode();
+            return eventTypeGenerator.GetCode();
         }
 
         private static void GetEventTypeParametersCode(EditorEventRef e, string eventName)
@@ -367,8 +368,8 @@ namespace RoyTheunissen.FMODSyntax
             // If there's no parameters for this event then we can just get rid of the keywords and leave it there.
             if (e.LocalParameters.Count <= 0)
             {
-                eventTypesGenerator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
-                eventTypesGenerator.RemoveKeywordLines(eventParametersKeyword);
+                eventTypeGenerator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
+                eventTypeGenerator.RemoveKeywordLines(eventParametersKeyword);
                 return;
             }
 
@@ -435,16 +436,16 @@ namespace RoyTheunissen.FMODSyntax
                 eventConfigPlayMethodWithParametersGenerator.ReplaceKeyword(
                     "ParameterArguments", parameterArguments);
                 
-                eventTypesGenerator.ReplaceKeyword(
+                eventTypeGenerator.ReplaceKeyword(
                     configPlayMethodWithParametersKeyword,
                     eventConfigPlayMethodWithParametersGenerator.GetCode());
             }
             else
             {
-                eventTypesGenerator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
+                eventTypeGenerator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
             }
             
-            eventTypesGenerator.ReplaceKeyword(eventParametersKeyword, eventParametersCode);
+            eventTypeGenerator.ReplaceKeyword(eventParametersKeyword, eventParametersCode);
         }
 
         private static string GetEventName(EditorEventRef e)
@@ -465,18 +466,18 @@ namespace RoyTheunissen.FMODSyntax
                 eventName = GetEventName(e);
             string fieldName = FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(eventName);
             
-            eventFieldsGenerator.Reset();
-            eventFieldsGenerator.ReplaceKeyword(EventNameKeyword, eventName);
-            eventFieldsGenerator.ReplaceKeyword("eventName", fieldName);
-            eventFieldsGenerator.ReplaceKeyword("GUID", e.Guid.ToString());
+            eventFieldGenerator.Reset();
+            eventFieldGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+            eventFieldGenerator.ReplaceKeyword("eventName", fieldName);
+            eventFieldGenerator.ReplaceKeyword("GUID", e.Guid.ToString());
             
             // Aliases have an Obsolete attribute, normal events don't and can just remove the keyword.
             if (string.IsNullOrEmpty(attribute))
-                eventFieldsGenerator.RemoveKeywordLines("Attributes");
+                eventFieldGenerator.RemoveKeywordLines("Attributes");
             else
-                eventFieldsGenerator.ReplaceKeyword("Attributes", attribute);
+                eventFieldGenerator.ReplaceKeyword("Attributes", attribute);
             
-            return eventFieldsGenerator.GetCode();
+            return eventFieldGenerator.GetCode();
         }
 
         [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
@@ -506,7 +507,7 @@ namespace RoyTheunissen.FMODSyntax
             eventUsingDirectives.Clear();
             eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
 
-            CodeGenerator codeGenerator = isStub ? eventsStubScriptGenerator : eventsScriptGenerator;
+            CodeGenerator codeGenerator = isStub ? eventsScriptGenerator : eventTypesScriptGenerator;
             codeGenerator.Reset();
             
             codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
