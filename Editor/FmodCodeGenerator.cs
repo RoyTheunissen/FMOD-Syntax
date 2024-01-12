@@ -481,12 +481,14 @@ namespace RoyTheunissen.FMODSyntax
             assemblyDefinitionGenerator.GenerateFile(ScriptPathBase + $"{Settings.NamespaceForGeneratedCode}.asmdef");
         }
 
-        private static void GenerateEventsScript(bool isStub, string eventsScriptPath)
+        private static void GenerateEventsScript(bool isDeclaration, string eventsScriptPath)
         {
             eventUsingDirectives.Clear();
             eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
 
-            CodeGenerator codeGenerator = isStub ? eventsScriptGenerator : eventTypesScriptGenerator;
+            // We either only declare the events or we define the events. Separating this out into separate files
+            // makes it easier to just have a look at which events were generated at all.
+            CodeGenerator codeGenerator = isDeclaration ? eventsScriptGenerator : eventTypesScriptGenerator;
             codeGenerator.Reset();
             
             codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
@@ -521,19 +523,19 @@ namespace RoyTheunissen.FMODSyntax
             parameterlessEventsCode = "";
             activeEventGuidsCode = "";
             string eventsCode;
-            if (!isStub && Settings.EventNameClashPreventionType != 
+            if (!isDeclaration && Settings.EventNameClashPreventionType != 
                 FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
             {
                 // If we don't separate events with folders then we define the event types outside of the root folder,
                 // which is how it used to work and prevents you from having to type
                 // 'AudioEvents.NameOfEventPlayback playback;' and lets you type
                 // 'NameOfEventPlayback playback;' instead (without the 'AudioEvents.')
-                eventsCode = GenerateFolderCode(rootEventFolder, isStub, out string eventTypesCode);
+                eventsCode = GenerateFolderCode(rootEventFolder, isDeclaration, out string eventTypesCode);
                 eventsCode = eventTypesCode + eventsCode;
             }
             else
             {
-                eventsCode = GenerateFolderCode(rootEventFolder, isStub);
+                eventsCode = GenerateFolderCode(rootEventFolder, isDeclaration);
             }
             codeGenerator.ReplaceKeyword("Events", eventsCode, true);
 
@@ -544,7 +546,7 @@ namespace RoyTheunissen.FMODSyntax
                 globalParametersCode += GetParameterCode(globalParameterGenerator, parameter);
             }
             
-            if (isStub)
+            if (isDeclaration)
             {
                 codeGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
                 codeGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode);
@@ -563,13 +565,13 @@ namespace RoyTheunissen.FMODSyntax
             codeGenerator.GenerateFile(eventsScriptPath);
         }
 
-        private static string GenerateFolderCode(EventFolder eventFolder, bool isStub, out string eventTypesCode)
+        private static string GenerateFolderCode(EventFolder eventFolder, bool isDeclaration, out string eventTypesCode)
         {
             string childFoldersCode = "";
             for (int i = 0; i < eventFolder.ChildFolders.Count; i++)
             {
                 EventFolder childFolder = eventFolder.ChildFolders[i];
-                string childFolderCode = GenerateFolderCode(childFolder, isStub);
+                string childFolderCode = GenerateFolderCode(childFolder, isDeclaration);
                 childFoldersCode += childFolderCode + "\n";
             }
             
@@ -604,11 +606,11 @@ namespace RoyTheunissen.FMODSyntax
                 activeEventGuidsCode += $"{eventName}={e.Guid}\r\n";
 
                 // Types
-                if (!isStub)
+                if (!isDeclaration)
                     eventTypesCode += GetEventTypeCode(e);
 
                 // Fields
-                if (isStub)
+                if (isDeclaration)
                     eventsCode += GetEventCode(e);
 
                 if (e.LocalParameters.Count == 0)
@@ -618,7 +620,7 @@ namespace RoyTheunissen.FMODSyntax
 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
-                if (isStub && wasRenamed)
+                if (isDeclaration && wasRenamed)
                 {
                     string attribute = $"[Obsolete(\"FMOD Event '{previousName}' has been renamed to '{currentName}'\")]";
 
@@ -669,15 +671,15 @@ namespace RoyTheunissen.FMODSyntax
                 eventFolderGenerator.ReplaceKeyword(eventAliasesKeyword, eventAliasesCode);
             }
 
-            string baseType = isStub ? "" : " : FmodAudioFolder";
+            string baseType = isDeclaration ? "" : " : FmodAudioFolder";
             eventFolderGenerator.ReplaceKeyword("BaseType", baseType);
             
             return eventFolderGenerator.GetCode();
         }
 
-        private static string GenerateFolderCode(EventFolder eventFolder, bool isStub)
+        private static string GenerateFolderCode(EventFolder eventFolder, bool isDeclaration)
         {
-            return GenerateFolderCode(eventFolder, isStub, out string _);
+            return GenerateFolderCode(eventFolder, isDeclaration, out string _);
         }
 
         private static void GenerateMiscellaneousScripts()
