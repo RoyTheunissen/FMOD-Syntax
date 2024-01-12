@@ -460,7 +460,7 @@ namespace RoyTheunissen.FMODSyntax
         }
 
         [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
-        private static void GenerateCode()
+        public static void GenerateCode()
         {
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
