@@ -153,7 +153,7 @@ namespace RoyTheunissen.FMODSyntax
 
         [NonSerialized] private static bool didSourceFilesChange;
         
-        [NonSerialized] private static Dictionary<string,string> previousEventNamesByGuid;
+        [NonSerialized] private static Dictionary<string,string> previousEventPathsByGuid;
         
         [NonSerialized] private static string parameterlessEventsCode = "";
         [NonSerialized] private static string activeEventGuidsCode = "";
@@ -290,23 +290,23 @@ namespace RoyTheunissen.FMODSyntax
             return codeGenerator.GetCode();
         }
 
-        private static Dictionary<string, string> GetExistingEventNamesByGuid()
+        private static Dictionary<string, string> GetExistingEventPathsByGuid()
         {
-            Dictionary<string, string> existingEventNamesByGuid = new Dictionary<string, string>();
+            Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
             
             // If a script has already been generated, open it.
             string existingFilePath = EventsScriptPath.GetAbsolutePath();
             if (!File.Exists(existingFilePath))
-                return existingEventNamesByGuid;
+                return existingEventPathsByGuid;
             
             // Check that there's a section with existing events by GUID.
             string existingCode = File.ReadAllText(existingFilePath);
             string activeEventGuidsSection = existingCode.GetSection(
                 "/* ACTIVE EVENT GUIDS", "ACTIVE EVENT GUIDS */");
             if (string.IsNullOrEmpty(activeEventGuidsSection))
-                return existingEventNamesByGuid;
+                return existingEventPathsByGuid;
             
-            // Every line is an individual event formatted as name=guid
+            // Every line is an individual event formatted as path=guid
             string[] lines = activeEventGuidsSection.Split("\r\n");
             for (int i = 1; i < lines.Length; i++)
             {
@@ -315,13 +315,13 @@ namespace RoyTheunissen.FMODSyntax
                 if (nameAndGuid.Length != 2)
                     continue;
                         
-                string name = nameAndGuid[0];
+                string path = nameAndGuid[0];
                 string guid = nameAndGuid[1];
                         
-                existingEventNamesByGuid.Add(guid, name);
+                existingEventPathsByGuid.Add(guid, path);
             }
 
-            return existingEventNamesByGuid;
+            return existingEventPathsByGuid;
         }
         
         private static string GetEventTypeCode(EditorEventRef e, string eventName = "", string attribute = "")
@@ -470,7 +470,7 @@ namespace RoyTheunissen.FMODSyntax
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
             
-            previousEventNamesByGuid = GetExistingEventNamesByGuid();
+            previousEventPathsByGuid = GetExistingEventPathsByGuid();
             
             GenerateEventsScript(true, EventsScriptPath);
             GenerateEventsScript(false, EventsScriptTypesPath);
@@ -614,21 +614,19 @@ namespace RoyTheunissen.FMODSyntax
             string eventsCode = string.Empty;
             foreach (EditorEventRef e in eventFolder.ChildEvents)
             {
-                string eventName = e.GetFilteredName();
-
-                // Check if this event used to go by a different name.
-                string currentName = eventName;
-                bool wasRenamed = previousEventNamesByGuid.TryGetValue(e.Guid.ToString(), out string previousName) &&
-                                  previousName != currentName;
+                // Check if this event used to have a different path.
+                string currentPath = e.GetFilteredPath();
+                bool shouldGenerateAlias = previousEventPathsByGuid.TryGetValue(
+                                            e.Guid.ToString(), out string previousPath) && previousPath != currentPath;
 
                 // Log it in the active event GUIDs. This way we can keep track of which events we had previously and
-                // which names / GUIDs they had. Then we can figure out if any of them have renamed, then add those
+                // which paths / GUIDs they had. Then we can figure out if they were renamed/moved, then add those
                 // back with an alias and an Obsolete tag so everything doesn't break immediately and you get a chance
                 // to fix your code first.
                 // NOTE: We don't *have* to keep track of them this way necessarily, we could intercept UpdateCache
                 // in EventManager.cs and make it expose a list of renamed events. Would require changing FMOD even
                 // further though, and the changes are already stacking up...
-                activeEventGuidsCode += $"{eventName}={e.Guid}\r\n";
+                activeEventGuidsCode += $"{currentPath}={e.Guid}\r\n";
 
                 // Types
                 if (!isDeclaration)
@@ -645,9 +643,11 @@ namespace RoyTheunissen.FMODSyntax
 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
-                if (wasRenamed)
+                if (shouldGenerateAlias)
                 {
-                    string attribute = $"[Obsolete(\"FMOD Event '{previousName}' has been renamed to '{currentName}'\")]";
+                    string attribute = $"[Obsolete(\"FMOD Event '{previousPath}' has been renamed to '{currentPath}'\")]";
+
+                    string previousName = FmodSyntaxUtilities.GetFilteredNameFromPath(previousPath);
 
                     if (isDeclaration)
                         eventAliasesCode += GetEventCode(e, previousName, attribute);
