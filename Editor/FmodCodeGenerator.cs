@@ -93,8 +93,6 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(EventsTemplatePath + "FmodEventTypes.cs");
         private static readonly CodeGenerator eventTypeGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventType.cs");
-        private static readonly CodeGenerator eventTypeStubGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventTypesStub.cs");
         private static readonly CodeGenerator eventFieldGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventField.cs");
         private static readonly CodeGenerator eventParameterGenerator =
@@ -321,29 +319,10 @@ namespace RoyTheunissen.FMODSyntax
             return existingEventNamesByGuid;
         }
         
-        private static string GetEventTypeStubCode(EditorEventRef e, string eventName = "", string attribute = "")
-        {
-            if (string.IsNullOrEmpty(eventName))
-                eventName = e.GetFilteredName();
-            
-            eventTypeStubGenerator.Reset();
-            eventTypeStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
-            
-            return eventTypeStubGenerator.GetCode();
-        }
-        
-        private static string GetEventTypeCode(
-            EditorEventRef e, bool isStub, string eventName = "", string attribute = "")
+        private static string GetEventTypeCode(EditorEventRef e, string eventName = "", string attribute = "")
         {
             if (string.IsNullOrEmpty(eventName))
                 eventName = GetEventName(e);
-
-            if (isStub)
-            {
-                eventTypeStubGenerator.Reset();
-                eventTypeStubGenerator.ReplaceKeyword(EventNameKeyword, eventName);
-                return eventTypeStubGenerator.GetCode();
-            }
             
             eventTypeGenerator.Reset();
             eventTypeGenerator.ReplaceKeyword(EventNameKeyword, eventName);
@@ -626,7 +605,7 @@ namespace RoyTheunissen.FMODSyntax
 
                 // Types
                 if (!isStub)
-                    eventTypesCode += GetEventTypeCode(e, isStub);
+                    eventTypesCode += GetEventTypeCode(e);
 
                 // Fields
                 if (isStub)
@@ -643,7 +622,7 @@ namespace RoyTheunissen.FMODSyntax
                 {
                     string attribute = $"[Obsolete(\"FMOD Event '{previousName}' has been renamed to '{currentName}'\")]";
 
-                    eventTypeAliasesCode += GetEventTypeCode(e, isStub, previousName, attribute);
+                    eventTypeAliasesCode += GetEventTypeCode(e, previousName, attribute);
                     eventAliasesCode += GetEventCode(e, previousName, attribute);
                 }
             }

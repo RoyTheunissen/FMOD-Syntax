@@ -1,3 +1,0 @@
-public sealed partial class ##EventName##Config { }
-public sealed partial class ##EventName##Playback { }
-
