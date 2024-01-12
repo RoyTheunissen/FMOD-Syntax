@@ -550,9 +550,10 @@ namespace RoyTheunissen.FMODSyntax
 
                 folder.ChildEvents.Add(e);
                 
-                string currentPath = e.GetFilteredPath();
-                bool shouldGenerateAlias = previousEventPathsByGuid.TryGetValue(
-                    e.Guid.ToString(), out string previousPath) && previousPath != currentPath;
+                string currentPath = path;
+                
+                bool hadEvent = previousEventPathsByGuid.TryGetValue(e.Guid.ToString(), out string previousPath);
+                bool shouldGenerateAlias = hadEvent && previousPath != currentPath;
                 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
@@ -630,7 +631,7 @@ namespace RoyTheunissen.FMODSyntax
             foreach (EditorEventRef e in eventFolder.ChildEvents)
             {
                 // Check if this event used to have a different path.
-                string currentPath = e.GetFilteredPath();
+                string currentPath = e.GetFilteredPath(true);
 
                 // Log it in the active event GUIDs. This way we can keep track of which events we had previously and
                 // which paths / GUIDs they had. Then we can figure out if they were renamed/moved, then add those
