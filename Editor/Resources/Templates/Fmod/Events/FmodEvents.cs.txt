@@ -5,21 +5,11 @@ namespace ##Namespace##
     /* ACTIVE EVENT GUIDS (We keep track of these to detect renames and keep old ones around with an Obsolete tag)
     ##ActiveEventGuids##
     ACTIVE EVENT GUIDS */
-
-    /// <summary>
-    /// GENERATED: Contains classes generated based on FMOD events so they can be called in a strongly-typed manner.
-    /// </summary>
-    ##EventTypes##
-    ##EventTypeAliases##
     
     /// <summary>
     /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.
     /// </summary>
-    public static class AudioEvents 
-    {
-        ##Events##
-        ##EventAliases##
-    }
+    ##Events##
     
     [Preserve]
     public static class AudioParameterlessEvents 

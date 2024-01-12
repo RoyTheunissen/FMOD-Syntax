@@ -1,0 +1,10 @@
+public sealed class ##FolderName## : FmodAudioFolder 
+{
+    ##Subfolders##
+    
+    ##EventTypes##
+    ##EventTypeAliases##
+    
+    ##Events##
+    ##EventAliases##
+}

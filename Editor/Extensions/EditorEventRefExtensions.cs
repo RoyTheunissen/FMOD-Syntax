@@ -25,9 +25,9 @@ namespace RoyTheunissen.FMODSyntax
             return FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(@event.name);
         }
         
-        public static string GetFilteredPath(this EditorEventRef @event)
+        public static string GetFilteredPath(this EditorEventRef @event, bool stripSpecialCharacters = false)
         {
-            return FmodSyntaxUtilities.GetFilteredPath(@event.Path, false);
+            return FmodSyntaxUtilities.GetFilteredPath(@event.Path, stripSpecialCharacters);
         }
     }
 }

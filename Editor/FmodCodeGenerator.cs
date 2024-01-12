@@ -14,6 +14,55 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public static class FmodCodeGenerator
     {
+        private sealed class EventFolder
+        {
+            private readonly string name;
+            public string Name => name;
+
+            private readonly List<EventFolder> childFolders = new List<EventFolder>();
+            public List<EventFolder> ChildFolders => childFolders;
+
+            private readonly List<EditorEventRef> childEvents = new List<EditorEventRef>();
+            public List<EditorEventRef> ChildEvents => childEvents;
+
+            public EventFolder(string name)
+            {
+                this.name = name;
+            }
+
+            private EventFolder GetOrCreateSubfolder(string name)
+            {
+                EventFolder existingFolder = 
+                    childFolders.FirstOrDefault(folder => string.Equals(folder.Name, name, StringComparison.Ordinal));
+                
+                if (existingFolder != null)
+                    return existingFolder;
+                
+                EventFolder newFolder = new EventFolder(name);
+                childFolders.Add(newFolder);
+                return newFolder;
+            }
+
+            public EventFolder GetOrCreateChildFolderFromPathRecursively(string path)
+            {
+                string[] pathSections = path.Split("/");
+                EventFolder currentFolder = this;
+                
+                // NOTE: The last section of the path is the event name.
+                for (int i = 0; i < pathSections.Length - 1; i++)
+                {
+                    currentFolder = currentFolder.GetOrCreateSubfolder(pathSections[i]);
+                }
+
+                return currentFolder;
+            }
+
+            public override string ToString()
+            {
+                return $"{nameof(EventFolder)}({Name})";
+            }
+        }
+        
         private static string ScriptPathBase => FmodSyntaxSettings.Instance.GeneratedScriptsFolderPath;
         private const string TemplatePathBase = "Templates/Fmod/";
         
@@ -50,6 +99,9 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(EventsTemplatePath + "FmodEventConfigPlayMethodWithParameters.cs");
         private static readonly CodeGenerator eventPlaybackPlayMethodWithParametersGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodEventPlaybackPlayMethodWithParameters.cs");
+        
+        private static readonly CodeGenerator eventFolderGenerator =
+            new CodeGenerator(EventsTemplatePath + "FmodEventFolders.cs");
 
         private static readonly CodeGenerator enumGenerator = new CodeGenerator(EventsTemplatePath + "FmodEnum.cs");
         private static readonly CodeGenerator globalParameterGenerator =
@@ -74,6 +126,8 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(VCAsTemplatePath + "FmodVCAs.cs");
         private static readonly CodeGenerator vcaFieldGenerator =
             new CodeGenerator(VCAsTemplatePath + "FmodVCAField.cs");
+
+        private static EventFolder rootEventFolder;
         
         private static FmodSyntaxSettings Settings => FmodSyntaxSettings.Instance;
         
@@ -89,6 +143,11 @@ namespace RoyTheunissen.FMODSyntax
         };
 
         [NonSerialized] private static bool didSourceFilesChange;
+        
+        [NonSerialized] private static Dictionary<string,string> previousEventNamesByGuid;
+        
+        [NonSerialized] private static string parameterlessEventsCode = "";
+        [NonSerialized] private static string activeEventGuidsCode = "";
 
         [InitializeOnLoadMethod]
         private static void Initialize()
@@ -131,10 +190,9 @@ namespace RoyTheunissen.FMODSyntax
         }
 #endif // FMOD_AUTO_REGENERATE_CODE
 
-        private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
+        [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
             = new Dictionary<string, Type>();
-
-        private static bool didCacheUserSpecifiedEnums;
+        [NonSerialized] private static bool didCacheUserSpecifiedEnums;
 
         [MenuItem("FMOD/Cache Enums")]
         private static void CacheUserSpecifiedLabelParameterEnums()
@@ -417,19 +475,80 @@ namespace RoyTheunissen.FMODSyntax
             
             eventsScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
 
-            Dictionary<string, string> previousEventNamesByGuid = GetExistingEventNamesByGuid();
+            previousEventNamesByGuid = GetExistingEventNamesByGuid();
 
             // Generate a config & playback class for every FMOD event.
-            string activeEventGuidsCode = string.Empty;
-            string eventTypesCode = string.Empty;
-            string eventsCode = string.Empty;
             EditorEventRef[] events = EventManager.Events
                 .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix))
                 .OrderBy(e => e.Path).ToArray();
+            
+            string foldersCode = "";
+            Debug.Log($"GENERATING EVENTS SCRIPT NOW!");
+
+            // Organize the events in a folder hierarchy.
+            rootEventFolder = new EventFolder("AudioEvents");
+            foreach (EditorEventRef e in events)
+            {
+                string path = e.GetFilteredPath(true);
+
+                EventFolder folder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(path);
+                
+                folder.ChildEvents.Add(e);
+            }
+            
+            // Generate code for the events per folder.
+            parameterlessEventsCode = "";
+            activeEventGuidsCode = "";
+            string eventsCode = GenerateFolderCode(rootEventFolder);
+            eventsScriptGenerator.ReplaceKeyword("Events", eventsCode, true);
+
+            // Also generate a field for every FMOD global parameter.
+            string globalParametersCode = string.Empty;
+            foreach (EditorParamRef parameter in EventManager.Parameters)
+            {
+                globalParametersCode += GetParameterCode(globalParameterGenerator, parameter);
+            }
+            
+            eventsScriptGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
+            eventsScriptGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode);
+
+            eventsScriptGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
+
+            // Also allow custom using directives to be specified.
+            string usingDirectives = string.Empty;
+            for (int i = 0; i < eventUsingDirectives.Count; i++)
+            {
+                string usingDirective = eventUsingDirectives[i];
+                usingDirectives += $"using {usingDirective};\r\n";
+            }
+            eventsScriptGenerator.ReplaceKeyword("UsingDirectives", usingDirectives);
+
+            eventsScriptGenerator.GenerateFile(EventsScriptPath);
+        }
+
+        private static string GenerateFolderCode(EventFolder eventFolder)
+        {
+            string childFoldersCode = "";
+            for (int i = 0; i < eventFolder.ChildFolders.Count; i++)
+            {
+                EventFolder childFolder = eventFolder.ChildFolders[i];
+                string childFolderCode = GenerateFolderCode(childFolder);
+                childFoldersCode += childFolderCode + "\n";
+            }
+            
+            // NOTE: Do this AFTER we have gathered code from child folders because there is recursion there. Otherwise
+            // our children would reset the event folder generator that we're using.
+            eventFolderGenerator.Reset();
+            
+            eventFolderGenerator.ReplaceKeyword("FolderName", eventFolder.Name);
+            eventFolderGenerator.ReplaceKeyword("FolderTypeName", eventFolder.Name + "Folder");
+            eventFolderGenerator.ReplaceKeyword("Subfolders", childFoldersCode, true);
+            
             string eventTypeAliasesCode = "";
             string eventAliasesCode = "";
-            string parameterlessEventsCode = "";
-            foreach (EditorEventRef e in events)
+            string eventTypesCode = string.Empty;
+            string eventsCode = string.Empty;
+            foreach (EditorEventRef e in eventFolder.ChildEvents)
             {
                 string eventName = e.GetFilteredName();
 
@@ -473,7 +592,7 @@ namespace RoyTheunissen.FMODSyntax
             const string eventTypeAliasesKeyword = "EventTypeAliases";
             if (string.IsNullOrEmpty(eventTypeAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
             {
-                eventsScriptGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
+                eventFolderGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
             }
             else
             {
@@ -484,45 +603,25 @@ namespace RoyTheunissen.FMODSyntax
                                        + "#pragma warning disable 618\r\n"
                                        + eventTypeAliasesCode
                                        + "#pragma warning restore 618\r\n";
-                eventsScriptGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
+                eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
             }
             
-            eventsScriptGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
-            eventsScriptGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode);
-            eventsScriptGenerator.ReplaceKeyword("EventTypes", eventTypesCode);
-            eventsScriptGenerator.ReplaceKeyword("Events", eventsCode);
+            eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode);
+            eventFolderGenerator.ReplaceKeyword("Events", eventsCode);
 
             // Also add a section for any event aliases, if needed.
             const string eventAliasesKeyword = "EventAliases";
             if (string.IsNullOrEmpty(eventAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
             {
-                eventsScriptGenerator.RemoveKeywordLines(eventAliasesKeyword);
+                eventFolderGenerator.RemoveKeywordLines(eventAliasesKeyword);
             }
             else
             {
                 eventAliasesCode = "\r\n// Aliases for events that have been renamed:\r\n" + eventAliasesCode;
-                eventsScriptGenerator.ReplaceKeyword(eventAliasesKeyword, eventAliasesCode);
+                eventFolderGenerator.ReplaceKeyword(eventAliasesKeyword, eventAliasesCode);
             }
 
-            // Also generate a field for every FMOD global parameter.
-            string globalParametersCode = string.Empty;
-            foreach (EditorParamRef parameter in EventManager.Parameters)
-            {
-                globalParametersCode += GetParameterCode(globalParameterGenerator, parameter);
-            }
-
-            eventsScriptGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
-
-            // Also allow custom using directives to be specified.
-            string usingDirectives = string.Empty;
-            for (int i = 0; i < eventUsingDirectives.Count; i++)
-            {
-                string usingDirective = eventUsingDirectives[i];
-                usingDirectives += $"using {usingDirective};\r\n";
-            }
-            eventsScriptGenerator.ReplaceKeyword("UsingDirectives", usingDirectives);
-
-            eventsScriptGenerator.GenerateFile(EventsScriptPath);
+            return eventFolderGenerator.GetCode();
         }
 
         private static void GenerateMiscellaneousScripts()
