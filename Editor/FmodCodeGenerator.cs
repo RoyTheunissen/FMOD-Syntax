@@ -434,14 +434,19 @@ namespace RoyTheunissen.FMODSyntax
             
             eventTypeGenerator.ReplaceKeyword(eventParametersKeyword, eventParametersCode);
         }
-
-        private static string GetEventName(EditorEventRef e)
+        
+        private static string GetEventName(string filteredPath)
         {
             // If specified, include the entire path as a prefix.
             if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes.IncludePath)
-                return e.GetFilteredPath(true).Replace("_", "").Replace("/", "_");
+                return filteredPath.Replace("_", "").Replace("/", "_");
             
-            return e.GetFilteredName();
+            return FmodSyntaxUtilities.GetFilteredNameFromPath(filteredPath);
+        }
+
+        private static string GetEventName(EditorEventRef e)
+        {
+            return GetEventName(e.GetFilteredPath(true));
         }
 
         private static string GetEventCode(EditorEventRef e, string eventName = "", string attribute = "")
@@ -553,13 +558,32 @@ namespace RoyTheunissen.FMODSyntax
                 string currentPath = path;
                 
                 bool hadEvent = previousEventPathsByGuid.TryGetValue(e.Guid.ToString(), out string previousPath);
-                bool shouldGenerateAlias = hadEvent && previousPath != currentPath;
+                bool shouldGenerateAlias = false;
+                if (hadEvent)
+                {
+                    if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes.None)
+                    {
+                        string previousName = GetEventName(previousPath);
+                        string currentName = GetEventName(currentPath);
+                        shouldGenerateAlias = previousName != currentName;
+                    }
+                    else
+                    {
+                        shouldGenerateAlias = previousPath != currentPath;
+                    }
+                }
                 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
                 if (shouldGenerateAlias)
                 {
-                    EventFolder previousFolder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(previousPath);
+                    EventFolder previousFolder = rootEventFolder;
+                    if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes
+                            .GenerateSeparateClassesPerFolder)
+                    {
+                        previousFolder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(previousPath);
+                    }
+
                     previousFolder.ChildEventToAliasPath[e] = previousPath;
                 }
             }
@@ -666,7 +690,7 @@ namespace RoyTheunissen.FMODSyntax
                     string currentPath = e.GetFilteredPath();
                     string previousPath = eventPreviousPathPair.Value;
 
-                    string previousName = FmodSyntaxUtilities.GetFilteredNameFromPath(previousPath);
+                    string previousName = GetEventName(previousPath);
 
                     string attribute =
                         $"[Obsolete(\"FMOD Event '{previousPath}' has been changed to '{currentPath}'\")]";
