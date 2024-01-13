@@ -156,7 +156,7 @@ namespace RoyTheunissen.FMODSyntax
 
         [NonSerialized] private static bool didSourceFilesChange;
         
-        [NonSerialized] private static Dictionary<string,string> previousEventPathsByGuid;
+        [NonSerialized] private static Dictionary<string,string> previousEventSyntaxPathsByGuid;
         
         [NonSerialized] private static string parameterlessEventsCode = "";
         [NonSerialized] private static string activeEventGuidsCode = "";
@@ -293,7 +293,7 @@ namespace RoyTheunissen.FMODSyntax
             return codeGenerator.GetCode();
         }
 
-        private static Dictionary<string, string> GetExistingEventPathsByGuid()
+        private static Dictionary<string, string> GetExistingEventSyntaxPathsByGuid()
         {
             Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
             
@@ -512,7 +512,7 @@ namespace RoyTheunissen.FMODSyntax
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
             
-            previousEventPathsByGuid = GetExistingEventPathsByGuid();
+            previousEventSyntaxPathsByGuid = GetExistingEventSyntaxPathsByGuid();
             
             GenerateEventsScript(true, EventsScriptPath);
             GenerateEventsScript(false, EventsScriptTypesPath);
@@ -591,34 +591,23 @@ namespace RoyTheunissen.FMODSyntax
                 
                 string currentPath = path;
                 
-                bool hadEvent = previousEventPathsByGuid.TryGetValue(e.Guid.ToString(), out string previousPath);
+                bool hadEvent = previousEventSyntaxPathsByGuid.TryGetValue(
+                    e.Guid.ToString(), out string previousSyntaxPath);
                 bool shouldGenerateAlias = false;
                 if (hadEvent)
                 {
-                    if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes.None)
-                    {
-                        string previousName = GetEventSyntaxName(previousPath);
-                        string currentName = GetEventSyntaxName(currentPath);
-                        shouldGenerateAlias = previousName != currentName;
-                    }
-                    else
-                    {
-                        shouldGenerateAlias = previousPath != currentPath;
-                    }
+                    string currentSyntaxPath = GetEventSyntaxPath(currentPath);
+                    shouldGenerateAlias = previousSyntaxPath != currentSyntaxPath;
                 }
                 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
                 if (shouldGenerateAlias)
                 {
-                    EventFolder previousFolder = rootEventFolder;
-                    if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes
-                            .GenerateSeparateClassesPerFolder)
-                    {
-                        previousFolder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(previousPath);
-                    }
+                    EventFolder previousFolder = rootEventFolder
+                        .GetOrCreateChildFolderFromPathRecursively(previousSyntaxPath);
 
-                    previousFolder.ChildEventToAliasPath[e] = previousPath;
+                    previousFolder.ChildEventToAliasPath[e] = previousSyntaxPath;
                 }
             }
             
@@ -662,9 +651,9 @@ namespace RoyTheunissen.FMODSyntax
 
         private static string GetActiveEventData(EditorEventRef e)
         {
-            string eventPath = GetEventSyntaxPath(e);
+            string eventSyntaxPath = GetEventSyntaxPath(e);
             
-            return $"{eventPath}={e.Guid}\r\n";
+            return $"{eventSyntaxPath}={e.Guid}\r\n";
         }
 
         private static string GenerateFolderCode(EventFolder eventFolder, bool isDeclaration, out string eventTypesCode)
