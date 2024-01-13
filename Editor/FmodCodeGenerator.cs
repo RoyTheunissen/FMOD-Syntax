@@ -229,9 +229,9 @@ namespace RoyTheunissen.FMODSyntax
         
         [NonSerialized] private static string parameterlessEventsCode = "";
         
-        [NonSerialized] private static string rawMetaData;
-        [NonSerialized] private static MetaDataFormats metaDataFormat;
-        [NonSerialized] private static MetaData metaData;
+        [NonSerialized] private static string rawMetaDataFromPreviousCodeGeneration;
+        [NonSerialized] private static MetaDataFormats metaDataFormatFromPreviousCodeGeneration;
+        [NonSerialized] private static MetaData metaDataFromPreviousCodeGeneration;
 
         [NonSerialized]
         private static Dictionary<string, string> activeEventGuidToCurrentSyntaxPath = new Dictionary<string, string>();
@@ -438,23 +438,32 @@ namespace RoyTheunissen.FMODSyntax
 
         private static void ParseMetaData()
         {
-            rawMetaData = GetRawMetaData(out metaDataFormat);
+            rawMetaDataFromPreviousCodeGeneration = GetRawMetaData(out metaDataFormatFromPreviousCodeGeneration);
             
-            if (metaDataFormat == MetaDataFormats.None)
+            if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.None)
             {
-                metaData = new MetaData();
+                // Metadata could not be found. Just assume the default empty metadata.
+                metaDataFromPreviousCodeGeneration = new MetaData();
             }
-            else if (metaDataFormat == MetaDataFormats.ActiveEventGuids)
+            else if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.ActiveEventGuids)
             {
+                // The metadata was in the old format. This one did not support name clash prevention nor did it specify
+                // a version number. Only event GUIDs and their old name.
                 string version = "0.0.1";
+                
                 FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
                     FmodSyntaxSettings.EventNameClashPreventionTypes.None;
+                
                 Dictionary<string, string> eventGuidToPreviousSyntaxPath = GetExistingEventSyntaxPathsByGuid();
-                metaData = new MetaData(version, clashPreventionType, eventGuidToPreviousSyntaxPath);
+                
+                metaDataFromPreviousCodeGeneration = new MetaData(
+                    version, clashPreventionType, eventGuidToPreviousSyntaxPath);
             }
             else
             {
-                metaData = JsonUtility.FromJson<MetaData>(rawMetaData);
+                // The metadata was in the new JSON format so we can just deserialize it.
+                metaDataFromPreviousCodeGeneration = JsonUtility.FromJson<MetaData>(
+                    rawMetaDataFromPreviousCodeGeneration);
             }
         }
 
@@ -463,7 +472,7 @@ namespace RoyTheunissen.FMODSyntax
             Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
             
             // Every line is an individual event formatted as path=guid
-            string[] lines = rawMetaData.Split("\r\n");
+            string[] lines = rawMetaDataFromPreviousCodeGeneration.Split("\r\n");
             for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i].TrimStart();
@@ -799,10 +808,10 @@ namespace RoyTheunissen.FMODSyntax
                 
                 string currentPath = path;
                 
-                bool hadEvent = metaData.EventGuidToPreviousSyntaxPath.TryGetValue(
-                    e.Guid.ToString(), out string previousSyntaxPath);
+                bool eventExistedDuringPreviousCodeGeneration = metaDataFromPreviousCodeGeneration
+                    .EventGuidToPreviousSyntaxPath.TryGetValue(e.Guid.ToString(), out string previousSyntaxPath);
                 bool shouldGenerateAlias = false;
-                if (hadEvent)
+                if (eventExistedDuringPreviousCodeGeneration)
                 {
                     string currentSyntaxPath = GetEventSyntaxPath(currentPath);
                     shouldGenerateAlias = previousSyntaxPath != currentSyntaxPath;
