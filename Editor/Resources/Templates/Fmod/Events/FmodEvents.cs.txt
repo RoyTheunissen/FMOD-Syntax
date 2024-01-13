@@ -2,9 +2,9 @@
 
 namespace ##Namespace##
 {
-    /* ACTIVE EVENT GUIDS (We keep track of these to detect renames and keep old ones around with an Obsolete tag)
-    ##ActiveEventGuids##
-    ACTIVE EVENT GUIDS */
+    /* ---------------------------------------------- METADATA ------------------------------------------------------
+    ##MetaData##
+    ------------------------------------------------- METADATA --------------------------------------------------- */
     
     /// <summary>
     /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.

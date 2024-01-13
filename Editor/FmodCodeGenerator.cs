@@ -293,24 +293,45 @@ namespace RoyTheunissen.FMODSyntax
             return codeGenerator.GetCode();
         }
 
-        private static Dictionary<string, string> GetExistingEventSyntaxPathsByGuid()
+        private static string GetMetaData()
         {
-            Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
-            
             // If a script has already been generated, open it.
             string existingFilePath = EventsScriptPath.GetAbsolutePath();
             if (!File.Exists(existingFilePath))
-                return existingEventPathsByGuid;
-            
-            // Check that there's a section with existing events by GUID.
+                return string.Empty;
+
             string existingCode = File.ReadAllText(existingFilePath);
-            string activeEventGuidsSection = existingCode.GetSection(
-                "/* ACTIVE EVENT GUIDS", "ACTIVE EVENT GUIDS */");
-            if (string.IsNullOrEmpty(activeEventGuidsSection))
-                return existingEventPathsByGuid;
+            
+            // Check that there's a section with existing events by GUID. This is the old format for metadata.
+            const string oldMetaDataStart = "/* ACTIVE EVENT GUIDS";
+            const string oldMetaDataEnd = "ACTIVE EVENT GUIDS */";
+            string activeEventGuidsSection = existingCode.GetSection(oldMetaDataStart, oldMetaDataEnd);
+            if (!string.IsNullOrEmpty(activeEventGuidsSection))
+                return activeEventGuidsSection;
+            
+            // Now check the new format.
+            const string newMetaDataStart = "/* ---------------------------------------------- METADATA ------------------------------------------------------";
+            const string newMetaDataEnd = "------------------------------------------------- METADATA --------------------------------------------------- */";
+            string metaDataSection = existingCode.GetSection(newMetaDataStart, newMetaDataEnd);
+            if (!string.IsNullOrEmpty(metaDataSection))
+                return metaDataSection;
+
+            return string.Empty;
+        }
+
+        private static void ParseMetaData()
+        {
+            string metaData = GetMetaData();
+            
+            previousEventSyntaxPathsByGuid = GetExistingEventSyntaxPathsByGuid(metaData);
+        }
+
+        private static Dictionary<string, string> GetExistingEventSyntaxPathsByGuid(string metaData)
+        {
+            Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
             
             // Every line is an individual event formatted as path=guid
-            string[] lines = activeEventGuidsSection.Split("\r\n");
+            string[] lines = metaData.Split("\r\n");
             for (int i = 1; i < lines.Length; i++)
             {
                 string line = lines[i].TrimStart();
@@ -512,7 +533,7 @@ namespace RoyTheunissen.FMODSyntax
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
             
-            previousEventSyntaxPathsByGuid = GetExistingEventSyntaxPathsByGuid();
+            ParseMetaData();
             
             GenerateEventsScript(true, EventsScriptPath);
             GenerateEventsScript(false, EventsScriptTypesPath);
@@ -634,7 +655,8 @@ namespace RoyTheunissen.FMODSyntax
             if (isDeclaration)
             {
                 codeGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
-                codeGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode);
+                codeGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode, true);
+                codeGenerator.ReplaceKeyword("MetaData", activeEventGuidsCode, true);
             }
 
             // Also allow custom using directives to be specified.
