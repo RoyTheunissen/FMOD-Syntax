@@ -899,7 +899,8 @@ namespace RoyTheunissen.FMODSyntax
                 // NOTE: We don't *have* to keep track of them this way necessarily, we could intercept UpdateCache
                 // in EventManager.cs and make it expose a list of renamed events. Would require changing FMOD even
                 // further though, and the changes are already stacking up...
-                activeEventGuidToCurrentSyntaxPath.Add(e.Guid.ToString(), GetEventSyntaxPath(e));
+                if (isDeclaration)
+                    activeEventGuidToCurrentSyntaxPath[e.Guid.ToString()] = GetEventSyntaxPath(e);
 
                 // Types
                 if (!isDeclaration)
