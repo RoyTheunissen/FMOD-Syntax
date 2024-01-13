@@ -831,15 +831,15 @@ namespace RoyTheunissen.FMODSyntax
             // Generate code for the events per folder.
             parameterlessEventsCode = "";
             string eventsCode;
-            if (!isDeclaration && Settings.EventNameClashPreventionType != 
-                FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+            if (!isDeclaration)
             {
                 // If we don't separate events with folders then we define the event types outside of the root folder,
                 // which is how it used to work and prevents you from having to type
                 // 'AudioEvents.NameOfEventPlayback playback;' and lets you type
                 // 'NameOfEventPlayback playback;' instead (without the 'AudioEvents.')
-                eventsCode = GenerateFolderCode(rootEventFolder, isDeclaration, out string eventTypesCode);
-                eventsCode = eventTypesCode + eventsCode;
+                eventsCode = GenerateFolderCode(
+                    rootEventFolder, isDeclaration, out string eventTypesCodeToBePlacedOutsideOfRootFolder);
+                eventsCode = eventTypesCodeToBePlacedOutsideOfRootFolder + eventsCode;
             }
             else
             {
@@ -873,7 +873,8 @@ namespace RoyTheunissen.FMODSyntax
             codeGenerator.GenerateFile(eventsScriptPath);
         }
 
-        private static string GenerateFolderCode(EventFolder eventFolder, bool isDeclaration, out string eventTypesCode)
+        private static string GenerateFolderCode(
+            EventFolder eventFolder, bool isDeclaration, out string eventTypesCodeToBePlacedOutsideOfRootFolder)
         {
             string childFoldersCode = "";
             for (int i = 0; i < eventFolder.ChildFolders.Count; i++)
@@ -896,8 +897,9 @@ namespace RoyTheunissen.FMODSyntax
             eventFolderGenerator.ReplaceKeyword("Subfolders", childFoldersCode, true);
             
             string eventTypeAliasesCode = "";
+            string eventTypeAliasesCodeThatUsedToBeOutsideRootFolder = "";
             string eventAliasesCode = "";
-            eventTypesCode = string.Empty;
+            string eventTypesCode = string.Empty;
             string eventsCode = string.Empty;
             foreach (EditorEventRef e in eventFolder.ChildEvents)
             {
@@ -943,7 +945,19 @@ namespace RoyTheunissen.FMODSyntax
                     if (isDeclaration)
                         eventAliasesCode += GetEventCode(e, previousName, attribute);
                     else
-                        eventTypeAliasesCode += GetEventTypeCode(e, previousName, attribute);
+                    {
+                        string eventTypeAliasCode = GetEventTypeCode(e, previousName, attribute);
+                        
+                        if (metaDataFromPreviousCodeGeneration.ClashPreventionType != FmodSyntaxSettings
+                                .EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                        {
+                            eventTypeAliasesCodeThatUsedToBeOutsideRootFolder += eventTypeAliasCode;
+                        }
+                        else
+                        {
+                            eventTypeAliasesCode += eventTypeAliasCode;
+                        }
+                    }
                 }
             }
 
@@ -973,6 +987,11 @@ namespace RoyTheunissen.FMODSyntax
             {
                 eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
                 eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
+                
+                // Most event type aliases code should go inside the appropriate folder, but if code was previously
+                // generated with a folderless name clash prevention then those type aliases should be placed OUTSIDE
+                // of the root folder because that's where the types in question used to be declared.
+                eventTypesCodeToBePlacedOutsideOfRootFolder = eventTypeAliasesCodeThatUsedToBeOutsideRootFolder;
             }
             else
             {
@@ -983,6 +1002,8 @@ namespace RoyTheunissen.FMODSyntax
                 // class for consistency.
                 if (!string.IsNullOrEmpty(eventTypeAliasesCode))
                     eventTypesCode += "\r\n" + eventTypeAliasesCode + "\r\n";
+
+                eventTypesCodeToBePlacedOutsideOfRootFolder = eventTypesCode;
             }
             
             eventFolderGenerator.ReplaceKeyword("Events", eventsCode, true);
