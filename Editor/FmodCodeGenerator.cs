@@ -330,7 +330,7 @@ namespace RoyTheunissen.FMODSyntax
         private static string GetEventTypeCode(EditorEventRef e, string eventName = "", string attribute = "")
         {
             if (string.IsNullOrEmpty(eventName))
-                eventName = GetEventName(e);
+                eventName = GetEventSyntaxName(e);
             
             eventTypeGenerator.Reset();
             eventTypeGenerator.ReplaceKeyword(EventNameKeyword, eventName);
@@ -435,7 +435,14 @@ namespace RoyTheunissen.FMODSyntax
             eventTypeGenerator.ReplaceKeyword(eventParametersKeyword, eventParametersCode);
         }
         
-        private static string GetEventName(string filteredPath)
+        /// <summary>
+        /// Gets the name of an event *as it is represented in the AudioEvents syntax*. For example, here's an event
+        /// called Core/Player/Footstep for different Name Clash Prevention types:
+        /// None:                                   Footstep
+        /// Generate Separate Classes Per Folder:   Footstep
+        /// Include Path:                           Core_Player_Footstep
+        /// </summary>
+        private static string GetEventSyntaxName(string filteredPath)
         {
             // If specified, include the entire path as a prefix.
             if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes.IncludePath)
@@ -443,10 +450,37 @@ namespace RoyTheunissen.FMODSyntax
             
             return FmodSyntaxUtilities.GetFilteredNameFromPath(filteredPath);
         }
-
-        private static string GetEventName(EditorEventRef e)
+        
+        private static string GetEventSyntaxName(EditorEventRef e)
         {
-            return GetEventName(e.GetFilteredPath(true));
+            return GetEventSyntaxName(e.GetFilteredPath(true));
+        }
+        
+        /// <summary>
+        /// Gets the path of an event *as it is represented in the AudioEvents syntax*. For example, here's an event
+        /// called Core/Player/Footstep for different Name Clash Prevention types:
+        /// None:                                   Footstep
+        /// Generate Separate Classes Per Folder:   Core/Player/Footstep
+        /// Include Path:                           Core_Player_Footstep
+        /// </summary>
+        private static string GetEventSyntaxPath(string filteredPath)
+        {
+            string eventName = GetEventSyntaxName(filteredPath);
+            
+            if (Settings.EventNameClashPreventionType !=
+                FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+            {
+                return eventName;
+            }
+            
+            string eventDirectories = Path.GetDirectoryName(filteredPath);
+            
+            return Path.Combine(eventDirectories, eventName).ToUnityPath();
+        }
+
+        private static string GetEventSyntaxPath(EditorEventRef e)
+        {
+            return GetEventSyntaxPath(e.GetFilteredPath(true));
         }
 
         private static string GetEventCode(EditorEventRef e, string eventName = "", string attribute = "")
@@ -455,7 +489,7 @@ namespace RoyTheunissen.FMODSyntax
             // a Config/Playback that has an old name but points to the GUID of the newly named event, so we want to 
             // be able to specify a different name in that use case.
             if (string.IsNullOrEmpty(eventName))
-                eventName = GetEventName(e);
+                eventName = GetEventSyntaxName(e);
             string fieldName = FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(eventName);
             
             eventFieldGenerator.Reset();
@@ -563,8 +597,8 @@ namespace RoyTheunissen.FMODSyntax
                 {
                     if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes.None)
                     {
-                        string previousName = GetEventName(previousPath);
-                        string currentName = GetEventName(currentPath);
+                        string previousName = GetEventSyntaxName(previousPath);
+                        string currentName = GetEventSyntaxName(currentPath);
                         shouldGenerateAlias = previousName != currentName;
                     }
                     else
@@ -626,6 +660,13 @@ namespace RoyTheunissen.FMODSyntax
             codeGenerator.GenerateFile(eventsScriptPath);
         }
 
+        private static string GetActiveEventData(EditorEventRef e)
+        {
+            string eventPath = GetEventSyntaxPath(e);
+            
+            return $"{eventPath}={e.Guid}\r\n";
+        }
+
         private static string GenerateFolderCode(EventFolder eventFolder, bool isDeclaration, out string eventTypesCode)
         {
             string childFoldersCode = "";
@@ -654,9 +695,6 @@ namespace RoyTheunissen.FMODSyntax
             string eventsCode = string.Empty;
             foreach (EditorEventRef e in eventFolder.ChildEvents)
             {
-                // Check if this event used to have a different path.
-                string currentPath = e.GetFilteredPath(true);
-
                 // Log it in the active event GUIDs. This way we can keep track of which events we had previously and
                 // which paths / GUIDs they had. Then we can figure out if they were renamed/moved, then add those
                 // back with an alias and an Obsolete tag so everything doesn't break immediately and you get a chance
@@ -664,7 +702,7 @@ namespace RoyTheunissen.FMODSyntax
                 // NOTE: We don't *have* to keep track of them this way necessarily, we could intercept UpdateCache
                 // in EventManager.cs and make it expose a list of renamed events. Would require changing FMOD even
                 // further though, and the changes are already stacking up...
-                activeEventGuidsCode += $"{currentPath}={e.Guid}\r\n";
+                activeEventGuidsCode += GetActiveEventData(e);
 
                 // Types
                 if (!isDeclaration)
@@ -687,13 +725,13 @@ namespace RoyTheunissen.FMODSyntax
                          eventFolder.ChildEventToAliasPath)
                 {
                     EditorEventRef e = eventPreviousPathPair.Key;
-                    string currentPath = e.GetFilteredPath();
-                    string previousPath = eventPreviousPathPair.Value;
+                    string currentSyntaxPath = GetEventSyntaxPath(e);
+                    string previousSyntaxPath = eventPreviousPathPair.Value;
 
-                    string previousName = GetEventName(previousPath);
+                    string previousName = Path.GetFileName(previousSyntaxPath);
 
                     string attribute =
-                        $"[Obsolete(\"FMOD Event '{previousPath}' has been changed to '{currentPath}'\")]";
+                        $"[Obsolete(\"FMOD Event '{previousSyntaxPath}' has been changed to '{currentSyntaxPath}'\")]";
 
                     if (isDeclaration)
                         eventAliasesCode += GetEventCode(e, previousName, attribute);
