@@ -65,6 +65,13 @@ namespace RoyTheunissen.FMODSyntax
                 return $"{nameof(EventFolder)}({Name})";
             }
         }
+
+        private enum MetaDataFormats
+        {
+            None,             // Could not be parsed.
+            ActiveEventGuids, // The old format that just specified which events are currently being used and their name
+            Json,             // The new format that still stores old event data but also supports storing additional data
+        }
         
         private static string ScriptPathBase => FmodSyntaxSettings.Instance.GeneratedScriptsFolderPath;
         private const string TemplatePathBase = "Templates/Fmod/";
@@ -160,6 +167,13 @@ namespace RoyTheunissen.FMODSyntax
         
         [NonSerialized] private static string parameterlessEventsCode = "";
         [NonSerialized] private static string activeEventGuidsCode = "";
+        
+        [NonSerialized] private static string metaData;
+        [NonSerialized] private static MetaDataFormats metaDataFormat;
+        
+        [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
+            = new Dictionary<string, Type>();
+        [NonSerialized] private static bool didCacheUserSpecifiedEnums;
 
         [InitializeOnLoadMethod]
         private static void Initialize()
@@ -201,10 +215,6 @@ namespace RoyTheunissen.FMODSyntax
             GenerateCode();
         }
 #endif // FMOD_AUTO_REGENERATE_CODE
-
-        [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
-            = new Dictionary<string, Type>();
-        [NonSerialized] private static bool didCacheUserSpecifiedEnums;
 
         [MenuItem("FMOD/Cache Enums")]
         private static void CacheUserSpecifiedLabelParameterEnums()
@@ -293,8 +303,10 @@ namespace RoyTheunissen.FMODSyntax
             return codeGenerator.GetCode();
         }
 
-        private static string GetMetaData()
+        private static string GetMetaData(out MetaDataFormats format)
         {
+            format = MetaDataFormats.None;
+            
             // If a script has already been generated, open it.
             string existingFilePath = EventsScriptPath.GetAbsolutePath();
             if (!File.Exists(existingFilePath))
@@ -307,26 +319,32 @@ namespace RoyTheunissen.FMODSyntax
             const string oldMetaDataEnd = "ACTIVE EVENT GUIDS */";
             string activeEventGuidsSection = existingCode.GetSection(oldMetaDataStart, oldMetaDataEnd);
             if (!string.IsNullOrEmpty(activeEventGuidsSection))
+            {
+                format = MetaDataFormats.ActiveEventGuids;
                 return activeEventGuidsSection;
+            }
             
             // Now check the new format.
             const string newMetaDataStart = "/* ---------------------------------------------- METADATA ------------------------------------------------------";
             const string newMetaDataEnd = "------------------------------------------------- METADATA --------------------------------------------------- */";
             string metaDataSection = existingCode.GetSection(newMetaDataStart, newMetaDataEnd);
             if (!string.IsNullOrEmpty(metaDataSection))
+            {
+                format = MetaDataFormats.Json;
                 return metaDataSection;
+            }
 
             return string.Empty;
         }
 
         private static void ParseMetaData()
         {
-            string metaData = GetMetaData();
+            metaData = GetMetaData(out metaDataFormat);
             
-            previousEventSyntaxPathsByGuid = GetExistingEventSyntaxPathsByGuid(metaData);
+            previousEventSyntaxPathsByGuid = GetExistingEventSyntaxPathsByGuid();
         }
 
-        private static Dictionary<string, string> GetExistingEventSyntaxPathsByGuid(string metaData)
+        private static Dictionary<string, string> GetExistingEventSyntaxPathsByGuid()
         {
             Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
             
