@@ -6,6 +6,7 @@ using System.Linq;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -63,6 +64,62 @@ namespace RoyTheunissen.FMODSyntax
             public override string ToString()
             {
                 return $"{nameof(EventFolder)}({Name})";
+            }
+        }
+        
+        [Serializable]
+        public sealed class MetaData
+        {
+            [SerializeField] private string version;
+            public string Version => version;
+
+            [SerializeField] private FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType;
+            public FmodSyntaxSettings.EventNameClashPreventionTypes ClashPreventionType => clashPreventionType;
+
+            [SerializeField] private string[] eventGuidToPreviousSyntaxPaths;
+            
+            [NonSerialized] private Dictionary<string,string> cachedEventGuidToPreviousSyntaxPathDictionary
+                = new Dictionary<string, string>();
+            [NonSerialized] private bool didCacheEventGuidToPreviousSyntaxPathDictionary;
+            public Dictionary<string,string> EventGuidToPreviousSyntaxPath
+            {
+                get
+                {
+                    if (!didCacheEventGuidToPreviousSyntaxPathDictionary)
+                    {
+                        didCacheEventGuidToPreviousSyntaxPathDictionary = true;
+                        for (int i = 0; i < eventGuidToPreviousSyntaxPaths.Length; i += 2)
+                        {
+                            string key = eventGuidToPreviousSyntaxPaths[i];
+                            string value = eventGuidToPreviousSyntaxPaths[i + 1];
+                            cachedEventGuidToPreviousSyntaxPathDictionary.Add(key, value);
+                        }
+                    }
+                    return cachedEventGuidToPreviousSyntaxPathDictionary;
+                }
+            }
+
+            public MetaData(
+                string version, FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType,
+                Dictionary<string, string> eventGuidToPreviousSyntaxPaths)
+            {
+                this.version = version;
+                this.clashPreventionType = clashPreventionType;
+                
+                List<string> previousEventSyntaxPathValues = new List<string>(); 
+                foreach (KeyValuePair<string, string> stringPair in eventGuidToPreviousSyntaxPaths)
+                {
+                    previousEventSyntaxPathValues.Add(stringPair.Key);
+                    previousEventSyntaxPathValues.Add(stringPair.Value);
+                }
+                this.eventGuidToPreviousSyntaxPaths = previousEventSyntaxPathValues.ToArray();
+            }
+
+            public string GetJson()
+            {
+                string json = JsonUtility.ToJson(this, true);
+                json = CleanUpJsonDictionarySyntax(json, "eventGuidToPreviousSyntaxPaths");
+                return json;
             }
         }
 
@@ -163,13 +220,14 @@ namespace RoyTheunissen.FMODSyntax
 
         [NonSerialized] private static bool didSourceFilesChange;
         
-        [NonSerialized] private static Dictionary<string,string> previousEventSyntaxPathsByGuid;
-        
         [NonSerialized] private static string parameterlessEventsCode = "";
-        [NonSerialized] private static string activeEventGuidsCode = "";
         
-        [NonSerialized] private static string metaData;
+        [NonSerialized] private static string rawMetaData;
         [NonSerialized] private static MetaDataFormats metaDataFormat;
+        [NonSerialized] private static MetaData metaData;
+
+        [NonSerialized]
+        private static Dictionary<string, string> activeEventGuidToCurrentSyntaxPath = new Dictionary<string, string>();
         
         [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
             = new Dictionary<string, Type>();
@@ -303,7 +361,30 @@ namespace RoyTheunissen.FMODSyntax
             return codeGenerator.GetCode();
         }
 
-        private static string GetMetaData(out MetaDataFormats format)
+        private static string GetCurrentVersionNumber()
+        {
+            // Get the data from the package.json file.
+            string packageJsonAssetPath = AssetDatabase.GUIDToAssetPath("9381d3b6ee2b4dc47a6dccb6aacaed4a");
+            TextAsset packageJsonFile = AssetDatabase.LoadAssetAtPath<TextAsset>(packageJsonAssetPath);
+            string packageJson = packageJsonFile.text;
+            
+            // Try to find the part where it starts defining the version.
+            const string versionStartSyntax = "\"version\": \"";
+            int versionStartIndex = packageJson.IndexOf(versionStartSyntax, StringComparison.OrdinalIgnoreCase);
+            if (versionStartIndex == -1)
+                return string.Empty;
+            versionStartIndex += versionStartSyntax.Length;
+
+            // Try to find where the version string ends.
+            int versionEndIndex = packageJson.IndexOf("\"", versionStartIndex + 1, StringComparison.Ordinal);
+            if (versionEndIndex == -1)
+                return string.Empty;
+
+            // Return the version number string.
+            return packageJson.Substring(versionStartIndex, versionEndIndex - versionStartIndex);
+        }
+
+        private static string GetRawMetaData(out MetaDataFormats format)
         {
             format = MetaDataFormats.None;
             
@@ -321,6 +402,17 @@ namespace RoyTheunissen.FMODSyntax
             if (!string.IsNullOrEmpty(activeEventGuidsSection))
             {
                 format = MetaDataFormats.ActiveEventGuids;
+                
+                string[] lines = activeEventGuidsSection.Split("\r\n");
+                List<string> linesList = lines.ToList();
+                // Skip the first line because it just has some explanation for what it's for.
+                if (linesList.Count > 0)
+                    linesList.RemoveAt(0);
+                // Also skip the last line because it's empty.
+                if (linesList.Count > 0)
+                    linesList.RemoveAt(linesList.Count - 1);
+                activeEventGuidsSection = string.Join("\r\n", linesList);
+                
                 return activeEventGuidsSection;
             }
             
@@ -339,9 +431,20 @@ namespace RoyTheunissen.FMODSyntax
 
         private static void ParseMetaData()
         {
-            metaData = GetMetaData(out metaDataFormat);
+            rawMetaData = GetRawMetaData(out metaDataFormat);
             
-            previousEventSyntaxPathsByGuid = GetExistingEventSyntaxPathsByGuid();
+            if (metaDataFormat == MetaDataFormats.ActiveEventGuids)
+            {
+                string version = "0.0.1";
+                FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
+                    FmodSyntaxSettings.EventNameClashPreventionTypes.None;
+                Dictionary<string, string> eventGuidToPreviousSyntaxPath = GetExistingEventSyntaxPathsByGuid();
+                metaData = new MetaData(version, clashPreventionType, eventGuidToPreviousSyntaxPath);
+            }
+            else
+            {
+                metaData = JsonUtility.FromJson<MetaData>(rawMetaData);
+            }
         }
 
         private static Dictionary<string, string> GetExistingEventSyntaxPathsByGuid()
@@ -349,8 +452,8 @@ namespace RoyTheunissen.FMODSyntax
             Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
             
             // Every line is an individual event formatted as path=guid
-            string[] lines = metaData.Split("\r\n");
-            for (int i = 1; i < lines.Length; i++)
+            string[] lines = rawMetaData.Split("\r\n");
+            for (int i = 0; i < lines.Length; i++)
             {
                 string line = lines[i].TrimStart();
                 string[] nameAndGuid = line.Split("=");
@@ -545,6 +648,61 @@ namespace RoyTheunissen.FMODSyntax
             return eventFieldGenerator.GetCode();
         }
 
+        /// <summary>
+        /// JsonUtility does not support serializing dictionaries, so we can instead serialize it as an array of strings.
+        /// Unfortunately then every key and value ends up on a separate line. For readability it would be great if
+        /// those were together on one line. So this does a small pass where it takes a dictionary and puts the key
+        /// and value lines on the same line but preserves indentation and whatnot.
+        /// </summary>
+        private static string CleanUpJsonDictionarySyntax(string json, string dictionaryName)
+        {
+            // Find out where the dictionary starts.
+            string dictionaryStartKeyword = $"\"{dictionaryName}\": [\n";
+            int startIndex = json.IndexOf(dictionaryStartKeyword, StringComparison.Ordinal);
+            if (startIndex == -1)
+                return json;
+            startIndex += dictionaryStartKeyword.Length;
+            
+            // Find out where the dictionary ends.
+            int endIndex = json.IndexOf("]", startIndex + 1, StringComparison.Ordinal);
+            if (endIndex == -1)
+                return json;
+
+            // Figure out the sections of the dictionary itself as well as before and after it.
+            string preDictionarySection = json.Substring(0, startIndex);
+            string dictionarySection = json.Substring(startIndex, endIndex - startIndex);
+            string postDictionarySection = json.Substring(endIndex);
+            
+            // Now let's clean up the dictionary section.
+            string[] dictionarySectionLines = dictionarySection.Split("\n");
+            List<string> combinedDictionarySectionLines = new List<string>();
+            
+            // NOTE: The last line is empty so skip that one.
+            for (int i = 0; i < dictionarySectionLines.Length; i += 2)
+            {
+                // The last line is empty but it has indentation so keep that as-is.
+                if (i == dictionarySectionLines.Length - 1)
+                {
+                    combinedDictionarySectionLines.Add(dictionarySectionLines[i]);
+                    break;
+                }
+                
+                // Find out what the key and value are.
+                string key = dictionarySectionLines[i];
+                string value = dictionarySectionLines[i + 1];
+                
+                // Now combine them in such a way that there is no linebreak between them, just a space.
+                // Preserve existing indentation.
+                key = key.TrimEnd();
+                value = value.TrimStart();
+                string combinedLine = key + " " + value;
+                combinedDictionarySectionLines.Add(combinedLine);
+            }
+            dictionarySection = string.Join("\n", combinedDictionarySectionLines);
+            
+            return preDictionarySection + dictionarySection + postDictionarySection;
+        }
+
         [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
         public static void GenerateCode()
         {
@@ -630,7 +788,7 @@ namespace RoyTheunissen.FMODSyntax
                 
                 string currentPath = path;
                 
-                bool hadEvent = previousEventSyntaxPathsByGuid.TryGetValue(
+                bool hadEvent = metaData.EventGuidToPreviousSyntaxPath.TryGetValue(
                     e.Guid.ToString(), out string previousSyntaxPath);
                 bool shouldGenerateAlias = false;
                 if (hadEvent)
@@ -652,7 +810,6 @@ namespace RoyTheunissen.FMODSyntax
             
             // Generate code for the events per folder.
             parameterlessEventsCode = "";
-            activeEventGuidsCode = "";
             string eventsCode;
             if (!isDeclaration && Settings.EventNameClashPreventionType != 
                 FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
@@ -673,8 +830,15 @@ namespace RoyTheunissen.FMODSyntax
             if (isDeclaration)
             {
                 codeGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
-                codeGenerator.ReplaceKeyword("ActiveEventGuids", activeEventGuidsCode, true);
-                codeGenerator.ReplaceKeyword("MetaData", activeEventGuidsCode, true);
+
+                // Write new metadata to the file while with the current data while preserving the old one,
+                // because we may still need that one for generating other files.
+                string versionNumber = GetCurrentVersionNumber();
+                FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
+                    Settings.EventNameClashPreventionType;
+                MetaData newMetaData = new MetaData(
+                    versionNumber, clashPreventionType, activeEventGuidToCurrentSyntaxPath);
+                codeGenerator.ReplaceKeyword("MetaData", newMetaData.GetJson(), true);
             }
 
             // Also allow custom using directives to be specified.
@@ -687,13 +851,6 @@ namespace RoyTheunissen.FMODSyntax
             codeGenerator.ReplaceKeyword("UsingDirectives", eventUsingDirectivesCode);
 
             codeGenerator.GenerateFile(eventsScriptPath);
-        }
-
-        private static string GetActiveEventData(EditorEventRef e)
-        {
-            string eventSyntaxPath = GetEventSyntaxPath(e);
-            
-            return $"{eventSyntaxPath}={e.Guid}\r\n";
         }
 
         private static string GenerateFolderCode(EventFolder eventFolder, bool isDeclaration, out string eventTypesCode)
@@ -731,7 +888,7 @@ namespace RoyTheunissen.FMODSyntax
                 // NOTE: We don't *have* to keep track of them this way necessarily, we could intercept UpdateCache
                 // in EventManager.cs and make it expose a list of renamed events. Would require changing FMOD even
                 // further though, and the changes are already stacking up...
-                activeEventGuidsCode += GetActiveEventData(e);
+                activeEventGuidToCurrentSyntaxPath.Add(e.Guid.ToString(), GetEventSyntaxPath(e));
 
                 // Types
                 if (!isDeclaration)

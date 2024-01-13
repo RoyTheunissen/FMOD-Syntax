@@ -15,9 +15,9 @@ namespace RoyTheunissen.FMODSyntax
     {
         public enum EventNameClashPreventionTypes
         {
-            None,
-            GenerateSeparateClassesPerFolder,
-            IncludePath,
+            None = 0,
+            GenerateSeparateClassesPerFolder = 1,
+            IncludePath = 2,
         }
         
         [SerializeField] private string generatedScriptsFolderPath;
