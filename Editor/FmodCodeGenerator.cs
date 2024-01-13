@@ -70,13 +70,13 @@ namespace RoyTheunissen.FMODSyntax
         [Serializable]
         public sealed class MetaData
         {
-            [SerializeField] private string version;
+            [SerializeField] private string version = "0.0.0";
             public string Version => version;
 
             [SerializeField] private FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType;
             public FmodSyntaxSettings.EventNameClashPreventionTypes ClashPreventionType => clashPreventionType;
 
-            [SerializeField] private string[] eventGuidToPreviousSyntaxPaths;
+            [SerializeField] private string[] eventGuidToPreviousSyntaxPaths = Array.Empty<string>();
             
             [NonSerialized] private Dictionary<string,string> cachedEventGuidToPreviousSyntaxPathDictionary
                 = new Dictionary<string, string>();
@@ -97,6 +97,20 @@ namespace RoyTheunissen.FMODSyntax
                     }
                     return cachedEventGuidToPreviousSyntaxPathDictionary;
                 }
+                set
+                {
+                    List<string> previousEventSyntaxPathValues = new List<string>(); 
+                    foreach (KeyValuePair<string, string> stringPair in value)
+                    {
+                        previousEventSyntaxPathValues.Add(stringPair.Key);
+                        previousEventSyntaxPathValues.Add(stringPair.Value);
+                    }
+                    this.eventGuidToPreviousSyntaxPaths = previousEventSyntaxPathValues.ToArray();
+                }
+            }
+
+            public MetaData()
+            {
             }
 
             public MetaData(
@@ -105,14 +119,7 @@ namespace RoyTheunissen.FMODSyntax
             {
                 this.version = version;
                 this.clashPreventionType = clashPreventionType;
-                
-                List<string> previousEventSyntaxPathValues = new List<string>(); 
-                foreach (KeyValuePair<string, string> stringPair in eventGuidToPreviousSyntaxPaths)
-                {
-                    previousEventSyntaxPathValues.Add(stringPair.Key);
-                    previousEventSyntaxPathValues.Add(stringPair.Value);
-                }
-                this.eventGuidToPreviousSyntaxPaths = previousEventSyntaxPathValues.ToArray();
+                EventGuidToPreviousSyntaxPath = eventGuidToPreviousSyntaxPaths;
             }
 
             public string GetJson()
@@ -433,7 +440,11 @@ namespace RoyTheunissen.FMODSyntax
         {
             rawMetaData = GetRawMetaData(out metaDataFormat);
             
-            if (metaDataFormat == MetaDataFormats.ActiveEventGuids)
+            if (metaDataFormat == MetaDataFormats.None)
+            {
+                metaData = new MetaData();
+            }
+            else if (metaDataFormat == MetaDataFormats.ActiveEventGuids)
             {
                 string version = "0.0.1";
                 FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
@@ -836,8 +847,8 @@ namespace RoyTheunissen.FMODSyntax
                 string versionNumber = GetCurrentVersionNumber();
                 FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
                     Settings.EventNameClashPreventionType;
-                MetaData newMetaData = new MetaData(
-                    versionNumber, clashPreventionType, activeEventGuidToCurrentSyntaxPath);
+                MetaData newMetaData = new MetaData();
+                newMetaData.EventGuidToPreviousSyntaxPath = activeEventGuidToCurrentSyntaxPath;
                 codeGenerator.ReplaceKeyword("MetaData", newMetaData.GetJson(), true);
             }
 
