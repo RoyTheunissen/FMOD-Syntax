@@ -856,8 +856,8 @@ namespace RoyTheunissen.FMODSyntax
                 string versionNumber = GetCurrentVersionNumber();
                 FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
                     Settings.EventNameClashPreventionType;
-                MetaData newMetaData = new MetaData();
-                newMetaData.EventGuidToPreviousSyntaxPath = activeEventGuidToCurrentSyntaxPath;
+                MetaData newMetaData = new MetaData(
+                    versionNumber, clashPreventionType, activeEventGuidToCurrentSyntaxPath);
                 codeGenerator.ReplaceKeyword("MetaData", newMetaData.GetJson(), true);
             }
 
