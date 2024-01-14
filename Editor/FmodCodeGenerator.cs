@@ -995,14 +995,25 @@ namespace RoyTheunissen.FMODSyntax
             }
             else
             {
+                if (metaDataFromPreviousCodeGeneration.ClashPreventionType == FmodSyntaxSettings
+                        .EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                {
+                    // Previously we did use folders, so place the type aliases in the appropriate folder instead of
+                    // next to the root folder like we would for our current clash prevention type.
+                    eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
+                }
+                else
+                {
+                    eventFolderGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
+
+                    // When we don't use folders we actually define event types *next* to AudioEvents (the root folder)
+                    // and not inside the root folder. That way you don't have to specify event types like
+                    // 'AudioEvents.FootstepPlayback' but just like 'FootstepPlayback' which is simpler.
+                    if (!string.IsNullOrEmpty(eventTypeAliasesCode))
+                        eventTypesCode += "\r\n" + eventTypeAliasesCode + "\r\n";
+                }
+                
                 eventFolderGenerator.RemoveKeywordLines("EventTypes");
-                eventFolderGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
-
-                // We actually want to have the event type aliases below the other event types *next* to the AudioEvents
-                // class for consistency.
-                if (!string.IsNullOrEmpty(eventTypeAliasesCode))
-                    eventTypesCode += "\r\n" + eventTypeAliasesCode + "\r\n";
-
                 eventTypesCodeToBePlacedOutsideOfRootFolder = eventTypesCode;
             }
             
