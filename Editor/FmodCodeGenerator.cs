@@ -1306,6 +1306,71 @@ namespace RoyTheunissen.FMODSyntax
             return EventContainerClass + "." + eventSyntaxPath.Replace("/", ".");
         }
 
+        private static readonly char[] AllowedWordEndingCharacters = { '.', '(', ')', '[', ']', '{', '}', ';' };
+
+        private static string ReplaceWords(string text, string oldWord, string newWord, out bool didReplace)
+        {
+            didReplace = false;
+            
+            int startIndex = text.IndexOf(oldWord, StringComparison.Ordinal);
+            if (startIndex == -1)
+                return text;
+
+            bool IsAllowedChar(char c) => char.IsWhiteSpace(c) || AllowedWordEndingCharacters.Contains(c);
+
+            int iterationCount = 0;
+            const int maxIterationCount = 10000;
+            while (startIndex != -1 && iterationCount < maxIterationCount)
+            {
+                int endIndex = startIndex + oldWord.Length;
+
+                // Check if this occurrence is a whole word or if it's part of a longer word.
+                bool isWholeWord = true;
+                if (startIndex > 0)
+                {
+                    char previousCharacter = text[startIndex - 1];
+                    if (!IsAllowedChar(previousCharacter))
+                        isWholeWord = false;
+                }
+                if (isWholeWord && endIndex < text.Length)
+                {
+                    char nextCharacter = text[endIndex];
+                    if (!IsAllowedChar(nextCharacter))
+                        isWholeWord = false;
+                }
+
+                // Actually replace the occurrence with the new word.
+                if (isWholeWord)
+                {
+                    string textPrecedingWord = text.Substring(0, startIndex);
+                    string textSucceedingWord = text.Substring(endIndex);
+                    text = textPrecedingWord + newWord + textSucceedingWord;
+                    
+                    didReplace = true;
+                    
+                    // Need to recompute the end index now that we modified the original text!
+                    endIndex = startIndex + newWord.Length;
+                }
+                
+                // Try to find the next occurrence of the word.
+                startIndex = text.IndexOf(oldWord, endIndex, StringComparison.Ordinal);
+
+                iterationCount++;
+            }
+
+            if (iterationCount >= maxIterationCount)
+            {
+                Debug.LogError($"Tried to replace word '{oldWord}' with '{newWord}' in text but something seemed to " +
+                               $"have gone wrong because we did {maxIterationCount} loops and there should never be " +
+                               $"that many occurrences. Exiting now to prevent a crash. If you genuinely have more " +
+                               $"than {maxIterationCount} occurrences of '{oldWord}' in a text then you can try and " +
+                               $"raise the limit and pray to whatever deity you hold dear because you clearly need " +
+                               $"their support for whatever crazy high jinks you're up to.");
+            }
+
+            return text;
+        }
+
         private static void RefactorOldEventReferences()
         {
             FmodSyntaxSettings.SyntaxFormats oldSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
@@ -1367,17 +1432,12 @@ namespace RoyTheunissen.FMODSyntax
                     bool didAnyRename = false;
                     foreach (KeyValuePair<string, string> renameToPerform in renamesToPerform)
                     {
-                        // Check if we did any rename at all. If we didn't do a rename, don't touch the file.
-                        if (!didAnyRename)
-                        {
-                            if (fileText.Contains(renameToPerform.Key))
-                                didAnyRename = true;
-                            else
-                                continue;
-                        }
-                        
-                        fileText = fileText.Replace(
-                            renameToPerform.Key, renameToPerform.Value, StringComparison.Ordinal);
+                        // We do a special kind of replace that checks that the text in question is not part of some
+                        // longer word. Helps prevent misfires like renaming fields of playback types.
+                        fileText = ReplaceWords(
+                            fileText, renameToPerform.Key, renameToPerform.Value, out bool didRename);
+                        if (didRename)
+                            didAnyRename = true;
                     }
                     
                     if (didAnyRename)
