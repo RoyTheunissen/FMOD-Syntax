@@ -14,11 +14,11 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public sealed class FmodSyntaxSettings : ScriptableObject 
     {
-        public enum EventNameClashPreventionTypes
+        public enum SyntaxFormats
         {
-            None = 0,
-            GenerateSeparateClassesPerFolder = 1,
-            IncludePath = 2,
+            Flat = 0,
+            FlatWithPathIncludedInName = 1,
+            SubclassesPerFolder = 2,
         }
         
         [SerializeField] private string generatedScriptsFolderPath;
@@ -35,11 +35,17 @@ namespace RoyTheunissen.FMODSyntax
                  "references so you can update the references without getting compile errors.")]
         [SerializeField] private bool generateFallbacksForChangedEvents = true;
         public bool GenerateFallbacksForChangedEvents => generateFallbacksForChangedEvents;
-
-        [Header("Syntax Format")]
-        [SerializeField] private EventNameClashPreventionTypes eventNameClashPreventionType
-            = EventNameClashPreventionTypes.None;
-        public EventNameClashPreventionTypes EventNameClashPreventionType => eventNameClashPreventionType;
+        
+        [Space]
+        [Tooltip("How to format the events syntax. Different formats suit different use cases:\n\n" +
+                 "Flat - Simplest syntax. All events are inside a class called AudioEvents. Event names have to be unique.\n\n" +
+                 "Flat (With Path Included In Name) - Like Flat but an event called 'Player/Footstep' would generate " +
+                 "a field called 'Player_Footstep'. Keeps things very simple but does prevent name conflicts.\n\n" +
+                 "Subclasses Per Folder (Recommended) - Generates subclasses inside AudioEvents to represent the " +
+                 "folders in the FMOD project. An event called 'Player/Footstep' would be accessed via " +
+                 "'AudioEvents.Player.Footstep'. A very clear and organized way to partition events.")]
+        [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.SubclassesPerFolder;
+        public SyntaxFormats SyntaxFormat => syntaxFormat;
 
         [NonSerialized] private static FmodSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;

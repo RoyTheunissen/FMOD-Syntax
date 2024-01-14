@@ -73,8 +73,8 @@ namespace RoyTheunissen.FMODSyntax
             [SerializeField] private string version = "0.0.0";
             public string Version => version;
 
-            [SerializeField] private FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType;
-            public FmodSyntaxSettings.EventNameClashPreventionTypes ClashPreventionType => clashPreventionType;
+            [SerializeField] private FmodSyntaxSettings.SyntaxFormats syntaxFormat;
+            public FmodSyntaxSettings.SyntaxFormats SyntaxFormat => syntaxFormat;
 
             [SerializeField] private string[] eventGuidToPreviousSyntaxPaths = Array.Empty<string>();
             
@@ -114,11 +114,11 @@ namespace RoyTheunissen.FMODSyntax
             }
 
             public MetaData(
-                string version, FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType,
+                string version, FmodSyntaxSettings.SyntaxFormats syntaxFormat,
                 Dictionary<string, string> eventGuidToPreviousSyntaxPaths)
             {
                 this.version = version;
-                this.clashPreventionType = clashPreventionType;
+                this.syntaxFormat = syntaxFormat;
                 EventGuidToPreviousSyntaxPath = eventGuidToPreviousSyntaxPaths;
             }
 
@@ -447,17 +447,16 @@ namespace RoyTheunissen.FMODSyntax
             }
             else if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.ActiveEventGuids)
             {
-                // The metadata was in the old format. This one did not support name clash prevention nor did it specify
-                // a version number. Only event GUIDs and their old name.
+                // The metadata was in the old format. This one did not support name different syntax format nor did
+                // it specify a version number; just event GUIDs and their previous name.
                 string version = "0.0.1";
                 
-                FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
-                    FmodSyntaxSettings.EventNameClashPreventionTypes.None;
+                FmodSyntaxSettings.SyntaxFormats syntaxFormat = FmodSyntaxSettings.SyntaxFormats.Flat;
                 
                 Dictionary<string, string> eventGuidToPreviousSyntaxPath = GetExistingEventSyntaxPathsByGuid();
                 
                 metaDataFromPreviousCodeGeneration = new MetaData(
-                    version, clashPreventionType, eventGuidToPreviousSyntaxPath);
+                    version, syntaxFormat, eventGuidToPreviousSyntaxPath);
             }
             else
             {
@@ -599,15 +598,15 @@ namespace RoyTheunissen.FMODSyntax
         
         /// <summary>
         /// Gets the name of an event *as it is represented in the AudioEvents syntax*. For example, here's an event
-        /// called Core/Player/Footstep for different Name Clash Prevention types:
-        /// None:                                   Footstep
-        /// Generate Separate Classes Per Folder:   Footstep
-        /// Include Path:                           Core_Player_Footstep
+        /// called Core/Player/Footstep for different Syntax Formats:
+        /// Flat:                                   Footstep
+        /// Flat (With Path Included In Name):      Core_Player_Footstep
+        /// Subclasses Per Folder:                  Footstep
         /// </summary>
         private static string GetEventSyntaxName(string filteredPath)
         {
             // If specified, include the entire path as a prefix.
-            if (Settings.EventNameClashPreventionType == FmodSyntaxSettings.EventNameClashPreventionTypes.IncludePath)
+            if (Settings.SyntaxFormat == FmodSyntaxSettings.SyntaxFormats.FlatWithPathIncludedInName)
                 return filteredPath.Replace("_", "").Replace("/", "_");
             
             return FmodSyntaxUtilities.GetFilteredNameFromPath(filteredPath);
@@ -620,17 +619,17 @@ namespace RoyTheunissen.FMODSyntax
         
         /// <summary>
         /// Gets the path of an event *as it is represented in the AudioEvents syntax*. For example, here's an event
-        /// called Core/Player/Footstep for different Name Clash Prevention types:
-        /// None:                                   Footstep
-        /// Generate Separate Classes Per Folder:   Core/Player/Footstep
-        /// Include Path:                           Core_Player_Footstep
+        /// called Core/Player/Footstep for different Syntax Formats:
+        /// Flat:                                   Footstep
+        /// Flat (With Path Included In Name):      Core_Player_Footstep
+        /// Subclasses Per Folder:                  Core/Player/Footstep
         /// </summary>
         private static string GetEventSyntaxPath(string filteredPath)
         {
             string eventName = GetEventSyntaxName(filteredPath);
             
-            if (Settings.EventNameClashPreventionType !=
-                FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+            if (Settings.SyntaxFormat !=
+                FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
             {
                 return eventName;
             }
@@ -750,8 +749,8 @@ namespace RoyTheunissen.FMODSyntax
             // Make sure they know there's a new syntax and let them opt out if they don't like it.
             // It should be a conscious decision to make the transition.
             if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.ActiveEventGuids
-                && Settings.EventNameClashPreventionType ==
-                FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                && Settings.SyntaxFormat ==
+                FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
             {
                 bool useNewSyntax = CheckIfUserWantsToContinueWithNewSyntax();
                 if (!useNewSyntax)
@@ -829,8 +828,8 @@ namespace RoyTheunissen.FMODSyntax
 
                 EventFolder folder = rootEventFolder;
                 
-                if (Settings.EventNameClashPreventionType ==
-                    FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                if (Settings.SyntaxFormat ==
+                    FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
                 {
                     folder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(path);
                 }
@@ -885,10 +884,9 @@ namespace RoyTheunissen.FMODSyntax
                 // Write new metadata to the file while with the current data while preserving the old one,
                 // because we may still need that one for generating other files.
                 string versionNumber = GetCurrentVersionNumber();
-                FmodSyntaxSettings.EventNameClashPreventionTypes clashPreventionType =
-                    Settings.EventNameClashPreventionType;
+                FmodSyntaxSettings.SyntaxFormats syntaxFormat = Settings.SyntaxFormat;
                 MetaData newMetaData = new MetaData(
-                    versionNumber, clashPreventionType, activeEventGuidToCurrentSyntaxPath);
+                    versionNumber, syntaxFormat, activeEventGuidToCurrentSyntaxPath);
                 codeGenerator.ReplaceKeyword("MetaData", newMetaData.GetJson(), true);
             }
 
@@ -993,8 +991,8 @@ namespace RoyTheunissen.FMODSyntax
                     {
                         string eventTypeAliasCode = GetEventTypeCode(e, previousName, attribute);
                         
-                        if (metaDataFromPreviousCodeGeneration.ClashPreventionType != FmodSyntaxSettings
-                                .EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                        if (metaDataFromPreviousCodeGeneration.SyntaxFormat != FmodSyntaxSettings
+                                .SyntaxFormats.SubclassesPerFolder)
                         {
                             eventTypeAliasesCodeThatUsedToBeOutsideRootFolder += eventTypeAliasCode;
                         }
@@ -1022,24 +1020,24 @@ namespace RoyTheunissen.FMODSyntax
             // only have one root folder, and we define the types outside of that, which is how it used to work and
             // prevents you from having to type 'AudioEvents.NameOfEventPlayback playback;' and lets you type
             // 'NameOfEventPlayback playback;' instead, without the 'AudioEvents.'
-            if (Settings.EventNameClashPreventionType 
-                == FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+            if (Settings.SyntaxFormat 
+                == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
             {
                 eventFolderGenerator.ReplaceKeyword(eventTypesKeyword, eventTypesCode, true);
                 eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
                 
                 // Most event type aliases code should go inside the appropriate folder, but if code was previously
-                // generated with a folderless name clash prevention then those type aliases should be placed OUTSIDE
+                // generated with a folderless syntax format then those type aliases should be placed OUTSIDE
                 // of the root folder because that's where the types in question used to be declared.
                 eventTypesCodeToBePlacedOutsideOfRootFolder = eventTypeAliasesCodeThatUsedToBeOutsideRootFolder;
             }
             else
             {
-                if (metaDataFromPreviousCodeGeneration.ClashPreventionType == FmodSyntaxSettings
-                        .EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
+                if (metaDataFromPreviousCodeGeneration.SyntaxFormat == FmodSyntaxSettings
+                        .SyntaxFormats.SubclassesPerFolder)
                 {
                     // Previously we did use folders, so place the type aliases in the appropriate folder instead of
-                    // next to the root folder like we would for our current clash prevention type.
+                    // next to the root folder like we would for our current syntax format.
                     eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
                 }
                 else
