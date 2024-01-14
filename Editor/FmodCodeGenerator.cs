@@ -873,6 +873,20 @@ namespace RoyTheunissen.FMODSyntax
             codeGenerator.GenerateFile(eventsScriptPath);
         }
 
+        private static string DisableWarnings(string code, string header = null)
+        {
+            if (string.IsNullOrEmpty(code))
+                return code;
+            
+            if (header == null)
+                header = string.Empty;
+            
+            return header
+                   + "#pragma warning disable 618\r\n"
+                   + code
+                   + "#pragma warning restore 618\r\n";
+        }
+
         private static string GenerateFolderCode(
             EventFolder eventFolder, bool isDeclaration, out string eventTypesCodeToBePlacedOutsideOfRootFolder)
         {
@@ -963,20 +977,14 @@ namespace RoyTheunissen.FMODSyntax
 
             // Also add a section for any event type aliases, if needed.
             const string eventTypeAliasesKeyword = "EventTypeAliases";
-            if (string.IsNullOrEmpty(eventTypeAliasesCode))
-            {
-                eventTypeAliasesCode = string.Empty;
-            }
-            else
-            {
-                // NOTE: We disable obsolete warnings for the classes themselves, as technically the Config class
-                // is using the obsolete Playback class, but we only want obsolete warnings where it is ACTUALLY
-                // used in the codebase by developers.
-                eventTypeAliasesCode = "\r\n// Aliases for event types that have been renamed:\r\n"
-                                       + "#pragma warning disable 618\r\n"
-                                       + eventTypeAliasesCode
-                                       + "#pragma warning restore 618\r\n";
-            }
+            
+            // NOTE: We disable obsolete warnings for the classes themselves, as technically the Config class
+            // is using the obsolete Playback class, but we only want obsolete warnings where it is ACTUALLY
+            // used in the codebase by developers.
+            const string eventTypeAliasesHeader = "\r\n// Aliases for event types that have been renamed:\r\n";
+            eventTypeAliasesCode = DisableWarnings(eventTypeAliasesCode, eventTypeAliasesHeader);
+            eventTypeAliasesCodeThatUsedToBeOutsideRootFolder = DisableWarnings(
+                eventTypeAliasesCodeThatUsedToBeOutsideRootFolder, eventTypeAliasesHeader);
             
             // If we separate events with folders then we define the types inside the folder in question. Otherwise we
             // only have one root folder, and we define the types outside of that, which is how it used to work and
