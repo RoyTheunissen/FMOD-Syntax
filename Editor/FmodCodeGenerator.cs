@@ -787,8 +787,6 @@ namespace RoyTheunissen.FMODSyntax
             EditorEventRef[] events = EventManager.Events
                 .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix))
                 .OrderBy(e => e.Path).ToArray();
-            
-            Debug.Log($"GENERATING EVENTS SCRIPT NOW!");
 
             // Organize the events in a folder hierarchy.
             rootEventFolder = new EventFolder("AudioEvents");
@@ -986,6 +984,7 @@ namespace RoyTheunissen.FMODSyntax
             eventTypeAliasesCodeThatUsedToBeOutsideRootFolder = DisableWarnings(
                 eventTypeAliasesCodeThatUsedToBeOutsideRootFolder, eventTypeAliasesHeader);
             
+            const string eventTypesKeyword = "EventTypes";
             // If we separate events with folders then we define the types inside the folder in question. Otherwise we
             // only have one root folder, and we define the types outside of that, which is how it used to work and
             // prevents you from having to type 'AudioEvents.NameOfEventPlayback playback;' and lets you type
@@ -993,7 +992,7 @@ namespace RoyTheunissen.FMODSyntax
             if (Settings.EventNameClashPreventionType 
                 == FmodSyntaxSettings.EventNameClashPreventionTypes.GenerateSeparateClassesPerFolder)
             {
-                eventFolderGenerator.ReplaceKeyword("EventTypes", eventTypesCode, true);
+                eventFolderGenerator.ReplaceKeyword(eventTypesKeyword, eventTypesCode, true);
                 eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
                 
                 // Most event type aliases code should go inside the appropriate folder, but if code was previously
@@ -1021,7 +1020,7 @@ namespace RoyTheunissen.FMODSyntax
                         eventTypesCode += "\r\n" + eventTypeAliasesCode + "\r\n";
                 }
                 
-                eventFolderGenerator.RemoveKeywordLines("EventTypes");
+                eventFolderGenerator.RemoveKeywordLines(eventTypesKeyword);
                 eventTypesCodeToBePlacedOutsideOfRootFolder = eventTypesCode;
             }
             
