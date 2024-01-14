@@ -940,7 +940,7 @@ namespace RoyTheunissen.FMODSyntax
             }
 
             // Generate code for event aliases.
-            if (Settings.GenerateFallbacksForMissingEvents)
+            if (Settings.GenerateFallbacksForChangedEvents)
             {
                 foreach (KeyValuePair<EditorEventRef, string> eventPreviousPathPair in
                          eventFolder.ChildEventToAliasPath)
@@ -1028,7 +1028,7 @@ namespace RoyTheunissen.FMODSyntax
             
             // Also add a section for any event aliases, if needed.
             const string eventAliasesKeyword = "EventAliases";
-            if (string.IsNullOrEmpty(eventAliasesCode) || !Settings.GenerateFallbacksForMissingEvents)
+            if (string.IsNullOrEmpty(eventAliasesCode) || !Settings.GenerateFallbacksForChangedEvents)
             {
                 eventFolderGenerator.RemoveKeywordLines(eventAliasesKeyword);
             }

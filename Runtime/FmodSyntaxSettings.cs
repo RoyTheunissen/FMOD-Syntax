@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -29,9 +30,13 @@ namespace RoyTheunissen.FMODSyntax
         [SerializeField] private bool shouldGenerateAssemblyDefinition;
         public bool ShouldGenerateAssemblyDefinition => shouldGenerateAssemblyDefinition;
         
-        [SerializeField] private bool generateFallbacksForMissingEvents = true;
-        public bool GenerateFallbacksForMissingEvents => generateFallbacksForMissingEvents;
+        [FormerlySerializedAs("generateFallbacksForMissingEvents")]
+        [Tooltip("If specified, renamed or moved events will first generate an 'alias' so that any existing " +
+                 "references so you can update the references without getting compile errors.")]
+        [SerializeField] private bool generateFallbacksForChangedEvents = true;
+        public bool GenerateFallbacksForChangedEvents => generateFallbacksForChangedEvents;
 
+        [Header("Syntax Format")]
         [SerializeField] private EventNameClashPreventionTypes eventNameClashPreventionType
             = EventNameClashPreventionTypes.None;
         public EventNameClashPreventionTypes EventNameClashPreventionType => eventNameClashPreventionType;
