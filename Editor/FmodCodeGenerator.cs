@@ -236,6 +236,8 @@ namespace RoyTheunissen.FMODSyntax
         [NonSerialized]
         private static Dictionary<string, string> activeEventGuidToCurrentSyntaxPath = new Dictionary<string, string>();
         
+        private static Dictionary<string, string> detectedEventChanges = new Dictionary<string, string>();
+        
         [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
             = new Dictionary<string, Type>();
         [NonSerialized] private static bool didCacheUserSpecifiedEnums;
@@ -763,6 +765,8 @@ namespace RoyTheunissen.FMODSyntax
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
             
+            detectedEventChanges.Clear();
+            
             GenerateEventsScript(true, EventsScriptPath);
             GenerateEventsScript(false, EventsScriptTypesPath);
             
@@ -771,6 +775,9 @@ namespace RoyTheunissen.FMODSyntax
             GenerateGlobalParametersScript();
             
             GenerateMiscellaneousScripts();
+
+            if (detectedEventChanges.Count > 0)
+                TryRefactoringOldEventReferencesInternal(false);
         }
 
         private static void GenerateAssemblyDefinition()
@@ -845,6 +852,11 @@ namespace RoyTheunissen.FMODSyntax
                 {
                     string currentSyntaxPath = GetEventSyntaxPath(currentPath);
                     shouldGenerateAlias = previousSyntaxPath != currentSyntaxPath;
+                    
+                    // Keep track of the event change we detected so we can try to automatically refactor existing
+                    // code to reference the new path instead.
+                    if (shouldGenerateAlias)
+                        detectedEventChanges[previousSyntaxPath] = currentSyntaxPath;
                 }
                 
                 // Also generate aliases for this event if it has been renamed so you have a chance to update the
@@ -1209,6 +1221,175 @@ namespace RoyTheunissen.FMODSyntax
             
             vcasScriptGenerator.ReplaceKeyword("VCAs", VCAsCode);
             vcasScriptGenerator.GenerateFile(VCAsScriptPath);
+        }
+        
+        private static void FindChangedEvents()
+        {
+            EditorEventRef[] events = EventManager.Events
+                .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix))
+                .OrderBy(e => e.Path).ToArray();
+            
+            foreach (EditorEventRef e in events)
+            {
+                bool eventExistedDuringPreviousCodeGeneration = metaDataFromPreviousCodeGeneration
+                    .EventGuidToPreviousSyntaxPath.TryGetValue(e.Guid.ToString(), out string previousSyntaxPath);
+                if (eventExistedDuringPreviousCodeGeneration)
+                {
+                    string currentPath = e.GetFilteredPath(true);
+                    string currentSyntaxPath = GetEventSyntaxPath(currentPath);
+                    
+                    // Keep track of the event change we detected so we can try to automatically refactor existing
+                    // code to reference the new path instead.
+                    if (previousSyntaxPath != currentSyntaxPath)
+                        detectedEventChanges[previousSyntaxPath] = currentSyntaxPath;
+                }
+            }
+        }
+
+        [MenuItem("FMOD/Refactor Old Event References", false, 999999998)]
+        private static void TryRefactoringOldEventReferences()
+        {
+            TryRefactoringOldEventReferencesInternal(true);
+        }
+
+        private static void TryRefactoringOldEventReferencesInternal(bool findChangedEvents)
+        {
+            if (findChangedEvents)
+            {
+                ParseMetaData();
+                FindChangedEvents();
+            }
+            
+            const string messageTitle = "Auto-refactor references to changed events";
+            
+            if (detectedEventChanges.Count == 0)
+            {
+                EditorUtility.DisplayDialog(
+                    messageTitle, "No events were detected as having been renamed or moved.", "OK");
+                return;
+            }
+            
+            const string messageText = "FMOD-Syntax detected that events were renamed or moved. References to the " +
+                                       "events in question will break. We can automatically try and refactor your " +
+                                       "scripts' old references. We recommend that you commit your changes to " +
+                                       "version control first so that you don't lose any work.";
+            const string yesText = "Auto-refactor";
+            const string noText = "Cancel";
+            bool autoRefactor = EditorUtility.DisplayDialog(messageTitle, messageText, yesText, noText);
+            if (!autoRefactor)
+                return;
+
+            RefactorOldEventReferences();
+        }
+
+        const string EventContainerClass = "AudioEvents";
+        private static string GetEventConfigType(string eventSyntaxPath, FmodSyntaxSettings.SyntaxFormats syntaxFormat)
+        {
+            const string configSuffix = "Config";
+            if (syntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+                return EventContainerClass + "." + eventSyntaxPath.Replace("/", ".") + configSuffix;
+
+            return eventSyntaxPath + configSuffix;
+        }
+        
+        private static string GetEventPlaybackType(string eventSyntaxPath, FmodSyntaxSettings.SyntaxFormats syntaxFormat)
+        {
+            const string playbackSuffix = "Playback";
+            if (syntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+                return EventContainerClass + "." + eventSyntaxPath.Replace("/", ".") + playbackSuffix;
+
+            return eventSyntaxPath + playbackSuffix;
+        }
+        
+        private static string GetEventField(string eventSyntaxPath)
+        {
+            return EventContainerClass + "." + eventSyntaxPath.Replace("/", ".");
+        }
+
+        private static void RefactorOldEventReferences()
+        {
+            FmodSyntaxSettings.SyntaxFormats oldSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
+            FmodSyntaxSettings.SyntaxFormats newSyntaxFormat = Settings.SyntaxFormat;
+            
+            Dictionary<string, string> renamesToPerform = new Dictionary<string, string>();
+            foreach (KeyValuePair<string,string> previousEventPathToNewPath in detectedEventChanges)
+            {
+                string oldSyntaxPath = previousEventPathToNewPath.Key;
+                string newSyntaxPath = previousEventPathToNewPath.Value;
+                
+                // Rename references to the config type
+                string oldConfigType = GetEventConfigType(oldSyntaxPath, oldSyntaxFormat);
+                string newConfigType = GetEventConfigType(newSyntaxPath, newSyntaxFormat);
+                if (!string.Equals(oldConfigType, newConfigType, StringComparison.Ordinal))
+                    renamesToPerform[oldConfigType] = newConfigType;
+                
+                // Rename references to the playback type
+                string oldPlaybackType = GetEventPlaybackType(oldSyntaxPath, oldSyntaxFormat);
+                string newPlaybackType = GetEventPlaybackType(newSyntaxPath, newSyntaxFormat);
+                if (!string.Equals(oldPlaybackType, newPlaybackType, StringComparison.Ordinal))
+                    renamesToPerform[oldPlaybackType] = newPlaybackType;
+                
+                // Rename references to the field
+                string oldFieldName = GetEventField(oldSyntaxPath);
+                string newFieldName = GetEventField(newSyntaxPath);
+                if (!string.Equals(oldFieldName, newFieldName, StringComparison.Ordinal))
+                    renamesToPerform[oldFieldName] = newFieldName;
+            }
+
+#if LOG_FMOD_AUTO_RENAMES
+            string log = "Intending to perform the following renames:\n";
+            foreach (KeyValuePair<string,string> renameToPerform in renamesToPerform)
+            {
+                log += $"\t<b>{renameToPerform.Key}</b> => <b>{renameToPerform.Value}</b>\n";
+            }
+            Debug.Log(log);
+#else
+            string[] csFiles = Directory.GetFiles(Application.dataPath, "*.cs", SearchOption.AllDirectories);
+            for (int i = 0; i < csFiles.Length; i++)
+            {
+                string file = csFiles[i].ToUnityPath();
+            
+                string fileRelative = file.RemovePrefix(Application.dataPath + "/");
+                
+                // Just a sanity check, but don't refactor FMOD-Syntax itself...
+                // The only thing that I could see it rename is examples in some of the comments.
+                if (fileRelative.StartsWith("FMOD-Syntax/Runtime/") || fileRelative.StartsWith("FMOD-Syntax/Editor/"))
+                    continue;
+                
+                // Don't update the generated code itself. That one is already up to date.
+                if (fileRelative.StartsWith(Settings.GeneratedScriptsFolderPath))
+                    continue;
+
+                // Perform the specified renames.
+                try
+                {
+                    string fileText = File.ReadAllText(csFiles[i]);
+                    bool didAnyRename = false;
+                    foreach (KeyValuePair<string, string> renameToPerform in renamesToPerform)
+                    {
+                        // Check if we did any rename at all. If we didn't do a rename, don't touch the file.
+                        if (!didAnyRename)
+                        {
+                            if (fileText.Contains(renameToPerform.Key))
+                                didAnyRename = true;
+                            else
+                                continue;
+                        }
+                        
+                        fileText = fileText.Replace(
+                            renameToPerform.Key, renameToPerform.Value, StringComparison.Ordinal);
+                    }
+                    
+                    if (didAnyRename)
+                        File.WriteAllText(csFiles[i], fileText);
+                }
+                catch (Exception)
+                {
+                    Debug.LogWarning($"Could not update code file '{file}'. It may have been locked in an application.");
+                    throw;
+                }
+            }
+#endif // !LOG_FMOD_AUTO_RENAMES
         }
     }
 }
