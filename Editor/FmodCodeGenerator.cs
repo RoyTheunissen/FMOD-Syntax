@@ -1016,7 +1016,7 @@ namespace RoyTheunissen.FMODSyntax
             }
             else
             {
-                eventAliasesCode = "\r\n// Aliases for events that have been renamed:\r\n" + eventAliasesCode;
+                eventAliasesCode = "\r\n// Aliases for events that have been changed:\r\n" + eventAliasesCode;
                 eventFolderGenerator.ReplaceKeyword(eventAliasesKeyword, eventAliasesCode);
             }
 
