@@ -624,7 +624,7 @@ namespace RoyTheunissen.FMODSyntax
         /// called Core/Player/Footstep for different Syntax Formats:
         /// Flat:                                   Footstep
         /// Flat (With Path Included In Name):      Core_Player_Footstep
-        /// Subclasses Per Folder:                  Core/Player/Footstep
+        /// Subclasses Per Folder:                  Core.Player.Footstep
         /// </summary>
         private static string GetEventSyntaxPath(string filteredPath)
         {
@@ -638,7 +638,7 @@ namespace RoyTheunissen.FMODSyntax
             
             string eventDirectories = Path.GetDirectoryName(filteredPath);
             
-            return Path.Combine(eventDirectories, eventName).ToUnityPath();
+            return Path.Combine(eventDirectories, eventName).ToUnityPath().Replace("/", ".");
         }
 
         private static string GetEventSyntaxPath(EditorEventRef e)
@@ -864,7 +864,7 @@ namespace RoyTheunissen.FMODSyntax
                 if (shouldGenerateAlias)
                 {
                     EventFolder previousFolder = rootEventFolder
-                        .GetOrCreateChildFolderFromPathRecursively(previousSyntaxPath);
+                        .GetOrCreateChildFolderFromPathRecursively(previousSyntaxPath.Replace(".", "/"));
 
                     previousFolder.ChildEventToAliasPath[e] = previousSyntaxPath;
                 }
@@ -991,7 +991,7 @@ namespace RoyTheunissen.FMODSyntax
                     string currentSyntaxPath = GetEventSyntaxPath(e);
                     string previousSyntaxPath = eventPreviousPathPair.Value;
 
-                    string previousName = Path.GetFileName(previousSyntaxPath);
+                    string previousName = Path.GetFileName(previousSyntaxPath.Replace(".", "/"));
 
                     string attribute =
                         $"[Obsolete(\"FMOD Event '{previousSyntaxPath}' has been changed to '{currentSyntaxPath}'\")]";
@@ -1269,7 +1269,7 @@ namespace RoyTheunissen.FMODSyntax
         {
             const string configSuffix = "Config";
             if (syntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
-                return EventContainerClass + "." + eventSyntaxPath.Replace("/", ".") + configSuffix;
+                return EventContainerClass + "." + eventSyntaxPath + configSuffix;
 
             return eventSyntaxPath + configSuffix;
         }
@@ -1278,14 +1278,14 @@ namespace RoyTheunissen.FMODSyntax
         {
             const string playbackSuffix = "Playback";
             if (syntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
-                return EventContainerClass + "." + eventSyntaxPath.Replace("/", ".") + playbackSuffix;
+                return EventContainerClass + "." + eventSyntaxPath + playbackSuffix;
 
             return eventSyntaxPath + playbackSuffix;
         }
         
         private static string GetEventField(string eventSyntaxPath)
         {
-            return EventContainerClass + "." + eventSyntaxPath.Replace("/", ".");
+            return EventContainerClass + "." + eventSyntaxPath;
         }
 
         private static readonly char[] AllowedWordEndingCharacters = { '.', '(', ')', '[', ']', '{', '}', ';' };
