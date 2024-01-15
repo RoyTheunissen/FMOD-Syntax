@@ -984,6 +984,9 @@ namespace RoyTheunissen.FMODSyntax
             // Generate code for event aliases.
             if (Settings.GenerateFallbacksForChangedEvents)
             {
+                FmodSyntaxSettings.SyntaxFormats previousSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
+                FmodSyntaxSettings.SyntaxFormats currentSyntaxFormat = Settings.SyntaxFormat;
+                
                 foreach (KeyValuePair<EditorEventRef, string> eventPreviousPathPair in
                          eventFolder.ChildEventToAliasPath)
                 {
@@ -993,13 +996,20 @@ namespace RoyTheunissen.FMODSyntax
 
                     string previousName = Path.GetFileName(previousSyntaxPath.Replace(".", "/"));
 
-                    string attribute =
-                        $"[Obsolete(\"FMOD Event '{previousSyntaxPath}' has been changed to '{currentSyntaxPath}'\")]";
-
                     if (isDeclaration)
+                    {
+                        string previousEventFieldName = GetEventField(previousSyntaxPath);
+                        string currentEventFieldName = GetEventField(currentSyntaxPath);
+                        string attribute =
+                            $"[Obsolete(\"FMOD Event '{previousEventFieldName}' has been changed to '{currentEventFieldName}'\")]";
                         eventAliasesCode += GetEventCode(e, previousName, attribute);
+                    }
                     else
                     {
+                        string previousEventPlaybackType = GetEventPlaybackType(previousSyntaxPath, previousSyntaxFormat);
+                        string currentEventPlaybackType = GetEventPlaybackType(currentSyntaxPath, currentSyntaxFormat);
+                        string attribute =
+                            $"[Obsolete(\"FMOD Event Type '{previousEventPlaybackType}' has been changed to '{currentEventPlaybackType}'\")]";
                         string eventTypeAliasCode = GetEventTypeCode(e, previousName, attribute);
                         eventTypeAliasesCode += eventTypeAliasCode;
                     }
