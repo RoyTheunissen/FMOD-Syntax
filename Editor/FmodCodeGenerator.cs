@@ -952,7 +952,6 @@ namespace RoyTheunissen.FMODSyntax
             eventFolderGenerator.ReplaceKeyword("Subfolders", childFoldersCode, true);
             
             string eventTypeAliasesCode = "";
-            string eventTypeAliasesCodeThatUsedToBeOutsideRootFolder = "";
             string eventAliasesCode = "";
             string eventTypesCode = string.Empty;
             string eventsCode = string.Empty;
@@ -1002,16 +1001,7 @@ namespace RoyTheunissen.FMODSyntax
                     else
                     {
                         string eventTypeAliasCode = GetEventTypeCode(e, previousName, attribute);
-                        
-                        if (metaDataFromPreviousCodeGeneration.SyntaxFormat != FmodSyntaxSettings
-                                .SyntaxFormats.SubclassesPerFolder)
-                        {
-                            eventTypeAliasesCodeThatUsedToBeOutsideRootFolder += eventTypeAliasCode;
-                        }
-                        else
-                        {
-                            eventTypeAliasesCode += eventTypeAliasCode;
-                        }
+                        eventTypeAliasesCode += eventTypeAliasCode;
                     }
                 }
             }
@@ -1024,47 +1014,39 @@ namespace RoyTheunissen.FMODSyntax
             // used in the codebase by developers.
             const string eventTypeAliasesHeader = "\r\n// Aliases for event types that have been renamed:\r\n";
             eventTypeAliasesCode = DisableWarnings(eventTypeAliasesCode, eventTypeAliasesHeader);
-            eventTypeAliasesCodeThatUsedToBeOutsideRootFolder = DisableWarnings(
-                eventTypeAliasesCodeThatUsedToBeOutsideRootFolder, eventTypeAliasesHeader);
-            
-            const string eventTypesKeyword = "EventTypes";
+
             // If we separate events with folders then we define the types inside the folder in question. Otherwise we
             // only have one root folder, and we define the types outside of that, which is how it used to work and
             // prevents you from having to type 'AudioEvents.NameOfEventPlayback playback;' and lets you type
             // 'NameOfEventPlayback playback;' instead, without the 'AudioEvents.'
-            if (Settings.SyntaxFormat 
-                == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+            eventTypesCodeToBePlacedOutsideOfRootFolder = string.Empty;
+            const string eventTypesKeyword = "EventTypes";
+            if (Settings.SyntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
             {
                 eventFolderGenerator.ReplaceKeyword(eventTypesKeyword, eventTypesCode, true);
-                eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
-                
-                // Most event type aliases code should go inside the appropriate folder, but if code was previously
-                // generated with a folderless syntax format then those type aliases should be placed OUTSIDE
-                // of the root folder because that's where the types in question used to be declared.
-                eventTypesCodeToBePlacedOutsideOfRootFolder = eventTypeAliasesCodeThatUsedToBeOutsideRootFolder;
             }
             else
             {
-                if (metaDataFromPreviousCodeGeneration.SyntaxFormat == FmodSyntaxSettings
-                        .SyntaxFormats.SubclassesPerFolder)
-                {
-                    // Previously we did use folders, so place the type aliases in the appropriate folder instead of
-                    // next to the root folder like we would for our current syntax format.
-                    eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
-                }
-                else
-                {
-                    eventFolderGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
-
-                    // When we don't use folders we actually define event types *next* to AudioEvents (the root folder)
-                    // and not inside the root folder. That way you don't have to specify event types like
-                    // 'AudioEvents.FootstepPlayback' but just like 'FootstepPlayback' which is simpler.
-                    if (!string.IsNullOrEmpty(eventTypeAliasesCode))
-                        eventTypesCode += "\r\n" + eventTypeAliasesCode + "\r\n";
-                }
-                
                 eventFolderGenerator.RemoveKeywordLines(eventTypesKeyword);
                 eventTypesCodeToBePlacedOutsideOfRootFolder = eventTypesCode;
+            }
+            
+            // Also decide where to place the event type aliases, which should either be in the appropriate folder
+            // or *next* to the AudioEvents class for folderless syntaxes.
+            if (metaDataFromPreviousCodeGeneration.SyntaxFormat ==
+                FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+            {
+                // Previously we did use folders, so place the type aliases in the appropriate folder.
+                eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
+            }
+            else
+            {
+                // Most event type aliases code should go inside the appropriate folder, but if code was previously
+                // generated with a folderless syntax format then those type aliases should be placed OUTSIDE
+                // of the root folder because that's where the types in question used to be declared.
+                eventFolderGenerator.RemoveKeywordLines(eventTypeAliasesKeyword);
+                if (!string.IsNullOrEmpty(eventTypeAliasesCode))
+                    eventTypesCodeToBePlacedOutsideOfRootFolder += "\r\n" + eventTypeAliasesCode + "\r\n";
             }
             
             eventFolderGenerator.ReplaceKeyword("Events", eventsCode, true);
