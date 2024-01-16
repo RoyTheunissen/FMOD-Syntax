@@ -776,8 +776,27 @@ namespace RoyTheunissen.FMODSyntax
             
             GenerateMiscellaneousScripts();
 
+            StorePreviousMetaData();
+
             if (detectedEventChanges.Count > 0)
                 TryRefactoringOldEventReferencesInternal(false);
+        }
+
+        private static void StorePreviousMetaData()
+        {
+            string userSettingsFolder = Application.dataPath.GetParentDirectory() + "/UserSettings/";
+            string previousMetaDataFilePath = userSettingsFolder + "/FMOD-Syntax/previousMetaData.json";
+            
+            if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.None)
+            {
+                if (File.Exists(previousMetaDataFilePath))
+                    File.Delete(previousMetaDataFilePath);
+                return;
+            }
+            
+            string metaDataFromPreviousCodeGenerationJson = JsonUtility.ToJson(
+                metaDataFromPreviousCodeGeneration, true);
+            File.WriteAllText(previousMetaDataFilePath, metaDataFromPreviousCodeGenerationJson);
         }
 
         private static void GenerateAssemblyDefinition()
