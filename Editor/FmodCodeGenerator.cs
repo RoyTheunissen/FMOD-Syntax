@@ -208,6 +208,8 @@ namespace RoyTheunissen.FMODSyntax
             new CodeGenerator(VCAsTemplatePath + "FmodVCAs.cs");
         private static readonly CodeGenerator vcaFieldGenerator =
             new CodeGenerator(VCAsTemplatePath + "FmodVCAField.cs");
+        
+        private const string RefactorOldEventReferencesMenuPath = "FMOD/Refactor Old Event References";
 
         private static EventFolder rootEventFolder;
         
@@ -232,6 +234,15 @@ namespace RoyTheunissen.FMODSyntax
         [NonSerialized] private static string rawMetaDataFromPreviousCodeGeneration;
         [NonSerialized] private static MetaDataFormats metaDataFormatFromPreviousCodeGeneration;
         [NonSerialized] private static MetaData metaDataFromPreviousCodeGeneration;
+
+        private static string PreviousMetaDataFilePath
+        {
+            get
+            {
+                string userSettingsFolder = Application.dataPath.GetParentDirectory() + "/UserSettings/";
+                return userSettingsFolder + "/FMOD-Syntax/previousMetaData.json";
+            }
+        }
 
         [NonSerialized]
         private static Dictionary<string, string> activeEventGuidToCurrentSyntaxPath = new Dictionary<string, string>();
@@ -782,21 +793,33 @@ namespace RoyTheunissen.FMODSyntax
                 TryRefactoringOldEventReferencesInternal(false);
         }
 
+        private static void LoadPreviousMetaData()
+        {
+            if (File.Exists(PreviousMetaDataFilePath))
+            {
+                metaDataFormatFromPreviousCodeGeneration = MetaDataFormats.Json;
+                metaDataFromPreviousCodeGeneration = JsonUtility.FromJson<MetaData>(
+                    rawMetaDataFromPreviousCodeGeneration);
+            }
+            else
+            {
+                metaDataFormatFromPreviousCodeGeneration = MetaDataFormats.None;
+                metaDataFromPreviousCodeGeneration = new MetaData();
+            }
+        }
+
         private static void StorePreviousMetaData()
         {
-            string userSettingsFolder = Application.dataPath.GetParentDirectory() + "/UserSettings/";
-            string previousMetaDataFilePath = userSettingsFolder + "/FMOD-Syntax/previousMetaData.json";
-            
             if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.None)
             {
-                if (File.Exists(previousMetaDataFilePath))
-                    File.Delete(previousMetaDataFilePath);
+                if (File.Exists(PreviousMetaDataFilePath))
+                    File.Delete(PreviousMetaDataFilePath);
                 return;
             }
             
             string metaDataFromPreviousCodeGenerationJson = JsonUtility.ToJson(
                 metaDataFromPreviousCodeGeneration, true);
-            File.WriteAllText(previousMetaDataFilePath, metaDataFromPreviousCodeGenerationJson);
+            File.WriteAllText(PreviousMetaDataFilePath, metaDataFromPreviousCodeGenerationJson);
         }
 
         private static void GenerateAssemblyDefinition()
@@ -1257,33 +1280,35 @@ namespace RoyTheunissen.FMODSyntax
             }
         }
 
-        [MenuItem("FMOD/Refactor Old Event References", false, 999999998)]
+        [MenuItem(RefactorOldEventReferencesMenuPath, false, 999999998)]
         private static void TryRefactoringOldEventReferences()
         {
+            LoadPreviousMetaData();
+            
+            FindChangedEvents();
+            
             TryRefactoringOldEventReferencesInternal(true);
         }
 
-        private static void TryRefactoringOldEventReferencesInternal(bool findChangedEvents)
+        private static void TryRefactoringOldEventReferencesInternal(bool showMessageIfNoEventsFound)
         {
-            if (findChangedEvents)
-            {
-                ParseMetaData();
-                FindChangedEvents();
-            }
-            
             const string messageTitle = "Auto-refactor references to changed events";
             
             if (detectedEventChanges.Count == 0)
             {
-                EditorUtility.DisplayDialog(
-                    messageTitle, "No events were detected as having been renamed or moved.", "OK");
+                if (showMessageIfNoEventsFound)
+                {
+                    EditorUtility.DisplayDialog(
+                        messageTitle, "No events were detected as having been renamed or moved.", "OK");
+                }
                 return;
             }
             
             const string messageText = "FMOD-Syntax detected that events were renamed or moved. References to the " +
-                                       "events in question will break. We can automatically try and refactor your " +
-                                       "scripts' old references. We recommend that you commit your changes to " +
-                                       "version control first so that you don't lose any work.";
+                                       "events in question will break. We can automatically try and refactor these " +
+                                       "old references in your scripts. We recommend that you commit your changes to " +
+                                       "version control first so that you don't lose any work. You can access this " +
+                                       "feature later via " + RefactorOldEventReferencesMenuPath + ".";
             const string yesText = "Auto-refactor";
             const string noText = "Cancel";
             bool autoRefactor = EditorUtility.DisplayDialog(messageTitle, messageText, yesText, noText);
