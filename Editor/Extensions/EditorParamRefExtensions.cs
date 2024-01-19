@@ -48,12 +48,8 @@ namespace RoyTheunissen.FMODSyntax
                     return parameter.HasNormalizedRange() ? "ParameterBool" : "ParameterInt";
                 case ParameterType.Labeled:
                 {
-                    string name = parameter.GetFilteredName();
-                    
-                    // First check if there's a user-specified type.
-                    
-
 #if SCRIPTABLE_OBJECT_COLLECTION
+                    string name = parameter.GetFilteredName();
                     bool hasUserType = FmodCodeGenerator.GetUserSpecifiedLabelParameterType(name, out Type userType);
                     if (hasUserType && !typeof(Enum).IsAssignableFrom(userType))
                         return $"ParameterScriptableObjectCollectionItem<{parameter.GetLabelParameterTypeName(false, null)}>";

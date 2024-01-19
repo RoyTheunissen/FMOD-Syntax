@@ -293,8 +293,7 @@ namespace RoyTheunissen.FMODSyntax
             GenerateCode();
         }
 #endif // FMOD_AUTO_REGENERATE_CODE
-
-        [MenuItem("FMOD/Cache Enums")]
+        
         private static void CacheUserSpecifiedLabelParameterTypes()
         {
             if (didCacheUserSpecifiedEnums)
@@ -303,20 +302,20 @@ namespace RoyTheunissen.FMODSyntax
             didCacheUserSpecifiedEnums = true;
             
             labelParameterNameToUserSpecifiedType.Clear();
-            Type[] enums = TypeExtensions.GetAllTypesWithAttribute<FmodLabelTypeAttribute>();
-            for (int i = 0; i < enums.Length; i++)
+            Type[] userSpecifiedTypes = TypeExtensions.GetAllTypesWithAttribute<FmodLabelTypeAttribute>();
+            for (int i = 0; i < userSpecifiedTypes.Length; i++)
             {
-                Type enumType = enums[i];
-                FmodLabelTypeAttribute attribute = enumType.GetAttribute<FmodLabelTypeAttribute>();
+                Type userSpecifiedType = userSpecifiedTypes[i];
+                FmodLabelTypeAttribute attribute = userSpecifiedType.GetAttribute<FmodLabelTypeAttribute>();
 
                 for (int j = 0; j < attribute.LabelledParameterNames.Length; j++)
                 {
                     string parameterName = attribute.LabelledParameterNames[j];
-                    bool succeeded = labelParameterNameToUserSpecifiedType.TryAdd(parameterName, enumType);
+                    bool succeeded = labelParameterNameToUserSpecifiedType.TryAdd(parameterName, userSpecifiedType);
                     if (!succeeded)
                     {
                         Type existingEnumType = labelParameterNameToUserSpecifiedType[parameterName];
-                        Debug.LogError($"Enum '{enumType.Name}' tried to map labelled parameters with name " +
+                        Debug.LogError($"Enum '{userSpecifiedType.Name}' tried to map labelled parameters with name " +
                                          $"'{parameterName}' via [FmodLabelType], but that was already mapped to " +
                                          $"type '{existingEnumType.Name}'. Make sure there is only one such mapping.");
                     }
