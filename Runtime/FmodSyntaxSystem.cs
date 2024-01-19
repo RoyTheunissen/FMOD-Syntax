@@ -26,6 +26,12 @@ namespace RoyTheunissen.FMODSyntax
         }
 #endif // UNITY_EDITOR
 
+        public static void StopAllActivePlaybacks()
+        {
+            StopAllActiveEventPlaybacks();
+            StopAllActiveSnapshotPlaybacks();
+        }
+        
         public static void RegisterActiveEventPlayback(FmodAudioPlayback playback)
         {
             activeEventPlaybacks.Add(playback);
@@ -43,6 +49,14 @@ namespace RoyTheunissen.FMODSyntax
             for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
             {
                 onEventPlaybackCallbackReceivers[i].OnFmodPlaybackUnregistered(playback);
+            }
+        }
+        
+        public static void StopAllActiveEventPlaybacks()
+        {
+            for (int i = activeEventPlaybacks.Count - 1; i >= 0; i--)
+            {
+                activeEventPlaybacks[i].Stop();
             }
         }
         
@@ -76,6 +90,14 @@ namespace RoyTheunissen.FMODSyntax
                 IFmodPlayback activeSnapshot = activeSnapshotPlaybacks[i];
                 if (activeSnapshot.CanBeCleanedUp)
                     activeSnapshot.Cleanup();
+            }
+        }
+
+        public static void StopAllActiveSnapshotPlaybacks()
+        {
+            for (int i = activeSnapshotPlaybacks.Count - 1; i >= 0; i--)
+            {
+                activeSnapshotPlaybacks[i].Stop();
             }
         }
         
