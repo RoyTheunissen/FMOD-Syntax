@@ -8,6 +8,8 @@ namespace RoyTheunissen.FMODSyntax
         /// Cleanup is responsible for finalizing playback and de-allocating whatever resources were used. 
         /// </summary>
         void Cleanup();
+
+        void Stop();
     }
     
     public interface IAudioPlayback : IFmodPlayback
