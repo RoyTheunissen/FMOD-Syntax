@@ -26,5 +26,9 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public sealed class FmodLabelEnumAttribute : FmodLabelTypeAttribute
     {
+        public FmodLabelEnumAttribute(params string[] labelledParameterNames)
+            : base(labelledParameterNames)
+        {
+        }
     }
 }
