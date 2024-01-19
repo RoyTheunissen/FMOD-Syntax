@@ -41,7 +41,7 @@ namespace RoyTheunissen.FMODSyntax
                  "Flat - Simplest syntax. All events are inside a class called AudioEvents. Event names have to be unique.\n\n" +
                  "Flat (With Path Included In Name) - Like Flat but an event called 'Player/Footstep' would generate " +
                  "a field called 'Player_Footstep'. Keeps things very simple but does prevent name conflicts.\n\n" +
-                 "Subclasses Per Folder (Recommended) - Generates subclasses inside AudioEvents to represent the " +
+                 "Subclasses Per Folder - Generates subclasses inside AudioEvents to represent the " +
                  "folders in the FMOD project. An event called 'Player/Footstep' would be accessed via " +
                  "'AudioEvents.Player.Footstep'. A very clear and organized way to partition events.")]
         [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.Flat;
