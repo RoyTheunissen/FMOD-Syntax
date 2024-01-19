@@ -240,7 +240,7 @@ namespace RoyTheunissen.FMODSyntax
             get
             {
                 string userSettingsFolder = Application.dataPath.GetParentDirectory() + "/UserSettings/";
-                return userSettingsFolder + "/FMOD-Syntax/previousMetaData.json";
+                return userSettingsFolder + "FMOD-Syntax/previousMetaData.json";
             }
         }
 
@@ -404,7 +404,7 @@ namespace RoyTheunissen.FMODSyntax
             return packageJson.Substring(versionStartIndex, versionEndIndex - versionStartIndex);
         }
 
-        private static string GetRawMetaData(out MetaDataFormats format)
+        private static string GetRawMetaDataFromEventsScript(out MetaDataFormats format)
         {
             format = MetaDataFormats.None;
             
@@ -451,7 +451,8 @@ namespace RoyTheunissen.FMODSyntax
 
         private static void ParseMetaData()
         {
-            rawMetaDataFromPreviousCodeGeneration = GetRawMetaData(out metaDataFormatFromPreviousCodeGeneration);
+            rawMetaDataFromPreviousCodeGeneration = GetRawMetaDataFromEventsScript(
+                out metaDataFormatFromPreviousCodeGeneration);
             
             if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.None)
             {
@@ -762,15 +763,18 @@ namespace RoyTheunissen.FMODSyntax
 
         private static void LoadPreviousMetaData()
         {
-            if (File.Exists(PreviousMetaDataFilePath))
+            string previousMetaDataFilePath = PreviousMetaDataFilePath;
+            if (File.Exists(previousMetaDataFilePath))
             {
                 metaDataFormatFromPreviousCodeGeneration = MetaDataFormats.Json;
+                rawMetaDataFromPreviousCodeGeneration = File.ReadAllText(previousMetaDataFilePath);
                 metaDataFromPreviousCodeGeneration = JsonUtility.FromJson<MetaData>(
                     rawMetaDataFromPreviousCodeGeneration);
             }
             else
             {
                 metaDataFormatFromPreviousCodeGeneration = MetaDataFormats.None;
+                rawMetaDataFromPreviousCodeGeneration = null;
                 metaDataFromPreviousCodeGeneration = new MetaData();
             }
         }
@@ -786,7 +790,13 @@ namespace RoyTheunissen.FMODSyntax
             
             string metaDataFromPreviousCodeGenerationJson = JsonUtility.ToJson(
                 metaDataFromPreviousCodeGeneration, true);
-            File.WriteAllText(PreviousMetaDataFilePath, metaDataFromPreviousCodeGenerationJson);
+            
+            string path = PreviousMetaDataFilePath;
+            
+            string directory = Path.GetDirectoryName(path);
+            Directory.CreateDirectory(directory);
+            
+            File.WriteAllText(path, metaDataFromPreviousCodeGenerationJson);
         }
 
         private static void GenerateAssemblyDefinition()
@@ -1230,6 +1240,7 @@ namespace RoyTheunissen.FMODSyntax
                 .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix))
                 .OrderBy(e => e.Path).ToArray();
             
+            detectedEventChanges.Clear();
             foreach (EditorEventRef e in events)
             {
                 bool eventExistedDuringPreviousCodeGeneration = metaDataFromPreviousCodeGeneration
@@ -1263,13 +1274,13 @@ namespace RoyTheunissen.FMODSyntax
             return File.Exists(PreviousMetaDataFilePath);
         }
 
-        private static void TryRefactoringOldEventReferencesInternal(bool showMessageIfNoEventsFound)
+        private static void TryRefactoringOldEventReferencesInternal(bool isTriggeredExplicitlyViaMenu)
         {
             const string messageTitle = "Auto-refactor references to changed events";
             
             if (detectedEventChanges.Count == 0)
             {
-                if (showMessageIfNoEventsFound)
+                if (isTriggeredExplicitlyViaMenu)
                 {
                     EditorUtility.DisplayDialog(
                         messageTitle, "No events were detected as having been renamed or moved.", "OK");
@@ -1277,11 +1288,13 @@ namespace RoyTheunissen.FMODSyntax
                 return;
             }
             
-            const string messageText = "FMOD-Syntax detected that events were renamed or moved. References to the " +
-                                       "events in question will break. We can automatically try and refactor these " +
-                                       "old references in your scripts. We recommend that you commit your changes to " +
-                                       "version control first so that you don't lose any work. You can access this " +
-                                       "feature later via " + RefactorOldEventReferencesMenuPath + ".";
+            string messageText =   "FMOD-Syntax detected that events were renamed or moved. References to the " +
+                                   "events in question will break. We can automatically try and refactor these " +
+                                   "old references in your scripts. We recommend that you commit your changes to " +
+                                   "version control first so that you don't lose any work.";
+            if (!isTriggeredExplicitlyViaMenu)
+                messageText += "\n\nYou can access this feature later via " + RefactorOldEventReferencesMenuPath + ".";
+            
             const string yesText = "Auto-refactor";
             const string noText = "Cancel";
             bool autoRefactor = EditorUtility.DisplayDialog(messageTitle, messageText, yesText, noText);
@@ -1458,6 +1471,8 @@ namespace RoyTheunissen.FMODSyntax
                     throw;
                 }
             }
+            
+            AssetDatabase.Refresh();
 #endif // !LOG_FMOD_AUTO_RENAMES
         }
     }
