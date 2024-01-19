@@ -735,43 +735,10 @@ namespace RoyTheunissen.FMODSyntax
             return preDictionarySection + dictionarySection + postDictionarySection;
         }
 
-        private static bool CheckIfUserWantsToContinueWithNewSyntax()
-        {
-            const string messageTitle = "Re-generating FMOD code with different syntax";
-            const string messageText = "The syntax has changed since the last time you generated code. \n" +
-                                       "\nPreviously you would fire events like so:\n" +
-                                       "'AudioEvents.Footstep.Play()'\n" +
-                                       "Simple, but it meant you could not have two events called 'Footstep'.\n" +
-                                       "\nThe new syntax looks like:\n" +
-                                       "'AudioEvents.Player.Footstep.Play()'\n" +
-                                       "So FMOD folders are represented in the syntax. This allows you to have " +
-                                       "several events with the same name, which is useful for larger projects.\n" +
-                                       "\nIf you wish to continue using the old syntax you can do so via the settings.";
-            const string yesText = "Use the new 'folder' syntax (Recommended)";
-            const string noText = "Change syntax format";
-            bool useNewSyntax = EditorUtility.DisplayDialog(messageTitle, messageText, yesText, noText);
-            return useNewSyntax;
-        }
-
         [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
         public static void GenerateCode()
         {
             ParseMetaData();
-
-            // Check if the user is transitioning from version < 0.1.2's 'flat' structure to the new foldered approach.
-            // Make sure they know there's a new syntax and let them opt out if they don't like it.
-            // It should be a conscious decision to make the transition.
-            if (metaDataFormatFromPreviousCodeGeneration == MetaDataFormats.ActiveEventGuids
-                && Settings.SyntaxFormat ==
-                FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
-            {
-                bool useNewSyntax = CheckIfUserWantsToContinueWithNewSyntax();
-                if (!useNewSyntax)
-                {
-                    Selection.activeObject = Settings;
-                    return;
-                }
-            }
 
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();

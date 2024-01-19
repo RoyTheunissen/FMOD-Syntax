@@ -44,7 +44,7 @@ namespace RoyTheunissen.FMODSyntax
                  "Subclasses Per Folder (Recommended) - Generates subclasses inside AudioEvents to represent the " +
                  "folders in the FMOD project. An event called 'Player/Footstep' would be accessed via " +
                  "'AudioEvents.Player.Footstep'. A very clear and organized way to partition events.")]
-        [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.SubclassesPerFolder;
+        [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.Flat;
         public SyntaxFormats SyntaxFormat => syntaxFormat;
 
         [NonSerialized] private static FmodSyntaxSettings cachedInstance;
