@@ -2,7 +2,8 @@
     "name": "RoyTheunissen.FMODSyntax",
     "rootNamespace": "RoyTheunissen.FMODSyntax",
     "references": [
-        "GUID:0c752da273b17c547ae705acf0f2adf2"
+        "GUID:0c752da273b17c547ae705acf0f2adf2",
+        "GUID:435719c11c6f941d98c6110929b03789"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -2,6 +2,10 @@ using System;
 using FMOD.Studio;
 using FMODUnity;
 
+#if SCRIPTABLE_OBJECT_COLLECTION
+using BrunoMikoski.ScriptableObjectCollections;
+#endif // SCRIPTABLE_OBJECT_COLLECTION
+
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
@@ -109,6 +113,26 @@ namespace RoyTheunissen.FMODSyntax
             return (int)(object)value;
         }
     }
+    
+#if SCRIPTABLE_OBJECT_COLLECTION
+    public sealed class ParameterScriptableObjectCollectionItem<ItemType> : ParameterGeneric<ItemType>
+        where ItemType : ScriptableObjectCollectionItem
+    {
+        public ParameterScriptableObjectCollectionItem(PARAMETER_ID id, bool isGlobal) : base(id, isGlobal)
+        {
+        }
+
+        protected override ItemType GetValueFromFloat(float value)
+        {
+            return ScriptableObjectCollection<ItemType>.Values[(int)value];
+        }
+
+        protected override float GetFloatFromValue(ItemType value)
+        {
+            return value.Index;
+        }
+    }
+#endif // SCRIPTABLE_OBJECT_COLLECTION
     
     public sealed class ParameterBool : ParameterGeneric<bool>
     {

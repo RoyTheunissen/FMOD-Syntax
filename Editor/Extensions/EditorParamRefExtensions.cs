@@ -22,10 +22,11 @@ namespace RoyTheunissen.FMODSyntax
         public static bool HasNormalizedRange(this EditorParamRef parameter) =>
             Mathf.Approximately(parameter.Min, 0.0f) && Mathf.Approximately(parameter.Max, 1.0f);
 
-        private static string GetEnumName(this EditorParamRef parameter, bool fullyQualified, EditorEventRef @event)
+        private static string GetLabelParameterTypeName(
+            this EditorParamRef parameter, bool fullyQualified, EditorEventRef @event)
         {
             string name = parameter.GetFilteredName();
-            bool hasUserEnum = FmodCodeGenerator.GetUserSpecifiedLabelParameterEnum(name, out Type userEnum);
+            bool hasUserEnum = FmodCodeGenerator.GetUserSpecifiedLabelParameterType(name, out Type userEnum);
             if (hasUserEnum)
                 return userEnum.FullName;
 
@@ -46,7 +47,20 @@ namespace RoyTheunissen.FMODSyntax
                 case ParameterType.Discrete:
                     return parameter.HasNormalizedRange() ? "ParameterBool" : "ParameterInt";
                 case ParameterType.Labeled:
-                    return $"ParameterEnum<{parameter.GetEnumName(false, null)}>";
+                {
+                    string name = parameter.GetFilteredName();
+                    
+                    // First check if there's a user-specified type.
+                    
+
+#if SCRIPTABLE_OBJECT_COLLECTION
+                    bool hasUserType = FmodCodeGenerator.GetUserSpecifiedLabelParameterType(name, out Type userType);
+                    if (hasUserType && !typeof(Enum).IsAssignableFrom(userType))
+                        return $"ParameterScriptableObjectCollectionItem<{parameter.GetLabelParameterTypeName(false, null)}>";
+#endif // SCRIPTABLE_OBJECT_COLLECTION
+                        
+                    return $"ParameterEnum<{parameter.GetLabelParameterTypeName(false, null)}>";
+                }
             }
         }
         
@@ -59,7 +73,7 @@ namespace RoyTheunissen.FMODSyntax
                 case ParameterType.Discrete:
                     return parameter.HasNormalizedRange() ? "bool" : "int";
                 case ParameterType.Labeled:
-                    return $"{parameter.GetEnumName(false, null)}";
+                    return $"{parameter.GetLabelParameterTypeName(false, null)}";
             }
         }
         
@@ -67,7 +81,7 @@ namespace RoyTheunissen.FMODSyntax
         {
             string type = parameter.GetArgumentType();
             if (parameter.Type == ParameterType.Labeled)
-                type = parameter.GetEnumName(true, @event);
+                type = parameter.GetLabelParameterTypeName(true, @event);
             return type;
         }
     }
