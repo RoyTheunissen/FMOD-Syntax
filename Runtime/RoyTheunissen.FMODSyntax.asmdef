@@ -2,7 +2,8 @@
     "name": "RoyTheunissen.FMODSyntax",
     "rootNamespace": "RoyTheunissen.FMODSyntax",
     "references": [
-        "GUID:0c752da273b17c547ae705acf0f2adf2"
+        "FMODUnity",
+        "BrunoMikoski.ScriptableObjectCollection"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -11,6 +12,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.brunomikoski.scriptableobjectcollection",
+            "expression": "2.2.1",
+            "define": "SCRIPTABLE_OBJECT_COLLECTION"
+        }
+    ],
     "noEngineReferences": false
 }

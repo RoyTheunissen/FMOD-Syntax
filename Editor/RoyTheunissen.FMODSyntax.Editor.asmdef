@@ -15,6 +15,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.brunomikoski.scriptableobjectcollection",
+            "expression": "2.2.1",
+            "define": "SCRIPTABLE_OBJECT_COLLECTION"
+        }
+    ],
     "noEngineReferences": false
 }

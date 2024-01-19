@@ -249,14 +249,14 @@ namespace RoyTheunissen.FMODSyntax
         
         private static Dictionary<string, string> detectedEventChanges = new Dictionary<string, string>();
         
-        [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedEnumType 
+        [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedType 
             = new Dictionary<string, Type>();
         [NonSerialized] private static bool didCacheUserSpecifiedEnums;
 
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
-            labelParameterNameToUserSpecifiedEnumType.Clear();
+            labelParameterNameToUserSpecifiedType.Clear();
             didCacheUserSpecifiedEnums = false;
 
             // NOTE: For this to work, SourceFilesChangedEvent and BankRefreshEvent events need to be added to FMOD.
@@ -293,42 +293,41 @@ namespace RoyTheunissen.FMODSyntax
             GenerateCode();
         }
 #endif // FMOD_AUTO_REGENERATE_CODE
-
-        [MenuItem("FMOD/Cache Enums")]
-        private static void CacheUserSpecifiedLabelParameterEnums()
+        
+        private static void CacheUserSpecifiedLabelParameterTypes()
         {
             if (didCacheUserSpecifiedEnums)
                 return;
 
             didCacheUserSpecifiedEnums = true;
             
-            labelParameterNameToUserSpecifiedEnumType.Clear();
-            Type[] enums = TypeExtensions.GetAllTypesWithAttribute<FmodLabelEnumAttribute>();
-            for (int i = 0; i < enums.Length; i++)
+            labelParameterNameToUserSpecifiedType.Clear();
+            Type[] userSpecifiedTypes = TypeExtensions.GetAllTypesWithAttribute<FmodLabelTypeAttribute>();
+            for (int i = 0; i < userSpecifiedTypes.Length; i++)
             {
-                Type enumType = enums[i];
-                FmodLabelEnumAttribute attribute = enumType.GetAttribute<FmodLabelEnumAttribute>();
+                Type userSpecifiedType = userSpecifiedTypes[i];
+                FmodLabelTypeAttribute attribute = userSpecifiedType.GetAttribute<FmodLabelTypeAttribute>();
 
                 for (int j = 0; j < attribute.LabelledParameterNames.Length; j++)
                 {
                     string parameterName = attribute.LabelledParameterNames[j];
-                    bool succeeded = labelParameterNameToUserSpecifiedEnumType.TryAdd(parameterName, enumType);
+                    bool succeeded = labelParameterNameToUserSpecifiedType.TryAdd(parameterName, userSpecifiedType);
                     if (!succeeded)
                     {
-                        Type existingEnumType = labelParameterNameToUserSpecifiedEnumType[parameterName];
-                        Debug.LogError($"Enum '{enumType.Name}' tried to map labelled parameters with name " +
-                                         $"'{parameterName}' via [FmodLabelEnum], but that was already mapped to " +
-                                         $"enum '{existingEnumType.Name}'. Make sure there is only one such mapping.");
+                        Type existingEnumType = labelParameterNameToUserSpecifiedType[parameterName];
+                        Debug.LogError($"Enum '{userSpecifiedType.Name}' tried to map labelled parameters with name " +
+                                         $"'{parameterName}' via [FmodLabelType], but that was already mapped to " +
+                                         $"type '{existingEnumType.Name}'. Make sure there is only one such mapping.");
                     }
                 }
             }
         }
 
-        public static bool GetUserSpecifiedLabelParameterEnum(string name, out Type enumType)
+        public static bool GetUserSpecifiedLabelParameterType(string name, out Type enumType)
         {
-            CacheUserSpecifiedLabelParameterEnums();
+            CacheUserSpecifiedLabelParameterTypes();
             
-            return labelParameterNameToUserSpecifiedEnumType.TryGetValue(name, out enumType);
+            return labelParameterNameToUserSpecifiedType.TryGetValue(name, out enumType);
         }
 
         private static string GetParameterCode(CodeGenerator codeGenerator, EditorParamRef parameter)
@@ -347,7 +346,7 @@ namespace RoyTheunissen.FMODSyntax
             const string enumKeyword = "ParameterEnum";
             if (parameter.Type == ParameterType.Labeled)
             {
-                bool hasUserSpecifiedEnum = GetUserSpecifiedLabelParameterEnum(parameter.Name, out Type enumType);
+                bool hasUserSpecifiedEnum = GetUserSpecifiedLabelParameterType(parameter.Name, out Type enumType);
                 if (hasUserSpecifiedEnum)
                 {
                     // Not generating a new enum.
