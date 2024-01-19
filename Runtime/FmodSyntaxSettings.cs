@@ -43,7 +43,8 @@ namespace RoyTheunissen.FMODSyntax
                  "a field called 'Player_Footstep'. Keeps things very simple but does prevent name conflicts.\n\n" +
                  "Subclasses Per Folder - Generates subclasses inside AudioEvents to represent the " +
                  "folders in the FMOD project. An event called 'Player/Footstep' would be accessed via " +
-                 "'AudioEvents.Player.Footstep'. A very clear and organized way to partition events.")]
+                 "'AudioEvents.Player.Footstep'. A very clear and organized way to prevent name clashes but does " +
+                 "require more typing.")]
         [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.Flat;
         public SyntaxFormats SyntaxFormat => syntaxFormat;
 
