@@ -141,7 +141,7 @@ namespace RoyTheunissen.FMODSyntax
         private const string TemplatePathBase = "Templates/Fmod/";
         
         private static string EventsScriptPath => ScriptPathBase + "FmodEvents.cs";
-        private static string EventsScriptTypesPath => ScriptPathBase + "FmodEventsTypes.cs";
+        private static string EventTypesScriptPath => ScriptPathBase + "FmodEventTypes.cs";
         private const string EventsTemplatePath = TemplatePathBase + "Events/";
         
         private static string BanksScriptPath => ScriptPathBase + "FmodBanks.cs";
@@ -747,7 +747,7 @@ namespace RoyTheunissen.FMODSyntax
             detectedEventChanges.Clear();
             
             GenerateEventsScript(true, EventsScriptPath);
-            GenerateEventsScript(false, EventsScriptTypesPath);
+            GenerateEventsScript(false, EventTypesScriptPath);
             
             // NOTE: This re-uses the using directives from the generated events. Therefore this should be called after
             // the events are generated.
@@ -829,14 +829,14 @@ namespace RoyTheunissen.FMODSyntax
             globalParametersGenerator.GenerateFile(GlobalParametersScriptPath);
         }
 
-        private static void GenerateEventsScript(bool isDeclaration, string eventsScriptPath)
+        private static void GenerateEventsScript(bool isFields, string eventsScriptPath)
         {
             eventUsingDirectives.Clear();
             eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
 
-            // We either only declare the events or we define the events. Separating this out into separate files
-            // makes it easier to just have a look at which events were generated at all.
-            CodeGenerator codeGenerator = isDeclaration ? eventsScriptGenerator : eventTypesScriptGenerator;
+            // We either only declare the event fields or we define the events tyoes. Separating this out into separate
+            // files makes it easier to just have a look at which events were generated at all.
+            CodeGenerator codeGenerator = isFields ? eventsScriptGenerator : eventTypesScriptGenerator;
             codeGenerator.Reset();
             
             codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
@@ -892,23 +892,23 @@ namespace RoyTheunissen.FMODSyntax
             // Generate code for the events per folder.
             parameterlessEventsCode = "";
             string eventsCode;
-            if (!isDeclaration)
+            if (!isFields)
             {
                 // If we don't separate events with folders then we define the event types outside of the root folder,
                 // which is how it used to work and prevents you from having to type
                 // 'AudioEvents.NameOfEventPlayback playback;' and lets you type
                 // 'NameOfEventPlayback playback;' instead (without the 'AudioEvents.')
                 eventsCode = GenerateFolderCode(
-                    rootEventFolder, isDeclaration, out string eventTypesCodeToBePlacedOutsideOfRootFolder);
+                    rootEventFolder, isFields, out string eventTypesCodeToBePlacedOutsideOfRootFolder);
                 eventsCode = eventTypesCodeToBePlacedOutsideOfRootFolder + eventsCode;
             }
             else
             {
-                eventsCode = GenerateFolderCode(rootEventFolder, isDeclaration);
+                eventsCode = GenerateFolderCode(rootEventFolder, isFields);
             }
             codeGenerator.ReplaceKeyword("Events", eventsCode, true);
             
-            if (isDeclaration)
+            if (isFields)
             {
                 codeGenerator.ReplaceKeyword("ParameterlessEventIds", parameterlessEventsCode, true);
 
