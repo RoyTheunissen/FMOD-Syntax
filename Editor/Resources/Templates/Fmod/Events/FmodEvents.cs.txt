@@ -2,10 +2,6 @@
 
 namespace ##Namespace##
 {
-    /* ---------------------------------------------- METADATA ------------------------------------------------------
-    ##MetaData##
-    ------------------------------------------------- METADATA --------------------------------------------------- */
-    
     /// <summary>
     /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.
     /// For readability's sake we only define the folders and fields in this file so you can easily get an overview of 
@@ -22,4 +18,8 @@ namespace ##Namespace##
             ##ParameterlessEventIds##
         };
     }
+    
+    /* ---------------------------------------------- METADATA ------------------------------------------------------
+    ##MetaData##
+    ------------------------------------------------- METADATA --------------------------------------------------- */
 }
