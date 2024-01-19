@@ -1,18 +1,10 @@
-public class ##EventName##Config : FmodAudioConfig<##EventName##Playback>
-{
-    public ##EventName##Config(string guid) : base(guid) { }
-    
-    public override ##EventName##Playback Play(Transform source = null)
-    {
-        ##EventName##Playback instance = new ##EventName##Playback();
-        instance.Play(EventDescription, source);
-        return instance;
-    }
-    ##ConfigPlayMethodWithParameters##
-}
-##Attributes##
-public class ##EventName##Playback : FmodAudioPlayback
-{
-    ##EventParameters##
-}
+##UsingDirectives##
 
+namespace ##Namespace##
+{
+    /// <summary>
+    /// GENERATED: Contains definition of FMOD events which is separated out from the declaration for readability.
+    /// To get an overview of which folders and events exist see 'FmodEvents.cs'
+    /// </summary>
+    ##Events##
+}

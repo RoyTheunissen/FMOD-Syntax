@@ -1,0 +1,8 @@
+public sealed partial class ##FolderName####BaseType## 
+{
+    ##Subfolders##
+    ##EventTypes##
+    ##EventTypeAliases##
+    ##Events##
+    ##EventAliases##
+}

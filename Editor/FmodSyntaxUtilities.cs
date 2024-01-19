@@ -60,6 +60,9 @@ namespace RoyTheunissen.FMODSyntax
         
         public static string GetFilteredPath(string path, bool stripSpecialCharacters)
         {
+            if (string.IsNullOrEmpty(path))
+                return string.Empty;
+            
             const char separator = '/';
             
             // Events start with something like event:/ , so get rid of that first.

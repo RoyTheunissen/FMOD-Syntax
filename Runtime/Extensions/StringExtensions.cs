@@ -9,6 +9,8 @@ namespace RoyTheunissen.FMODSyntax
         private const string HungarianPrefix = "m_";
         private const char Underscore = '_';
         public const char DefaultSeparator = ' ';
+        
+        private static readonly char[] DirectorySeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
 
         private static bool IsExcludedSymbol(char symbol, char wordSeparator = DefaultSeparator)
         {
@@ -223,6 +225,15 @@ namespace RoyTheunissen.FMODSyntax
                 return string.Empty;
 
             return text.Substring(fromIndex, toIndex - fromIndex);
+        }
+        
+        public static string GetParentDirectory(this string path)
+        {
+            int lastDirectorySeparator = path.LastIndexOfAny(DirectorySeparators);
+            if (lastDirectorySeparator == -1)
+                return path;
+
+            return path.Substring(0, lastDirectorySeparator);
         }
     }
 }

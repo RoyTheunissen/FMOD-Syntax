@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -13,6 +14,13 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public sealed class FmodSyntaxSettings : ScriptableObject 
     {
+        public enum SyntaxFormats
+        {
+            Flat = 0,
+            FlatWithPathIncludedInName = 1,
+            SubclassesPerFolder = 2,
+        }
+        
         [SerializeField] private string generatedScriptsFolderPath;
         public string GeneratedScriptsFolderPath => generatedScriptsFolderPath;
 
@@ -22,8 +30,23 @@ namespace RoyTheunissen.FMODSyntax
         [SerializeField] private bool shouldGenerateAssemblyDefinition;
         public bool ShouldGenerateAssemblyDefinition => shouldGenerateAssemblyDefinition;
         
-        [SerializeField] private bool generateFallbacksForMissingEvents = true;
-        public bool GenerateFallbacksForMissingEvents => generateFallbacksForMissingEvents;
+        [FormerlySerializedAs("generateFallbacksForMissingEvents")]
+        [Tooltip("If specified, renamed or moved events will first generate an 'alias' so that any existing " +
+                 "references so you can update the references without getting compile errors.")]
+        [SerializeField] private bool generateFallbacksForChangedEvents = true;
+        public bool GenerateFallbacksForChangedEvents => generateFallbacksForChangedEvents;
+        
+        [Space]
+        [Tooltip("How to format the events syntax. Different formats suit different use cases:\n\n" +
+                 "Flat - Simplest syntax. All events are inside a class called AudioEvents. Event names have to be unique.\n\n" +
+                 "Flat (With Path Included In Name) - Like Flat but an event called 'Player/Footstep' would generate " +
+                 "a field called 'Player_Footstep'. Keeps things very simple but does prevent name conflicts.\n\n" +
+                 "Subclasses Per Folder - Generates subclasses inside AudioEvents to represent the " +
+                 "folders in the FMOD project. An event called 'Player/Footstep' would be accessed via " +
+                 "'AudioEvents.Player.Footstep'. A very clear and organized way to prevent name clashes but does " +
+                 "require more typing.")]
+        [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.Flat;
+        public SyntaxFormats SyntaxFormat => syntaxFormat;
 
         [NonSerialized] private static FmodSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;

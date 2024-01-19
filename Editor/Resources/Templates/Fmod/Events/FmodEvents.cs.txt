@@ -2,24 +2,12 @@
 
 namespace ##Namespace##
 {
-    /* ACTIVE EVENT GUIDS (We keep track of these to detect renames and keep old ones around with an Obsolete tag)
-    ##ActiveEventGuids##
-    ACTIVE EVENT GUIDS */
-
-    /// <summary>
-    /// GENERATED: Contains classes generated based on FMOD events so they can be called in a strongly-typed manner.
-    /// </summary>
-    ##EventTypes##
-    ##EventTypeAliases##
-    
     /// <summary>
     /// GENERATED: Contains FMOD event configs so they can be called in a strongly-typed manner to produce instances.
+    /// For readability's sake we only define the folders and fields in this file so you can easily get an overview of 
+    /// the events that exist. The definitions of the classes in question can be found in 'FmodEventTypes.cs'
     /// </summary>
-    public static class AudioEvents 
-    {
-        ##Events##
-        ##EventAliases##
-    }
+    ##Events##
     
     [Preserve]
     public static class AudioParameterlessEvents 
@@ -30,12 +18,8 @@ namespace ##Namespace##
             ##ParameterlessEventIds##
         };
     }
-
-    /// <summary>
-    /// GENERATED: Contains FMOD global parameters so they can be called in a strongly-typed manner.
-    /// </summary>
-    public static class AudioGlobalParameters 
-    {
-        ##GlobalParameters##
-    }
+    
+    /* ---------------------------------------------- METADATA ------------------------------------------------------
+    ##MetaData##
+    ------------------------------------------------- METADATA --------------------------------------------------- */
 }
