@@ -104,12 +104,12 @@ AudioEvents.Jump.Play(transform, JumpPlayback.SurfaceValues.Generic);
 
 Furthermore, the enums in FMOD may actually represent an enum in your game. So it's inconvenient to have to map from that game enum to the FMOD enum. But there's a solution for that: **User-specified labeled parameter enums**.
 
-Simply tag your game enum with `[FmodLabelEnum]` and specify the names of the labeled parameters that it represents, and then when code is generated instead of generating event-specific enums, it uses the game enum you specified for those events.
+Simply tag your game enum with `[FmodLabelType]` and specify the names of the labeled parameters that it represents, and then when code is generated instead of generating event-specific enums, it uses the game enum you specified for those events.
 
 No more duplication, no more mapping.
 
 ```cs
-[FmodLabelEnum("Surface")]
+[FmodLabelType("Surface")]
 public enum SurfaceTypes
 {
     Generic,
@@ -121,6 +121,13 @@ public enum SurfaceTypes
 AudioEvents.Footstep.Play(transform, SurfaceTypes.Generic);
 AudioEvents.Jump.Play(transform, SurfaceTypes.Generic);
 ```
+#### Scriptable Object Collection Support
+
+The above 'Labeled parameter enums' feature now also works for the [Scriptable Object Collection](https://github.com/brunomikoski/ScriptableObjectCollection). Simply add the `[FmodLabelType]` attribute to the Scriptable Object Collection Item the same way you would with an enum.
+
+_**NOTE:** If you installed FMOD-Syntax or ScriptableObjectCollection to the `Assets` folder instead of via the Package Manager / in the Packages folder, a `SCRIPTABLE_OBJECT_COLLECTION` scripting define symbol will not be defined automatically and you will have to manually add this to the project settings for this feature to work._
+
+
 
 ### Moving/renaming Events
 FMOD-Syntax has a two-tiered solution for allowing you to move/rename events in FMOD and update your code accordingly:
