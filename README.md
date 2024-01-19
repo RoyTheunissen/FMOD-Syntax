@@ -122,6 +122,28 @@ AudioEvents.Footstep.Play(transform, SurfaceTypes.Generic);
 AudioEvents.Jump.Play(transform, SurfaceTypes.Generic);
 ```
 
+### Moving/renaming Events
+FMOD-Syntax has a two-tiered solution for allowing you to move/rename events in FMOD and update your code accordingly:
+- **Alias Generation** - When an event is detected as having been moved or renamed, 'aliases' are generated under the old name, tagged with an `[Obsolete]` attribute that informs you what the event is currently called. This causes the game to throw a compile warning everywhere that the old incorrect syntax is used, and you can copy/paste the correct name from the warning. This lets you manually migrate your event code without compile errors and with reminders for what the new syntax is.
+- **Auto-Refactoring** - When an event is detected has having been moved or renamed, you are also presented with the option to Auto-Refactor. If chosen, FMOD-Syntax will look through your .cs files, find any references to the old events and automatically refactor them to use the new event syntax.
+
+### Syntax Formats
+FMOD-Syntax provides three syntax formats for defining events:
+- **Flat**: All events are defined in `AudioEvents`. Simplest / shortest syntax, but event names have to be unique.<br />
+  An event called `Player/Footstep` is invoked via `AudioEvents.Footstep.Play();`
+- **Flat (With Path Included In Name)**: Slightly longer names, but event names don't have to be unique. Requested by @AldeRoberge <br/>
+  An event called `Player/Footstep` is invoked via `AudioEvents.Player_Footstep.Play();`
+- **Subclasses Per Folder**: Subclasses are generated inside the `AudioEvents` class for every folder holding their events. Longer syntax, but events are neatly organized and names don't have to be unique.
+  An event called `Player/Footstep` is invoked via `AudioEvents.Player.Footstep.Play();`
+
+The default syntax is `Flat`, and you are recommended to use that and give unique names to your events.
+
+For example, you can use the following naming convention: `Object_Event`. That way you can have a footstep event for both a player and a monster without getting a name clash, and it doesn't matter if the event is in a folder called `Core/World1/Gameplay/Characters/Enemies/Monster/Monster_Footstep`, because including all those folders in the name is cumbersome.
+
+However, as you may be integrating FMOD-Syntax into an existing project and may not have the ability to affect the naming convention of events much, we recognize that different projects have different structures and you are free to choose whatever syntax suits your project best.
+
+Switching syntax formats supports all the same migration features as renaming or moving events.
+
 ## Compatibility
 
 This system was developed for Unity 2021 and upwards, it's recommended that you use it for these versions.
@@ -129,7 +151,6 @@ This system was developed for Unity 2021 and upwards, it's recommended that you 
 If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
 
 ## Known Issues
-- No support for snapshots yet, but this will be added soon
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
 
 
