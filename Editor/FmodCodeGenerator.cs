@@ -1289,6 +1289,12 @@ namespace RoyTheunissen.FMODSyntax
             
             TryRefactoringOldEventReferencesInternal(true);
         }
+        
+        [MenuItem(RefactorOldEventReferencesMenuPath, true, 999999998)]
+        private static bool TryRefactoringOldEventReferencesValidate()
+        {
+            return File.Exists(PreviousMetaDataFilePath);
+        }
 
         private static void TryRefactoringOldEventReferencesInternal(bool showMessageIfNoEventsFound)
         {
