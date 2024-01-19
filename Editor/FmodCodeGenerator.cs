@@ -788,8 +788,7 @@ namespace RoyTheunissen.FMODSyntax
                 return;
             }
             
-            string metaDataFromPreviousCodeGenerationJson = JsonUtility.ToJson(
-                metaDataFromPreviousCodeGeneration, true);
+            string metaDataFromPreviousCodeGenerationJson = metaDataFromPreviousCodeGeneration.GetJson();
             
             string path = PreviousMetaDataFilePath;
             
