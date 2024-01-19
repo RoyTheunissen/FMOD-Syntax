@@ -1,7 +1,7 @@
 {
   "name": "com.roytheunissen.fmod-syntax",
   "displayName": "FMOD Syntax",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "unity": "2021.3",
   "description": "Generates code to allow invoking FMOD events with a strongly-typed syntax.",
   "keywords": [
