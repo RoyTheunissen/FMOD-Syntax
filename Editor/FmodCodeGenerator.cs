@@ -44,6 +44,7 @@ namespace RoyTheunissen.FMODSyntax
                 
                 EventFolder newFolder = new EventFolder(name);
                 childFolders.Add(newFolder);
+                childFolders.Sort((x, y) => String.Compare(x.name, y.name, StringComparison.Ordinal));
                 return newFolder;
             }
 
@@ -859,6 +860,7 @@ namespace RoyTheunissen.FMODSyntax
                 }
 
                 folder.ChildEvents.Add(e);
+                folder.ChildEvents.Sort((x, y) => String.Compare(x.Path, y.Path, StringComparison.Ordinal));
                 
                 string currentPath = path;
                 
