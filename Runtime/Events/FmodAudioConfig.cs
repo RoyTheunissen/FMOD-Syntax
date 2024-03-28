@@ -31,6 +31,8 @@ namespace RoyTheunissen.FMODSyntax
 
         public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
 
+        public bool IsAssigned => !id.IsNull;
+
         public abstract PlaybackType Play(Transform source = null);
 
         public FmodAudioConfig(string guid)
