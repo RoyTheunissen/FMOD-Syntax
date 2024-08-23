@@ -71,6 +71,13 @@ namespace RoyTheunissen.FMODSyntax
                 instance.getVolume(out float volume);
                 return volume;
             }
+            set
+            {
+                if (!eventDescription.isValid() || !instance.isValid())
+                    return;
+                
+                instance.setVolume(value);
+            }
         }
 
         public void Play(EventDescription eventDescription, Transform source)
