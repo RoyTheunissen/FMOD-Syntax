@@ -24,6 +24,11 @@ namespace RoyTheunissen.FMODSyntax
                 {
                     guidFmodAudioConfigIsCachedFor = fmodEventGuid;
                     cachedFmodAudioConfig = GetParameterlessEventConfig(fmodEventGuid);
+                    if (!string.IsNullOrEmpty(fmodEventGuid) && cachedFmodAudioConfig == null)
+                    {
+                        Debug.LogError($"FMOD event was assigned to audio reference but its corresponding config could " +
+                                  $"not be found at runtime. Did you forget to compile FMOD code?");
+                    }
                 }
                 return cachedFmodAudioConfig;
             }
