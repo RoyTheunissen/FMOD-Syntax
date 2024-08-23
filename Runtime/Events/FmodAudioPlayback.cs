@@ -76,7 +76,7 @@ namespace RoyTheunissen.FMODSyntax
                 if (!eventDescription.isValid() || !instance.isValid())
                     return;
                 
-                instance.setVolume(value);
+                instance.setVolume(Mathf.Max(value, 0.0f));
             }
         }
         
