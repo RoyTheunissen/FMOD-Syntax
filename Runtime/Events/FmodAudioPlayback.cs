@@ -79,6 +79,8 @@ namespace RoyTheunissen.FMODSyntax
                 instance.setVolume(value);
             }
         }
+        
+        private float smoothDampVolumeVelocity;
 
         public void Play(EventDescription eventDescription, Transform source)
         {
@@ -128,6 +130,16 @@ namespace RoyTheunissen.FMODSyntax
         {
             if (instance.isValid())
                 instance.stop(STOP_MODE.ALLOWFADEOUT);
+        }
+        
+        public void MoveTowardsVolume(float target, float maxDelta)
+        {
+            Volume = Mathf.MoveTowards(Volume, target, maxDelta);
+        }
+        
+        public void SmoothDampTowardsVolume(float target, float duration)
+        {
+            Volume = Mathf.SmoothDamp(Volume, target, ref smoothDampVolumeVelocity, duration);
         }
 
         public void Cleanup()
