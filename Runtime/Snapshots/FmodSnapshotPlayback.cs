@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using FMOD;
 using FMOD.Studio;
+using Debug = UnityEngine.Debug;
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -10,6 +11,32 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public abstract class FmodSnapshotPlaybackBase : FmodPlayablePlaybackBase
     {
+        private const string IntensityParameterName = "Intensity";
+        
+        public float Intensity
+        {
+            get
+            {
+                RESULT result = Instance.getParameterByName(IntensityParameterName, out float value);
+                if (result != RESULT.OK)
+                {
+                    Debug.LogWarning($"Tried to get {IntensityParameterName} parameter of snapshot '{Name}' but no " +
+                                     $"such parameter was found. Did you forget to set up an " +
+                                     $"{IntensityParameterName} parameter in FMOD?");
+                }
+                return value;
+            }
+            set
+            {
+                RESULT result = Instance.setParameterByName(IntensityParameterName, value);
+                if (result != RESULT.OK)
+                {
+                    Debug.LogWarning($"Tried to set {IntensityParameterName} parameter of snapshot '{Name}' but no " +
+                                     $"such parameter was found. Did you forget to set up an " +
+                                     $"{IntensityParameterName} parameter in FMOD?");
+                }
+            }
+        }
     }
     
     /// <summary>
@@ -24,7 +51,7 @@ namespace RoyTheunissen.FMODSyntax
             if (!eventDescription.isValid())
             {
                 eventDescription.getID(out GUID guid);
-                UnityEngine.Debug.LogError($"Trying to play invalid FMOD Snapshot guid: '{guid}' path:'{path}'");
+                Debug.LogError($"Trying to play invalid FMOD Snapshot guid: '{guid}' path:'{path}'");
                 return;
             }
             
@@ -37,7 +64,7 @@ namespace RoyTheunissen.FMODSyntax
             EventDescription = eventDescription;
             eventDescription.createInstance(out EventInstance newInstance);
             Instance = newInstance;
-            
+
             InitializeParameters();
 
             Instance.start();

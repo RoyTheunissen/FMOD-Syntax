@@ -547,9 +547,23 @@ namespace RoyTheunissen.FMODSyntax
             string parameterArgumentsWithType = string.Empty;
             string parameterArgumentsWithTypeFullyQualified = string.Empty;
             string parameterInitializationsFromArguments = string.Empty;
+            int validParameterCount = 0;
             for (int i = 0; i < e.LocalParameters.Count; i++)
             {
                 EditorParamRef parameter = e.LocalParameters[i];
+
+                // For snapshots we support an "Intensity" parameter by default, so don't explicitly create one.
+                // We do it this way so you can have a reference to a Snapshot and then set its intensity, even though
+                // we don't know 100% sure that the selected Snapshot supports that. Otherwise it's very tedious to set
+                // the intensity parameter on some generic Snapshot. You would have to see if it is one of the known
+                // types that has the parameter, defeating the purpose of allowing users to select one via the inspector
+                if (e.Path.StartsWith(EditorEventRefExtensions.SnapshotPrefix) && string.Equals(
+                        parameter.GetFilteredName(), "Intensity", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                validParameterCount++;
                 
                 // Define a new local parameter for this event.
                 eventParametersCode += GetParameterCode(eventParameterGenerator, parameter);
@@ -568,6 +582,14 @@ namespace RoyTheunissen.FMODSyntax
                     spacing + $"{argumentTypeFullyQualified} {argumentName}";
                 parameterInitializationsFromArguments +=
                     $"{parameterName}.Value = {argumentName};\r\n";
+            }
+            
+            // Actually no valid parameters were found. Ignore it after all.
+            if (validParameterCount <= 0)
+            {
+                generator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
+                generator.RemoveKeywordLines(eventParametersKeyword);
+                return;
             }
 
             // THEN write an InitializeParameters function to pass along the instance to the parameters.
