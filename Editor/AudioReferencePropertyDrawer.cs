@@ -23,7 +23,7 @@ namespace RoyTheunissen.FMODSyntax
             
             SerializedProperty audioConfigProperty = property.FindPropertyRelative("fmodEventGuid");
             
-            // Figure out the display text and the content property depending on the mode.
+            // Figure out the display text and the content property.
             string displayedText;
             string guid = audioConfigProperty.stringValue;
             if (string.IsNullOrEmpty(guid))
