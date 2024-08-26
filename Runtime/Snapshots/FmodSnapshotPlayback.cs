@@ -12,7 +12,15 @@ namespace RoyTheunissen.FMODSyntax
     public abstract class FmodSnapshotPlaybackBase : FmodPlayablePlaybackBase
     {
         private const string IntensityParameterName = "Intensity";
+        private const float IntensityParameterRange = 100;
         
+        /// <summary>
+        /// For snapshots it's very useful to define a parameter to control the Intensity setting of the snapshot and
+        /// thus blend it in and out. This can easily be created by right-clicking the Intensity control in the right
+        /// of the snapshot editor and choosing Expose As Parameter.
+        /// NOTE: By default the intensity parameter's values go from 0 - 100 so we respect that.
+        /// Use IntensityNormalized if you prefer to set it as number between 0 and 1.
+        /// </summary>
         public float Intensity
         {
             get
@@ -36,6 +44,12 @@ namespace RoyTheunissen.FMODSyntax
                                      $"{IntensityParameterName} parameter in FMOD?");
                 }
             }
+        }
+
+        public float IntensityNormalized
+        {
+            get => Intensity / IntensityParameterRange;
+            set => Intensity = value * IntensityParameterRange;
         }
     }
     
