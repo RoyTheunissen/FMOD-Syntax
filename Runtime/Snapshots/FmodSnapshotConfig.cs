@@ -18,7 +18,7 @@ namespace RoyTheunissen.FMODSyntax
     /// unlike events, snapshots do not have any parameters. As such, we do not need to generate new types of snapshots,
     /// we just need to generate snapshots with the appropriate GUIDs. 
     /// </summary>
-    public abstract class FmodSnapshotConfig<PlaybackType> : FmodPlayableConfig
+    public abstract class FmodSnapshotConfig<PlaybackType> : FmodSnapshotConfigBase
         where PlaybackType : FmodSnapshotPlayback
     {
         public FmodSnapshotConfig(string guid) : base(guid)
@@ -26,5 +26,7 @@ namespace RoyTheunissen.FMODSyntax
         }
         
         public abstract PlaybackType Play();
+
+        public override FmodSnapshotPlayback PlayGeneric() => Play();
     }
 }

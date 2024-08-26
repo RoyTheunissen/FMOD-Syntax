@@ -15,7 +15,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Playback of a snapshot. Sort of like an event, but simpler.
     /// </summary>
-    public class FmodSnapshotPlayback : FmodSnapshotPlaybackBase, IFmodPlayback
+    public abstract class FmodSnapshotPlayback : FmodSnapshotPlaybackBase, IFmodPlayback
     {
         public void Play(EventDescription eventDescription)
         {

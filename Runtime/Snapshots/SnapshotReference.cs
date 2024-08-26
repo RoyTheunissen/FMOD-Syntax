@@ -88,7 +88,7 @@ namespace RoyTheunissen.FMODSyntax
                 FieldInfo[] fields = containerType.GetFields(BindingFlags.Public | BindingFlags.Static);
                 for (int i = 0; i < fields.Length; i++)
                 {
-                    if (typeof(FmodSnapshotConfigBase).IsAssignableFrom(fields[i].FieldType))
+                    if (!typeof(FmodSnapshotConfigBase).IsAssignableFrom(fields[i].FieldType))
                         continue;
 
                     // If the field is a valid snapshot config, add it to the dictionary.
