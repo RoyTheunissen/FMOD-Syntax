@@ -14,11 +14,23 @@ namespace RoyTheunissen.FMODSyntax
     public sealed class FmodSnapshotConfig 
     {
         [NonSerialized] private GUID id;
+        public string Id => id.ToString();
         
         /// <summary>
         /// NOTE: Seems like we can't cache this for some reason that's related to domain reloading. Not sure yet why.
         /// </summary>
         private EventDescription EventDescription => RuntimeManager.GetEventDescription(id);
+        
+        public string Path
+        {
+            get
+            {
+                EventDescription.getPath(out string path);
+                return path;
+            }
+        }
+
+        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
         
         public FmodSnapshotConfig(string guid)
         {

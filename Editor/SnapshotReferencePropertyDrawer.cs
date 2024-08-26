@@ -7,10 +7,10 @@ using GUID = FMOD.GUID;
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
-    /// Draws dropdowns for selecting an audio config. 
+    /// Draws dropdowns for selecting a snapshot config. 
     /// </summary>
-    [CustomPropertyDrawer(typeof(AudioReference))]
-    public class AudioReferencePropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(SnapshotReference))]
+    public class SnapshotReferencePropertyDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -21,11 +21,11 @@ namespace RoyTheunissen.FMODSyntax
             if (property.IsInArray())
                 label = GUIContent.none;
             
-            SerializedProperty audioConfigProperty = property.FindPropertyRelative("fmodEventGuid");
+            SerializedProperty snapshotConfigProperty = property.FindPropertyRelative("fmodSnapshotGuid");
             
             // Figure out the display text and the content property.
             string displayedText;
-            string guid = audioConfigProperty.stringValue;
+            string guid = snapshotConfigProperty.stringValue;
             if (string.IsNullOrEmpty(guid))
             {
                 displayedText = "";
@@ -37,8 +37,8 @@ namespace RoyTheunissen.FMODSyntax
                 displayedText = eventRef.GetDisplayName();
             }
 
-            // Draw a dropdown button to select the audio config.
-            EditorGUI.BeginProperty(position, label, audioConfigProperty);
+            // Draw a dropdown button to select the snapshot config.
+            EditorGUI.BeginProperty(position, label, snapshotConfigProperty);
             Rect valueRect = EditorGUI.PrefixLabel(position, label);
             bool didPress = EditorGUI.DropdownButton(
                 valueRect, new GUIContent(displayedText), FocusType.Keyboard);
@@ -47,7 +47,8 @@ namespace RoyTheunissen.FMODSyntax
                 Rect dropDownRect = position;
                 dropDownRect.xMax += 200;
                 
-                AudioReferenceDropdown menu = new AudioReferenceDropdown(new AdvancedDropdownState(), audioConfigProperty);
+                SnapshotReferenceDropdown menu = new SnapshotReferenceDropdown(
+                    new AdvancedDropdownState(), snapshotConfigProperty);
                 menu.Show(dropDownRect);
             }
             EditorGUI.EndProperty();
