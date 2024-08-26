@@ -1,17 +1,17 @@
-public sealed class ##EventName##Config : FmodAudioConfig<##EventName##Playback>
+public sealed class ##EventName##Config : FmodSnapshotConfig<##EventName##Playback>
 {
     public ##EventName##Config(string guid) : base(guid) { }
     
     public override ##EventName##Playback Play()
     {
         ##EventName##Playback instance = new ##EventName##Playback();
-        instance.Play(EventDescription, source);
+        instance.Play(EventDescription);
         return instance;
     }
     ##ConfigPlayMethodWithParameters##
 }
 ##Attributes##
-public sealed class ##EventName##Playback : FmodAudioPlayback
+public sealed class ##EventName##Playback : FmodSnapshotPlayback
 {
     ##EventParameters##
 }

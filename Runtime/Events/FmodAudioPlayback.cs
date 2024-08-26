@@ -15,6 +15,12 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public abstract class FmodAudioPlaybackBase : FmodPlayablePlaybackBase
     {
+        private bool isOneshot = false;
+        public bool IsOneshot
+        {
+            get => isOneshot;
+            protected set => isOneshot = value;
+        }
     }
     
     /// <summary>
@@ -51,23 +57,14 @@ namespace RoyTheunissen.FMODSyntax
             }
             
             // Cache properties.
-            eventDescription.isSnapshot(out bool isSnapshot);
-            if (!isSnapshot)
-            {
-                eventDescription.isOneshot(out bool isOneshotResult);
-                IsOneshot = isOneshotResult;
-            }
+            eventDescription.isOneshot(out bool isOneshotResult);
+            IsOneshot = isOneshotResult;
 
             InitializeParameters();
 
             Instance.start();
 
             FmodSyntaxSystem.RegisterActiveEventPlayback(this);
-        }
-
-        protected virtual void InitializeParameters()
-        {
-            // We need to pass our instance on to our parameters so we can set its values correctly.
         }
 
         public void Stop()

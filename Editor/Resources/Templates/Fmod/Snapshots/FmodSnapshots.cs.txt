@@ -3,10 +3,13 @@
 namespace ##Namespace##
 {
     /// <summary>
-    /// GENERATED: Contains classes generated based on FMOD snapshots so they can be called in a strongly-typed manner.
+    /// GENERATED: Contains FMOD snapshot configs so they can be called in a strongly-typed manner to produce instances.
+    /// For readability's sake we only define the folders and fields in this file so you can easily get an overview of 
+    /// the events that exist. The definitions of the classes in question can be found in 'FmodSnapshotTypes.cs'
     /// </summary>
-    public static class AudioSnapshots 
-    {
-        ##SnapshotTypes##
-    }
+    ##Events##
+    
+    /* ---------------------------------------------- METADATA ------------------------------------------------------
+    ##MetaData##
+    ------------------------------------------------- METADATA --------------------------------------------------- */
 }

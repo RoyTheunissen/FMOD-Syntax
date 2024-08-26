@@ -22,8 +22,6 @@ namespace RoyTheunissen.FMODSyntax
             set => eventDescription = value;
         }
 
-        private bool isOneshot = false;
-
         public bool CanBeCleanedUp
         {
             get
@@ -48,12 +46,6 @@ namespace RoyTheunissen.FMODSyntax
         {
             get => searchKeywords;
             protected set => searchKeywords = value;
-        }
-
-        public bool IsOneshot
-        {
-            get => isOneshot;
-            protected set => isOneshot = value;
         }
 
         public float NormalizedProgress
@@ -88,6 +80,11 @@ namespace RoyTheunissen.FMODSyntax
         }
         
         private float smoothDampVolumeVelocity;
+        
+        protected virtual void InitializeParameters()
+        {
+            // We need to pass our instance on to our parameters so we can set its values correctly.
+        }
         
         public void MoveTowardsVolume(float target, float maxDelta)
         {
