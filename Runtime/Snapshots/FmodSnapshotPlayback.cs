@@ -7,7 +7,8 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Playback of a snapshot. Sort of like an event, but simpler. No parameters, for example.
     /// </summary>
-    public sealed class FmodSnapshotPlayback : IFmodPlayback
+    // TODO: Make abstrack
+    public class FmodSnapshotPlayback : IFmodPlayback
     {
         private EventInstance instance;
 

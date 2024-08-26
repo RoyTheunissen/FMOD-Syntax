@@ -1,0 +1,10 @@
+##UsingDirectives##
+
+namespace ##Namespace##
+{
+    /// <summary>
+    /// GENERATED: Contains definition of FMOD snapshots which is separated out from the declaration for readability.
+    /// To get an overview of which folders and events exist see 'FmodSnapshots.cs'
+    /// </summary>
+    ##Events##
+}

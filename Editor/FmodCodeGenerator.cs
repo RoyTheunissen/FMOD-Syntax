@@ -154,6 +154,9 @@ namespace RoyTheunissen.FMODSyntax
         private static string SnapshotsScriptPath => ScriptPathBase + "FmodSnapshots.cs";
         private const string SnapshotsTemplatePath = TemplatePathBase + "Snapshots/";
         
+        private static string SnapshotsParameterizedScriptPath => ScriptPathBase + "FmodSnapshotsParameterized.cs";
+        private static string SnapshotTypesParameterizedScriptPath => ScriptPathBase + "FmodSnapshotTypesParameterized.cs";
+        
         private static string VCAsScriptPath => ScriptPathBase + "FmodVCAs.cs";
         private const string VCAsTemplatePath = TemplatePathBase + "VCAs/";
 
@@ -202,6 +205,12 @@ namespace RoyTheunissen.FMODSyntax
         
         private static readonly CodeGenerator snapshotsScriptGenerator =
             new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshots.cs");
+        private static readonly CodeGenerator snapshotsParameterizedScriptGenerator =
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotsParameterized.cs");
+        private static readonly CodeGenerator snapshotTypesScriptGenerator =
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotTypes.cs");
+        private static readonly CodeGenerator snapshotTypeGenerator =
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotType.cs");
         private static readonly CodeGenerator snapshotFieldsGenerator =
             new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.cs");
         
@@ -502,27 +511,27 @@ namespace RoyTheunissen.FMODSyntax
             return existingEventPathsByGuid;
         }
         
-        private static string GetEventTypeCode(EditorEventRef e, string eventName = "", string attribute = "")
+        private static string GetEventTypeCode(CodeGenerator generator, EditorEventRef e, string eventName = "", string attribute = "")
         {
             if (string.IsNullOrEmpty(eventName))
                 eventName = GetEventSyntaxName(e);
             
-            eventTypeGenerator.Reset();
-            eventTypeGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+            generator.Reset();
+            generator.ReplaceKeyword(EventNameKeyword, eventName);
             
             // Parameters
-            GetEventTypeParametersCode(e, eventName);
+            GetEventTypeParametersCode(generator, e, eventName);
 
             const string attributesKeyword = "Attributes";
             if (string.IsNullOrEmpty(attribute))
-                eventTypeGenerator.RemoveKeywordLines(attributesKeyword);
+                generator.RemoveKeywordLines(attributesKeyword);
             else
-                eventTypeGenerator.ReplaceKeyword(attributesKeyword, attribute);
+                generator.ReplaceKeyword(attributesKeyword, attribute);
             
-            return eventTypeGenerator.GetCode();
+            return generator.GetCode();
         }
 
-        private static void GetEventTypeParametersCode(EditorEventRef e, string eventName)
+        private static void GetEventTypeParametersCode(CodeGenerator generator, EditorEventRef e, string eventName)
         {
             const string eventParametersKeyword = "EventParameters";
             const string configPlayMethodWithParametersKeyword = "ConfigPlayMethodWithParameters";
@@ -530,8 +539,8 @@ namespace RoyTheunissen.FMODSyntax
             // If there's no parameters for this event then we can just get rid of the keywords and leave it there.
             if (e.LocalParameters.Count <= 0)
             {
-                eventTypeGenerator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
-                eventTypeGenerator.RemoveKeywordLines(eventParametersKeyword);
+                generator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
+                generator.RemoveKeywordLines(eventParametersKeyword);
                 return;
             }
 
@@ -598,16 +607,16 @@ namespace RoyTheunissen.FMODSyntax
                 eventConfigPlayMethodWithParametersGenerator.ReplaceKeyword(
                     "ParameterArguments", parameterArguments);
                 
-                eventTypeGenerator.ReplaceKeyword(
+                generator.ReplaceKeyword(
                     configPlayMethodWithParametersKeyword,
                     eventConfigPlayMethodWithParametersGenerator.GetCode());
             }
             else
             {
-                eventTypeGenerator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
+                generator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
             }
             
-            eventTypeGenerator.ReplaceKeyword(eventParametersKeyword, eventParametersCode);
+            generator.ReplaceKeyword(eventParametersKeyword, eventParametersCode);
         }
         
         /// <summary>
@@ -746,8 +755,15 @@ namespace RoyTheunissen.FMODSyntax
             
             detectedEventChanges.Clear();
             
-            GenerateEventsScript(true, EventsScriptPath);
-            GenerateEventsScript(false, EventTypesScriptPath);
+            GenerateEventsScript(true, EventsScriptPath,
+                EditorEventRefExtensions.EventPrefix, eventsScriptGenerator, eventTypeGenerator);
+            GenerateEventsScript(false, EventTypesScriptPath,
+                EditorEventRefExtensions.EventPrefix, eventTypesScriptGenerator, eventTypeGenerator);
+
+            GenerateEventsScript(true, SnapshotsParameterizedScriptPath, 
+                EditorEventRefExtensions.SnapshotPrefix, snapshotsParameterizedScriptGenerator, snapshotTypeGenerator);
+            GenerateEventsScript(false, SnapshotTypesParameterizedScriptPath,
+                EditorEventRefExtensions.SnapshotPrefix, snapshotTypesScriptGenerator, snapshotTypeGenerator);
             
             // NOTE: This re-uses the using directives from the generated events. Therefore this should be called after
             // the events are generated.
@@ -828,21 +844,22 @@ namespace RoyTheunissen.FMODSyntax
             globalParametersGenerator.GenerateFile(GlobalParametersScriptPath);
         }
 
-        private static void GenerateEventsScript(bool isFields, string eventsScriptPath)
+        private static void GenerateEventsScript(bool isFields, string eventsScriptPath, string eventPrefix,
+            CodeGenerator codeGenerator, CodeGenerator typeGenerator)
         {
             eventUsingDirectives.Clear();
             eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
 
-            // We either only declare the event fields or we define the events tyoes. Separating this out into separate
+            // We either only declare the event fields or we define the events types. Separating this out into separate
             // files makes it easier to just have a look at which events were generated at all.
-            CodeGenerator codeGenerator = isFields ? eventsScriptGenerator : eventTypesScriptGenerator;
+            //CodeGenerator codeGenerator = isFields ? eventsScriptGenerator : eventTypesScriptGenerator;
             codeGenerator.Reset();
             
             codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
 
             // Generate a config & playback class for every FMOD event.
             EditorEventRef[] events = EventManager.Events
-                .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix))
+                .Where(e => e.Path.StartsWith(eventPrefix))
                 .OrderBy(e => e.Path).ToArray();
 
             // Organize the events in a folder hierarchy.
@@ -899,12 +916,12 @@ namespace RoyTheunissen.FMODSyntax
                 // 'AudioEvents.NameOfEventPlayback playback;' and lets you type
                 // 'NameOfEventPlayback playback;' instead (without the 'AudioEvents.')
                 eventsCode = GenerateFolderCode(
-                    rootEventFolder, isFields, out string eventTypesCodeToBePlacedOutsideOfRootFolder);
+                    typeGenerator, rootEventFolder, isFields, out string eventTypesCodeToBePlacedOutsideOfRootFolder);
                 eventsCode = eventTypesCodeToBePlacedOutsideOfRootFolder + eventsCode;
             }
             else
             {
-                eventsCode = GenerateFolderCode(rootEventFolder, isFields);
+                eventsCode = GenerateFolderCode(typeGenerator, rootEventFolder, isFields);
             }
             codeGenerator.ReplaceKeyword("Events", eventsCode, true);
             
@@ -947,14 +964,14 @@ namespace RoyTheunissen.FMODSyntax
                    + "#pragma warning restore 618\r\n";
         }
 
-        private static string GenerateFolderCode(
+        private static string GenerateFolderCode(CodeGenerator typeGenerator,
             EventFolder eventFolder, bool isDeclaration, out string eventTypesCodeToBePlacedOutsideOfRootFolder)
         {
             string childFoldersCode = "";
             for (int i = 0; i < eventFolder.ChildFolders.Count; i++)
             {
                 EventFolder childFolder = eventFolder.ChildFolders[i];
-                string childFolderCode = GenerateFolderCode(childFolder, isDeclaration);
+                string childFolderCode = GenerateFolderCode(typeGenerator, childFolder, isDeclaration);
                 childFoldersCode += childFolderCode + "\r\n";
             }
             
@@ -988,7 +1005,7 @@ namespace RoyTheunissen.FMODSyntax
 
                 // Types
                 if (!isDeclaration)
-                    eventTypesCode += GetEventTypeCode(e);
+                    eventTypesCode += GetEventTypeCode(typeGenerator, e);
 
                 // Fields
                 if (isDeclaration)
@@ -1029,7 +1046,7 @@ namespace RoyTheunissen.FMODSyntax
                         string currentEventPlaybackType = GetEventPlaybackType(currentSyntaxPath, currentSyntaxFormat);
                         string attribute =
                             $"[Obsolete(\"FMOD Event Type '{previousEventPlaybackType}' has been changed to '{currentEventPlaybackType}'\")]";
-                        string eventTypeAliasCode = GetEventTypeCode(e, previousName, attribute);
+                        string eventTypeAliasCode = GetEventTypeCode(typeGenerator, e, previousName, attribute);
                         eventTypeAliasesCode += eventTypeAliasCode;
                     }
                 }
@@ -1098,9 +1115,10 @@ namespace RoyTheunissen.FMODSyntax
             return eventFolderGenerator.GetCode();
         }
 
-        private static string GenerateFolderCode(EventFolder eventFolder, bool isDeclaration)
+        private static string GenerateFolderCode(
+            CodeGenerator typeGenerator, EventFolder eventFolder, bool isDeclaration)
         {
-            return GenerateFolderCode(eventFolder, isDeclaration, out string _);
+            return GenerateFolderCode(typeGenerator, eventFolder, isDeclaration, out string _);
         }
 
         private static void GenerateMiscellaneousScripts()
