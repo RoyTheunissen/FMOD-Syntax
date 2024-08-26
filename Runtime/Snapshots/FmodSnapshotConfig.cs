@@ -1,8 +1,3 @@
-using System;
-using FMOD;
-using FMOD.Studio;
-using FMODUnity;
-
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
@@ -11,30 +6,10 @@ namespace RoyTheunissen.FMODSyntax
     /// unlike events, snapshots do not have any parameters. As such, we do not need to generate new types of snapshots,
     /// we just need to generate snapshots with the appropriate GUIDs. 
     /// </summary>
-    public sealed class FmodSnapshotConfig 
+    public sealed class FmodSnapshotConfig : FmodPlayableConfig
     {
-        [NonSerialized] private GUID id;
-        public string Id => id.ToString();
-        
-        /// <summary>
-        /// NOTE: Seems like we can't cache this for some reason that's related to domain reloading. Not sure yet why.
-        /// </summary>
-        private EventDescription EventDescription => RuntimeManager.GetEventDescription(id);
-        
-        public string Path
+        public FmodSnapshotConfig(string guid) : base(guid)
         {
-            get
-            {
-                EventDescription.getPath(out string path);
-                return path;
-            }
-        }
-
-        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
-        
-        public FmodSnapshotConfig(string guid)
-        {
-            id = GUID.Parse(guid);
         }
 
         public FmodSnapshotPlayback Play()

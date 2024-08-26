@@ -5,30 +5,10 @@ using FMOD.Studio;
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
-    /// Playback of a snapshot. Sort of like an event, but simpler. No parameters, for example.
+    /// Playback of a snapshot. Sort of like an event, but simpler.
     /// </summary>
-    // TODO: Make abstrack
-    public class FmodSnapshotPlayback : IFmodPlayback
+    public class FmodSnapshotPlayback : FmodPlayablePlaybackBase, IFmodPlayback
     {
-        private EventInstance instance;
-
-        private EventDescription eventDescription;
-
-        public bool CanBeCleanedUp
-        {
-            get
-            {
-                if (!instance.isValid())
-                    return true;
-                
-                instance.getPlaybackState(out PLAYBACK_STATE playbackState);
-                return playbackState == PLAYBACK_STATE.STOPPED;
-            }
-        }
-
-        private string name;
-        public string Name => name;
-
         public void Play(EventDescription eventDescription)
         {
             eventDescription.getPath(out string path);
@@ -40,30 +20,31 @@ namespace RoyTheunissen.FMODSyntax
                 return;
             }
 
-            name = Path.GetFileName(path);
+            Name = Path.GetFileName(path);
 
-            this.eventDescription = eventDescription;
-            eventDescription.createInstance(out instance);
+            EventDescription = eventDescription;
+            eventDescription.createInstance(out EventInstance newInstance);
+            Instance = newInstance;
 
-            instance.start();
+            Instance.start();
 
             FmodSyntaxSystem.RegisterActiveSnapshotPlayback(this);
         }
         
         public void Stop()
         {
-            if (instance.isValid())
-                instance.stop(STOP_MODE.ALLOWFADEOUT);
+            if (Instance.isValid())
+                Instance.stop(STOP_MODE.ALLOWFADEOUT);
         }
 
-        public void Cleanup()
+        public override void Cleanup()
         {
-            if (instance.isValid())
+            if (Instance.isValid())
             {
-                if (eventDescription.isValid())
+                if (EventDescription.isValid())
                 {
-                    instance.release();
-                    instance.clearHandle();
+                    Instance.release();
+                    Instance.clearHandle();
                 }
             }
 
