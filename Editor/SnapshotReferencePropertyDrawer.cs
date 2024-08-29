@@ -28,13 +28,13 @@ namespace RoyTheunissen.FMODSyntax
             string guid = snapshotConfigProperty.stringValue;
             if (string.IsNullOrEmpty(guid))
             {
-                displayedText = "";
+                displayedText = string.Empty;
             }
             else
             {
                 GUID id = GUID.Parse(guid);
                 EditorEventRef eventRef = EventManager.EventFromGUID(id);
-                displayedText = eventRef.GetDisplayName();
+                displayedText = eventRef == null ? string.Empty : eventRef.GetDisplayName();
             }
 
             // Draw a dropdown button to select the snapshot config.
