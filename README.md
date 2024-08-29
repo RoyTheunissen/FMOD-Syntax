@@ -151,6 +151,11 @@ However, as you may be integrating FMOD-Syntax into an existing project and may 
 
 Switching syntax formats supports all the same migration features as renaming or moving events.
 
+#### Miscellaneous Features
+
+- Code is also generated for playing Snapshots. Basically treated like events, though it's separated in its own `AudioSnapshots` class.
+- Code is also generated for Buses and VCA's, which can be accessed via an `AudioBuses` and `AudioVCAs` class respectively.
+
 ## Compatibility
 
 This system was developed for Unity 2021 and upwards, it's recommended that you use it for these versions.
