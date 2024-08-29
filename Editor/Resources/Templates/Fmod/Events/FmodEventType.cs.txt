@@ -1,4 +1,4 @@
-public sealed partial class ##EventName##Config : FmodAudioConfig<##EventName##Playback>
+public sealed class ##EventName##Config : FmodAudioConfig<##EventName##Playback>
 {
     public ##EventName##Config(string guid) : base(guid) { }
     
@@ -11,7 +11,7 @@ public sealed partial class ##EventName##Config : FmodAudioConfig<##EventName##P
     ##ConfigPlayMethodWithParameters##
 }
 ##Attributes##
-public sealed partial class ##EventName##Playback : FmodAudioPlayback
+public sealed class ##EventName##Playback : FmodAudioPlayback
 {
     ##EventParameters##
 }

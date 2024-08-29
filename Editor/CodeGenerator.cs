@@ -55,6 +55,12 @@ namespace RoyTheunissen.FMODSyntax
         {
             return KeywordStart + keyword + KeywordEnd;
         }
+        
+        public bool HasKeyword(string keyword)
+        {
+            keyword = GetKeywordFormatted(keyword);
+            return contents.Contains(keyword);
+        }
 
         public void ReplaceKeyword(string keyword, string code, bool removeLineIfCodeIsEmpty = false)
         {

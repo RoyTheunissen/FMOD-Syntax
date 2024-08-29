@@ -13,75 +13,22 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Non-generic base class for AudioFmodPlayback to apply as a type constraint.
     /// </summary>
-    public abstract class FmodAudioPlaybackBase
+    public abstract class FmodAudioPlaybackBase : FmodPlayablePlaybackBase
     {
+        private bool isOneshot = false;
+        public bool IsOneshot
+        {
+            get => isOneshot;
+            protected set => isOneshot = value;
+        }
     }
     
     /// <summary>
-    /// Playback for a playable FMOD audio event. Allows you to update its parameters, similar to a AudioUnityPlayback
-    /// instance. Produced by calling Play() on an AudioFmodConfig, which are specified in FmodEvents.Events
+    /// Playback for a playable FMOD audio event. Allows you to update its parameters.
+    /// Produced by calling Play() on an AudioFmodConfig, which are specified in FmodEvents.AudioEvents
     /// </summary>
     public abstract class FmodAudioPlayback : FmodAudioPlaybackBase, IAudioPlayback
     {
-        private EventInstance instance;
-        protected EventInstance Instance => instance;
-
-        private EventDescription eventDescription;
-        
-        private bool isOneshot = false;
-
-        public bool CanBeCleanedUp
-        {
-            get
-            {
-                if (!Instance.isValid())
-                    return true;
-                
-                Instance.getPlaybackState(out PLAYBACK_STATE playbackState);
-                return playbackState == PLAYBACK_STATE.STOPPED;
-            }
-        }
-
-        private string name;
-        public string Name => name;
-
-        private string searchKeywords;
-        public string SearchKeywords => searchKeywords;
-
-        public bool IsOneshot => isOneshot;
-        public float NormalizedProgress
-        {
-            get
-            {
-                if (!eventDescription.isValid() || !instance.isValid())
-                    return 0.0f;
-                
-                eventDescription.getLength(out int timelineDurationInMilliseconds);
-                instance.getTimelinePosition(out int timelinePositionInMilliSeconds);
-                return (float)(timelinePositionInMilliSeconds / (double)timelineDurationInMilliseconds);
-            }
-        }
-
-        public float Volume
-        {
-            get
-            {
-                if (!eventDescription.isValid() || !instance.isValid())
-                    return 1.0f;
-                instance.getVolume(out float volume);
-                return volume;
-            }
-            set
-            {
-                if (!eventDescription.isValid() || !instance.isValid())
-                    return;
-                
-                instance.setVolume(Mathf.Max(value, 0.0f));
-            }
-        }
-        
-        private float smoothDampVolumeVelocity;
-
         public void Play(EventDescription eventDescription, Transform source)
         {
             eventDescription.getPath(out string path);
@@ -95,62 +42,46 @@ namespace RoyTheunissen.FMODSyntax
 
             // Events are called something like event:/ but we want to get rid of any prefix like that.
             // Also every 'folder' along the way will be treated like a sort of 'tag'
-            searchKeywords = path.Substring(path.IndexOf("/", StringComparison.Ordinal) + 1).Replace('/', ',');
+            SearchKeywords = path.Substring(path.IndexOf("/", StringComparison.Ordinal) + 1).Replace('/', ',');
             
-            name = Path.GetFileName(path);
+            Name = Path.GetFileName(path);
 
-            this.eventDescription = eventDescription;
-            eventDescription.createInstance(out instance);
+            EventDescription = eventDescription;
+            eventDescription.createInstance(out EventInstance newInstance);
+            Instance = newInstance;
             
             if (source != null)
             {
-                instance.set3DAttributes(RuntimeUtils.To3DAttributes(source));
-                RuntimeManager.AttachInstanceToGameObject(instance, source);
+                Instance.set3DAttributes(RuntimeUtils.To3DAttributes(source));
+                RuntimeManager.AttachInstanceToGameObject(Instance, source);
             }
             
             // Cache properties.
-            bool isSnapshot;
-            eventDescription.isSnapshot(out isSnapshot);
-            if (!isSnapshot)
-                eventDescription.isOneshot(out isOneshot);
+            eventDescription.isOneshot(out bool isOneshotResult);
+            IsOneshot = isOneshotResult;
 
             InitializeParameters();
 
-            instance.start();
+            Instance.start();
 
             FmodSyntaxSystem.RegisterActiveEventPlayback(this);
         }
 
-        protected virtual void InitializeParameters()
-        {
-            // We need to pass our instance on to our parameters so we can set its values correctly.
-        }
-
         public void Stop()
         {
-            if (instance.isValid())
-                instance.stop(STOP_MODE.ALLOWFADEOUT);
-        }
-        
-        public void MoveTowardsVolume(float target, float maxDelta)
-        {
-            Volume = Mathf.MoveTowards(Volume, target, maxDelta);
-        }
-        
-        public void SmoothDampTowardsVolume(float target, float duration)
-        {
-            Volume = Mathf.SmoothDamp(Volume, target, ref smoothDampVolumeVelocity, duration);
+            if (Instance.isValid())
+                Instance.stop(STOP_MODE.ALLOWFADEOUT);
         }
 
-        public void Cleanup()
+        public override void Cleanup()
         {
-            if (instance.isValid())
+            if (Instance.isValid())
             {
-                RuntimeManager.DetachInstanceFromGameObject(instance);
-                if (eventDescription.isValid() && isOneshot)
+                RuntimeManager.DetachInstanceFromGameObject(Instance);
+                if (EventDescription.isValid() && IsOneshot)
                 {
-                    instance.release();
-                    instance.clearHandle();
+                    Instance.release();
+                    Instance.clearHandle();
                 }
             }
 

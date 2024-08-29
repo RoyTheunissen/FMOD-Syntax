@@ -14,9 +14,9 @@ namespace RoyTheunissen.FMODSyntax
     {
         [SerializeField] private string fmodSnapshotGuid;
         
-        [NonSerialized] private FmodSnapshotConfig cachedFmodSnapshotConfig;
+        [NonSerialized] private FmodSnapshotConfigBase cachedFmodSnapshotConfig;
         [NonSerialized] private string guidFmodSnapshotConfigIsCachedFor;
-        private FmodSnapshotConfig FmodSnapshotConfig
+        private FmodSnapshotConfigBase FmodSnapshotConfig
         {
             get
             {
@@ -40,12 +40,12 @@ namespace RoyTheunissen.FMODSyntax
         public string Path => IsAssigned ? FmodSnapshotConfig.Path : "";
 
         [NonSerialized] private static bool didCacheSnapshots;
-        private static readonly Dictionary<string, FmodSnapshotConfig> snapshotsByGuid =
-            new Dictionary<string, FmodSnapshotConfig>();
+        private static readonly Dictionary<string, FmodSnapshotConfigBase> snapshotsByGuid =
+            new Dictionary<string, FmodSnapshotConfigBase>();
 
         public FmodSnapshotPlayback Play()
         {
-            return FmodSnapshotConfig.Play();
+            return FmodSnapshotConfig.PlayGeneric();
         }
 
 #if UNITY_EDITOR
@@ -58,11 +58,11 @@ namespace RoyTheunissen.FMODSyntax
 #endif // UNITY_EDITOR
         
         
-        public static FmodSnapshotConfig GetSnapshotConfig(string guid)
+        public static FmodSnapshotConfigBase GetSnapshotConfig(string guid)
         {
             CacheSnapshotConfigs();
             
-            if (snapshotsByGuid.TryGetValue(guid, out FmodSnapshotConfig result))
+            if (snapshotsByGuid.TryGetValue(guid, out FmodSnapshotConfigBase result))
                 return result;
 
             return null;
@@ -88,11 +88,11 @@ namespace RoyTheunissen.FMODSyntax
                 FieldInfo[] fields = containerType.GetFields(BindingFlags.Public | BindingFlags.Static);
                 for (int i = 0; i < fields.Length; i++)
                 {
-                    if (fields[i].FieldType != typeof(FmodSnapshotConfig))
+                    if (!typeof(FmodSnapshotConfigBase).IsAssignableFrom(fields[i].FieldType))
                         continue;
 
                     // If the field is a valid snapshot config, add it to the dictionary.
-                    if (fields[i].GetValue(null) is FmodSnapshotConfig snapshotConfig)
+                    if (fields[i].GetValue(null) is FmodSnapshotConfigBase snapshotConfig)
                         snapshotsByGuid.Add(snapshotConfig.Id, snapshotConfig);
                 }
             }
@@ -100,7 +100,7 @@ namespace RoyTheunissen.FMODSyntax
 
         public override string ToString()
         {
-            FmodSnapshotConfig config = FmodSnapshotConfig;
+            FmodSnapshotConfigBase config = FmodSnapshotConfig;
             return config == null ? "" : config.ToString();
         }
     }

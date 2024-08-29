@@ -24,7 +24,7 @@ namespace RoyTheunissen.FMODSyntax
                 this, string.Empty, "Snapshots", string.Empty);
 
             EditorEventRef[] snapshots = EventManager.Events
-                .Where(e => e.Path.StartsWith(EditorEventRefExtensions.SnapshotPrefix) && e.LocalParameters.Count == 0)
+                .Where(e => e.Path.StartsWith(EditorEventRefExtensions.SnapshotPrefix))
                 .OrderBy(e => e.Path)
                 .ToArray();
             string[] paths = new string[snapshots.Length];

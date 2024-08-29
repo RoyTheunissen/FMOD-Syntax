@@ -1,0 +1,18 @@
+public sealed class ##EventName##Config : FmodSnapshotConfig<##EventName##Playback>
+{
+    public ##EventName##Config(string guid) : base(guid) { }
+    
+    public override ##EventName##Playback Play()
+    {
+        ##EventName##Playback instance = new ##EventName##Playback();
+        instance.Play(EventDescription);
+        return instance;
+    }
+    ##ConfigPlayMethodWithParameters##
+}
+##Attributes##
+public sealed class ##EventName##Playback : FmodSnapshotPlayback
+{
+    ##EventParameters##
+}
+
