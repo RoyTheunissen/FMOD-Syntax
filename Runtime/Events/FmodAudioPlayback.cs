@@ -77,8 +77,10 @@ namespace RoyTheunissen.FMODSyntax
         {
             if (Instance.isValid())
             {
+                Instance.stop(STOP_MODE.IMMEDIATE);
+                
                 RuntimeManager.DetachInstanceFromGameObject(Instance);
-                if (EventDescription.isValid() && IsOneshot)
+                if (EventDescription.isValid())
                 {
                     Instance.release();
                     Instance.clearHandle();

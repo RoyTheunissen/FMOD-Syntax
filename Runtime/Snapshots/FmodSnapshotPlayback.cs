@@ -96,6 +96,8 @@ namespace RoyTheunissen.FMODSyntax
         {
             if (Instance.isValid())
             {
+                Instance.stop(STOP_MODE.IMMEDIATE);
+                
                 if (EventDescription.isValid())
                 {
                     Instance.release();
