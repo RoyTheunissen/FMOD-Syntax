@@ -93,7 +93,10 @@ namespace RoyTheunissen.FMODSyntax
         
         public void SmoothDampTowardsVolume(float target, float duration)
         {
-            Volume = Mathf.SmoothDamp(Volume, target, ref smoothDampVolumeVelocity, duration);
+            // Need to explicitly check for this or it can return NaN if Time.timeScale is 0. Yes, really.
+            // https://discussions.unity.com/t/mathf-smoothdamp-assigns-nan/383635/13
+            if (!Mathf.Approximately(Time.deltaTime, 0.0f))
+                Volume = Mathf.SmoothDamp(Volume, target, ref smoothDampVolumeVelocity, duration);
         }
 
         public abstract void Cleanup();
