@@ -23,7 +23,7 @@ namespace RoyTheunissen.FMODSyntax
             { ")", "" },
         };
 
-        private static string Filter(string name, bool performReplacements = true)
+        public static string Filter(string name, bool performReplacements = true)
         {
             if (performReplacements)
             {

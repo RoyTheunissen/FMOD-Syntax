@@ -47,8 +47,14 @@ namespace RoyTheunissen.FMODSyntax
             {
                 SetupWizard setupWizard = GetWindow<SetupWizard>(true, "FMOD Syntax Setup Wizard");
                 setupWizard.minSize = setupWizard.maxSize = new Vector2(500, 270);
-                setupWizard.namespaceForGeneratedCode = $"{Application.companyName}.{Application.productName}.FMOD";
+                setupWizard.namespaceForGeneratedCode =
+                    $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.FMOD";
             };
+        }
+
+        private static string SanitizeNamespace(string @namespace)
+        {
+            return FmodSyntaxUtilities.Filter(@namespace, false);
         }
 
         private void OnGUI()
