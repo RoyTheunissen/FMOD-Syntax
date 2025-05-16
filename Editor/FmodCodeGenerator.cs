@@ -1164,8 +1164,9 @@ namespace RoyTheunissen.FMODSyntax
                 string bankPath = bank.getPath();
                 string bankName = bank.GetName();
 
-                if (bankName.Contains("."))
+                if (bankPath.Contains("."))
                     continue;
+                
                 bankFieldGenerator.ReplaceKeyword("BankName", bankName);
                 bankFieldGenerator.ReplaceKeyword("BankPath", bankPath);
                 banksCode += bankFieldGenerator.GetCode();
