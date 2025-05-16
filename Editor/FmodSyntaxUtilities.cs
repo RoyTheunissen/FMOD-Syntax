@@ -21,6 +21,7 @@ namespace RoyTheunissen.FMODSyntax
             { ".", "" },
             { "(", "" },
             { ")", "" },
+            { "&", "And" },
         };
 
         public static string Filter(string name, bool performReplacements = true)
