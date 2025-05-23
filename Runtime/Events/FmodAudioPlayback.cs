@@ -1,9 +1,9 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
-using RoyTheunissen.FMODSyntax.Callbacks;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
@@ -29,6 +29,29 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public abstract class FmodAudioPlayback : FmodAudioPlaybackBase, IAudioPlayback
     {
+        public delegate void TimelineMarkerReachedHandler(FmodAudioPlayback playback, string markerName);
+        private int timelineMarkerListenerCount;
+        private event TimelineMarkerReachedHandler timelineMarkerReachedEvent;
+        public event TimelineMarkerReachedHandler TimelineMarkerReachedEvent
+        {
+            add
+            {
+                timelineMarkerReachedEvent += value;
+                timelineMarkerListenerCount++;
+                
+                if (timelineMarkerListenerCount == 1)
+                    Instance.setCallback(OnTimelineMarkerReached, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+            }
+            remove
+            {
+                timelineMarkerReachedEvent -= value;
+                timelineMarkerListenerCount--;
+                
+                if (timelineMarkerListenerCount == 0)
+                    Instance.setCallback(null, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+            }
+        }
+        
         public void Play(EventDescription eventDescription, Transform source)
         {
             eventDescription.getPath(out string path);
@@ -87,7 +110,39 @@ namespace RoyTheunissen.FMODSyntax
                 }
             }
 
+            timelineMarkerReachedEvent = null;
+
             FmodSyntaxSystem.UnregisterActiveEventPlayback(this);
+        }
+
+        /// <summary>
+        /// Fluid method for subscribing to timeline events so you don't have to save the playback to a variable first
+        /// if you don't want to (for example for one-off sounds).
+        /// </summary>
+        public FmodAudioPlayback SubscribeToTimelineMarkerReachedEvent(TimelineMarkerReachedHandler handler)
+        {
+            TimelineMarkerReachedEvent += handler;
+            return this;
+        }
+        
+        /// <summary>
+        /// Fluid method for unsubscribing from timeline events so you don't have to save the playback to a variable
+        /// first if you don't want to (for example for one-off sounds).
+        /// </summary>
+        public FmodAudioPlayback UnsubscribeFromTimelineMarkerReachedEvent(TimelineMarkerReachedHandler handler)
+        {
+            TimelineMarkerReachedEvent -= handler;
+            return this;
+        }
+        
+        private RESULT OnTimelineMarkerReached(EVENT_CALLBACK_TYPE type, IntPtr @event, IntPtr parameterPtr)
+        {
+            TIMELINE_MARKER_PROPERTIES parameter = (TIMELINE_MARKER_PROPERTIES)Marshal.PtrToStructure(
+                parameterPtr, typeof(TIMELINE_MARKER_PROPERTIES));
+            
+            timelineMarkerReachedEvent?.Invoke(this, parameter.name);
+            
+            return RESULT.OK;
         }
     }
 }
