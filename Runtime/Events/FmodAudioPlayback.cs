@@ -98,8 +98,13 @@ namespace RoyTheunissen.FMODSyntax
 
         public override void Cleanup()
         {
+            timelineMarkerReachedEvent = null;
+            timelineMarkerListenerCount = 0;
+            
             if (Instance.isValid())
             {
+                Instance.setCallback(null, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+                
                 Instance.stop(STOP_MODE.IMMEDIATE);
                 
                 RuntimeManager.DetachInstanceFromGameObject(Instance);
@@ -109,8 +114,6 @@ namespace RoyTheunissen.FMODSyntax
                     Instance.clearHandle();
                 }
             }
-
-            timelineMarkerReachedEvent = null;
 
             FmodSyntaxSystem.UnregisterActiveEventPlayback(this);
         }
