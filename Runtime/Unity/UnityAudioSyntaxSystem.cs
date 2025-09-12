@@ -30,7 +30,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             }
         }
 
-        public static UnityAudioSyntaxSystem Instance => FmodSyntaxSystem.UnityAudioSyntaxSystem;
+        public static UnityAudioSyntaxSystem Instance => AudioSyntaxSystem.UnityAudioSyntaxSystem;
         
         [NonSerialized] private AudioSource audioSourcePooledPrefab;
         [NonSerialized] private AudioMixerGroup defaultMixerGroup;

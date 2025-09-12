@@ -87,7 +87,7 @@ namespace RoyTheunissen.FMODSyntax
 
             Instance.start();
 
-            FmodSyntaxSystem.RegisterActiveEventPlayback(this);
+            AudioSyntaxSystem.RegisterActiveEventPlayback(this);
         }
 
         public void Stop()
@@ -115,7 +115,7 @@ namespace RoyTheunissen.FMODSyntax
                 }
             }
 
-            FmodSyntaxSystem.UnregisterActiveEventPlayback(this);
+            AudioSyntaxSystem.UnregisterActiveEventPlayback(this);
         }
 
         /// <summary>

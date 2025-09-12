@@ -10,9 +10,9 @@ using UnityEditor;
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
-    /// Scriptable object that holds all the settings for the FMOD Syntax system.
+    /// Scriptable object that holds all the settings for the Audio Syntax system.
     /// </summary>
-    public sealed class FmodSyntaxSettings : ScriptableObject 
+    public sealed class AudioSyntaxSettings : ScriptableObject 
     {
         public enum SyntaxFormats
         {
@@ -48,20 +48,20 @@ namespace RoyTheunissen.FMODSyntax
         [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.Flat;
         public SyntaxFormats SyntaxFormat => syntaxFormat;
 
-        [NonSerialized] private static FmodSyntaxSettings cachedInstance;
+        [NonSerialized] private static AudioSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;
-        public static FmodSyntaxSettings Instance
+        public static AudioSyntaxSettings Instance
         {
             get
             {
 #if UNITY_EDITOR
                 if (!didCacheInstance)
                 {
-                    string[] guids = AssetDatabase.FindAssets($"t:{nameof(FmodSyntaxSettings)}");
+                    string[] guids = AssetDatabase.FindAssets($"t:{nameof(AudioSyntaxSettings)}");
                     if (guids.Length > 0)
                     {
                         string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                        cachedInstance = AssetDatabase.LoadAssetAtPath<FmodSyntaxSettings>(path);
+                        cachedInstance = AssetDatabase.LoadAssetAtPath<AudioSyntaxSettings>(path);
                         didCacheInstance = cachedInstance != null;
                     }
                 }

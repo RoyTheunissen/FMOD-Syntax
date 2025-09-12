@@ -39,7 +39,7 @@ namespace RoyTheunissen.FMODSyntax
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
-            string[] settingsAsset = AssetDatabase.FindAssets($"t:{nameof(FmodSyntaxSettings)}");
+            string[] settingsAsset = AssetDatabase.FindAssets($"t:{nameof(AudioSyntaxSettings)}");
             if (settingsAsset.Length > 0)
                 return;
 
@@ -114,8 +114,8 @@ namespace RoyTheunissen.FMODSyntax
         
         private void InitializeFmodSyntaxSystem()
         {
-            FmodSyntaxSettings settings = CreateScriptableObject<FmodSyntaxSettings>(
-                settingsFolderPath, nameof(FmodSyntaxSettings));
+            AudioSyntaxSettings settings = CreateScriptableObject<AudioSyntaxSettings>(
+                settingsFolderPath, nameof(AudioSyntaxSettings));
             
             settings.InitializeFromWizard(
                 generatedScriptsFolderPath, namespaceForGeneratedCode, shouldGenerateAssemblyDefinition);

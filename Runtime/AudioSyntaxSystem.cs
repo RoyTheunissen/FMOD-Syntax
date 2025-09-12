@@ -11,7 +11,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Class to use to expose information, help manage playback instances, that sort of thing.
     /// </summary>
-    public static class FmodSyntaxSystem
+    public static class AudioSyntaxSystem
     {
         private static readonly List<IAudioPlayback> activeEventPlaybacks = new List<IAudioPlayback>();
         public static List<IAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;

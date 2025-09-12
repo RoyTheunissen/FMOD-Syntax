@@ -74,8 +74,8 @@ namespace RoyTheunissen.FMODSyntax
             [SerializeField] private string version = "0.0.0";
             public string Version => version;
 
-            [SerializeField] private FmodSyntaxSettings.SyntaxFormats syntaxFormat;
-            public FmodSyntaxSettings.SyntaxFormats SyntaxFormat => syntaxFormat;
+            [SerializeField] private AudioSyntaxSettings.SyntaxFormats syntaxFormat;
+            public AudioSyntaxSettings.SyntaxFormats SyntaxFormat => syntaxFormat;
 
             [SerializeField] private string[] eventGuidToPreviousSyntaxPaths = Array.Empty<string>();
             
@@ -115,7 +115,7 @@ namespace RoyTheunissen.FMODSyntax
             }
 
             public MetaData(
-                string version, FmodSyntaxSettings.SyntaxFormats syntaxFormat,
+                string version, AudioSyntaxSettings.SyntaxFormats syntaxFormat,
                 Dictionary<string, string> eventGuidToPreviousSyntaxPaths)
             {
                 this.version = version;
@@ -138,7 +138,7 @@ namespace RoyTheunissen.FMODSyntax
             Json,             // The new format that still stores old event data but also supports storing additional data
         }
         
-        private static string ScriptPathBase => FmodSyntaxSettings.Instance.GeneratedScriptsFolderPath;
+        private static string ScriptPathBase => AudioSyntaxSettings.Instance.GeneratedScriptsFolderPath;
         private const string TemplatePathBase = "Templates/Fmod/";
         
         private static string EventsScriptPath => ScriptPathBase + "FmodEvents.cs";
@@ -220,7 +220,7 @@ namespace RoyTheunissen.FMODSyntax
 
         private static EventFolder rootEventFolder;
         
-        private static FmodSyntaxSettings Settings => FmodSyntaxSettings.Instance;
+        private static AudioSyntaxSettings Settings => AudioSyntaxSettings.Instance;
         
         [NonSerialized] private static List<string> eventUsingDirectives = new List<string>();
         [NonSerialized] private static string eventUsingDirectivesCode;
@@ -471,7 +471,7 @@ namespace RoyTheunissen.FMODSyntax
                 // it specify a version number; just event GUIDs and their previous name.
                 string version = "0.0.1";
                 
-                FmodSyntaxSettings.SyntaxFormats syntaxFormat = FmodSyntaxSettings.SyntaxFormats.Flat;
+                AudioSyntaxSettings.SyntaxFormats syntaxFormat = AudioSyntaxSettings.SyntaxFormats.Flat;
                 
                 Dictionary<string, string> eventGuidToPreviousSyntaxPath = GetExistingEventSyntaxPathsByGuid();
                 
@@ -648,7 +648,7 @@ namespace RoyTheunissen.FMODSyntax
         private static string GetEventSyntaxName(string filteredPath)
         {
             // If specified, include the entire path as a prefix.
-            if (Settings.SyntaxFormat == FmodSyntaxSettings.SyntaxFormats.FlatWithPathIncludedInName)
+            if (Settings.SyntaxFormat == AudioSyntaxSettings.SyntaxFormats.FlatWithPathIncludedInName)
                 return filteredPath.Replace("_", "").Replace("/", "_");
             
             return FmodSyntaxUtilities.GetFilteredNameFromPath(filteredPath);
@@ -671,7 +671,7 @@ namespace RoyTheunissen.FMODSyntax
             string eventName = GetEventSyntaxName(filteredPath);
             
             if (Settings.SyntaxFormat !=
-                FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+                AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
             {
                 return eventName;
             }
@@ -890,7 +890,7 @@ namespace RoyTheunissen.FMODSyntax
                 EventFolder folder = rootEventFolder;
                 
                 if (Settings.SyntaxFormat ==
-                    FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+                    AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
                 {
                     folder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(path);
                 }
@@ -951,7 +951,7 @@ namespace RoyTheunissen.FMODSyntax
                 // Write new metadata to the file while with the current data while preserving the old one,
                 // because we may still need that one for generating other files.
                 string versionNumber = GetCurrentVersionNumber();
-                FmodSyntaxSettings.SyntaxFormats syntaxFormat = Settings.SyntaxFormat;
+                AudioSyntaxSettings.SyntaxFormats syntaxFormat = Settings.SyntaxFormat;
                 MetaData newMetaData = new MetaData(
                     versionNumber, syntaxFormat, activeEventGuidToCurrentSyntaxPath);
                 codeGenerator.ReplaceKeyword("MetaData", newMetaData.GetJson(), true);
@@ -1039,8 +1039,8 @@ namespace RoyTheunissen.FMODSyntax
             // Generate code for event aliases.
             if (Settings.GenerateFallbacksForChangedEvents)
             {
-                FmodSyntaxSettings.SyntaxFormats previousSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
-                FmodSyntaxSettings.SyntaxFormats currentSyntaxFormat = Settings.SyntaxFormat;
+                AudioSyntaxSettings.SyntaxFormats previousSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
+                AudioSyntaxSettings.SyntaxFormats currentSyntaxFormat = Settings.SyntaxFormat;
                 
                 foreach (KeyValuePair<EditorEventRef, string> eventPreviousPathPair in
                          eventFolder.ChildEventToAliasPath)
@@ -1086,7 +1086,7 @@ namespace RoyTheunissen.FMODSyntax
             // 'NameOfEventPlayback playback;' instead, without the 'AudioEvents.'
             eventTypesCodeToBePlacedOutsideOfRootFolder = string.Empty;
             const string eventTypesKeyword = "EventTypes";
-            if (Settings.SyntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+            if (Settings.SyntaxFormat == AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
             {
                 eventFolderGenerator.ReplaceKeyword(eventTypesKeyword, eventTypesCode, true);
             }
@@ -1099,7 +1099,7 @@ namespace RoyTheunissen.FMODSyntax
             // Also decide where to place the event type aliases, which should either be in the appropriate folder
             // or *next* to the AudioEvents class for folderless syntaxes.
             if (metaDataFromPreviousCodeGeneration.SyntaxFormat ==
-                FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+                AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
             {
                 // Previously we did use folders, so place the type aliases in the appropriate folder.
                 eventFolderGenerator.ReplaceKeyword(eventTypeAliasesKeyword, eventTypeAliasesCode);
@@ -1314,19 +1314,19 @@ namespace RoyTheunissen.FMODSyntax
         const string SnapshotContainerClass = "AudioSnapshots";
 
         private static string GetEventConfigType(
-            string eventSyntaxPath, FmodSyntaxSettings.SyntaxFormats syntaxFormat, string containerName)
+            string eventSyntaxPath, AudioSyntaxSettings.SyntaxFormats syntaxFormat, string containerName)
         {
             const string configSuffix = "Config";
-            if (syntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+            if (syntaxFormat == AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
                 return containerName + "." + eventSyntaxPath + configSuffix;
 
             return eventSyntaxPath + configSuffix;
         }
 
-        private static string GetEventPlaybackType(string eventSyntaxPath, FmodSyntaxSettings.SyntaxFormats syntaxFormat)
+        private static string GetEventPlaybackType(string eventSyntaxPath, AudioSyntaxSettings.SyntaxFormats syntaxFormat)
         {
             const string playbackSuffix = "Playback";
-            if (syntaxFormat == FmodSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+            if (syntaxFormat == AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
                 return EventContainerClass + "." + eventSyntaxPath + playbackSuffix;
 
             return eventSyntaxPath + playbackSuffix;
@@ -1404,8 +1404,8 @@ namespace RoyTheunissen.FMODSyntax
 
         private static void RefactorOldEventReferences(string containerName)
         {
-            FmodSyntaxSettings.SyntaxFormats oldSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
-            FmodSyntaxSettings.SyntaxFormats newSyntaxFormat = Settings.SyntaxFormat;
+            AudioSyntaxSettings.SyntaxFormats oldSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
+            AudioSyntaxSettings.SyntaxFormats newSyntaxFormat = Settings.SyntaxFormat;
             
             Dictionary<string, string> renamesToPerform = new Dictionary<string, string>();
             foreach (KeyValuePair<string,string> previousEventPathToNewPath in detectedEventChanges)

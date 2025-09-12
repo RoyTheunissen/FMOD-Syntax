@@ -6,7 +6,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Draws a button for re-generating FMOD code.
     /// </summary>
-    [CustomEditor(typeof(FmodSyntaxSettings))]
+    [CustomEditor(typeof(AudioSyntaxSettings))]
     public class FmodSyntaxSettingsEditor : Editor
     {
         public override void OnInspectorGUI()
