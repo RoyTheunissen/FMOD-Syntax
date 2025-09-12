@@ -57,7 +57,7 @@ namespace RoyTheunissen.FMODSyntax
         [SerializeField, HideInInspector] private AudioMixerGroup defaultMixerGroup;
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
         
-        [SerializeField, HideInInspector] private FolderReference unityAudioConfigRootFolder;
+        [SerializeField] private FolderReference unityAudioConfigRootFolder;
         public FolderReference UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
 
         [NonSerialized] private static AudioSyntaxSettings cachedInstance;

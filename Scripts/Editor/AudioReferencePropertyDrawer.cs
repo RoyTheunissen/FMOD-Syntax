@@ -1,4 +1,6 @@
+using System;
 using FMODUnity;
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -12,13 +14,40 @@ namespace RoyTheunissen.FMODSyntax
     [CustomPropertyDrawer(typeof(AudioReference))]
     public class AudioReferencePropertyDrawer : PropertyDrawer
     {
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        private string GetDisplayText(
+            bool supportsBothSystems, AudioReference.Modes mode, UnityAudioConfigBase unityAudioConfig,
+            string fmodEventGuid)
         {
-#if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
-            return EditorGUIUtility.singleLineHeight * 2 + EditorGUIUtility.standardVerticalSpacing;
-#else
-            return base.GetPropertyHeight(property, label);
-#endif
+            string displayText;
+            switch (mode)
+            {
+                case AudioReference.Modes.Unity:
+                    displayText = unityAudioConfig == null ? "" : unityAudioConfig.name;
+                    if (supportsBothSystems)
+                        displayText += " (Unity)";
+                    break;
+
+                case AudioReference.Modes.FMOD:
+                    if (string.IsNullOrEmpty(fmodEventGuid))
+                    {
+                        displayText = "";
+                        break;
+                    }
+
+                    GUID id = GUID.Parse(fmodEventGuid);
+                    EditorEventRef eventRef = EventManager.EventFromGUID(id);
+                    displayText = eventRef.GetDisplayName();
+                    
+                    if (supportsBothSystems)
+                        displayText += " (FMOD)";
+                    
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+            }
+
+            return displayText;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -30,34 +59,36 @@ namespace RoyTheunissen.FMODSyntax
             if (property.IsInArray())
                 label = GUIContent.none;
             
-            SerializedProperty audioConfigProperty = property.FindPropertyRelative("fmodEventGuid");
+            SerializedProperty unityAudioConfigProperty = property.FindPropertyRelative("unityAudioConfig");
+            SerializedProperty fmodAudioConfigProperty = property.FindPropertyRelative("fmodEventGuid");
+
+            SerializedProperty audioConfigProperty;
+            bool supportsBothSystems = false;
+#if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
+            if (unityAudioConfigProperty.objectReferenceValue != null)
+                audioConfigProperty = unityAudioConfigProperty;
+            else
+                audioConfigProperty = fmodAudioConfigProperty;
+            supportsBothSystems = true;
+#elif UNITY_AUDIO_SYNTAX
+            audioConfigProperty = unityAudioConfigProperty;
+#elif FMOD_AUDIO_SYNTAX
+            audioConfigProperty = fmodAudioConfigProperty;
+#else
+            audioConfigProperty = null;
+            EditorGUI.Label(position, "Select at least one audio system.");
+            return;
+#endif
+            
+            SerializedProperty modeProperty = property.FindPropertyRelative("mode");
             
             // Figure out the display text and the content property.
-            string displayedText;
-            string guid = audioConfigProperty.stringValue;
-            if (string.IsNullOrEmpty(guid))
-            {
-                displayedText = "";
-            }
-            else
-            {
-                GUID id = GUID.Parse(guid);
-                EditorEventRef eventRef = EventManager.EventFromGUID(id);
-                displayedText = eventRef.GetDisplayName();
-            }
+            string displayedText = GetDisplayText(supportsBothSystems,
+                (AudioReference.Modes)modeProperty.intValue,
+                (UnityAudioConfigBase)unityAudioConfigProperty.objectReferenceValue,
+                fmodAudioConfigProperty.stringValue);
 
-            Rect configRect;
-#if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
-            SerializedProperty modeProperty = property.FindPropertyRelative("mode");
-            Rect modeRect = position.GetControlFirstRect();
-            EditorGUI.PropertyField(modeRect, modeProperty, label);
-            label = GUIContent.none;
-            
-            configRect = modeRect.GetControlNextRect().GetLabelRectRemainder();
-            configRect.xMin += 2;
-#else
-            configRect = position;
-#endif
+            Rect configRect = position;
 
             // Draw a dropdown button to select the audio config.
             EditorGUI.BeginProperty(configRect, label, audioConfigProperty);
@@ -68,8 +99,10 @@ namespace RoyTheunissen.FMODSyntax
             {
                 Rect dropDownRect = configRect;
                 dropDownRect.xMax += 200;
-                
-                AudioReferenceDropdown menu = new AudioReferenceDropdown(new AdvancedDropdownState(), audioConfigProperty);
+
+                AudioReferenceDropdown menu = new(
+                    new AdvancedDropdownState(), property.serializedObject, unityAudioConfigProperty,
+                    fmodAudioConfigProperty, modeProperty);
                 menu.Show(dropDownRect, 200);
             }
             EditorGUI.EndProperty();

@@ -23,10 +23,6 @@ namespace RoyTheunissen.FMODSyntax
             FMOD,
         }
         
-        // If only one audio platform is active, then there is no need to show the current platform in the inspector.
-#if (!FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX) || (FMOD_AUDIO_SYNTAX && !UNITY_AUDIO_SYNTAX)
-        [HideInInspector]
-#endif
 #pragma warning disable CS0414 // Field is assigned but its value is never used
 #if FMOD_AUDIO_SYNTAX
         [SerializeField] private Modes mode = Modes.FMOD;
@@ -35,20 +31,8 @@ namespace RoyTheunissen.FMODSyntax
 #endif
 #pragma warning restore CS0414 // Field is assigned but its value is never used
         
-        private Modes Mode
-        {
-            get
-            {
-#if FMOD_AUDIO_SYNTAX && !UNITY_AUDIO_SYNTAX
-                return Modes.FMOD;
-#elif !FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX
-                return Modes.Unity;
-#else
-                return mode;
-#endif
-            }
-        }
-        
+        private Modes Mode => mode;
+
         [SerializeField] private UnityAudioConfigBase unityAudioConfig;
         public UnityAudioConfigBase UnityAudioConfig => unityAudioConfig;
 
