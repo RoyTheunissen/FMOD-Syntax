@@ -6,6 +6,10 @@ using RoyTheunissen.FMODSyntax.Callbacks;
 using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
 #endif // UNITY_AUDIO_SYNTAX
 
+#if FMOD_AUDIO_SYNTAX
+using RoyTheunissen.FMODSyntax;
+#endif // FMOD_AUDIO_SYNTAX
+
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
@@ -42,6 +46,28 @@ namespace RoyTheunissen.FMODSyntax
             cachedUnityAudioSyntaxSystem = new UnityAudioSyntaxSystem();
         }
 #endif // UNITY_AUDIO_SYNTAX
+        
+#if FMOD_AUDIO_SYNTAX
+        [NonSerialized] private static FmodAudioSyntaxSystem cachedFmodAudioSyntaxSystem;
+        [NonSerialized] private static bool initializedFmodAudioSyntaxSystem;
+        public static FmodAudioSyntaxSystem FmodAudioSyntaxSystem
+        {
+            get
+            {
+                InitializeFmodAudioSyntaxSystem();
+                return cachedFmodAudioSyntaxSystem;
+            }
+        }
+
+        public static void InitializeFmodAudioSyntaxSystem()
+        {
+            if (initializedFmodAudioSyntaxSystem)
+                return;
+            
+            initializedFmodAudioSyntaxSystem = true;
+            cachedFmodAudioSyntaxSystem = new FmodAudioSyntaxSystem();
+        }
+#endif // FMOD_AUDIO_SYNTAX
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
