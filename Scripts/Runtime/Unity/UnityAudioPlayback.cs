@@ -44,7 +44,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             }
         }
 
-        public abstract float Volume { get; }
+        public abstract float Volume { get; set; }
 
         private bool canBeCleanedUp;
         public bool CanBeCleanedUp => canBeCleanedUp;
@@ -189,9 +189,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         
         private float volumeAdjustVelocity;
         
-        public override float Volume => VolumeFactor;
-
-        public float VolumeFactor
+        public override float Volume
         {
             get => volumeFactor;
             set
@@ -236,7 +234,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         
         protected void UpdateAudioSourceVolume()
         {
-            Source.volume = VolumeFactorOverride * Config.VolumeFactor * VolumeFactor;
+            Source.volume = VolumeFactorOverride * Config.VolumeFactor * Volume;
         }
         
         protected void TryFiringRemainingEvents(float timePrevious, float timeCurrent)
@@ -270,13 +268,13 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         
         public ThisType MoveTowardsVolume(float volume, float amount)
         {
-            VolumeFactor = Mathf.MoveTowards(VolumeFactor, volume, amount);
+            Volume = Mathf.MoveTowards(Volume, volume, amount);
             return this as ThisType;
         }
         
         public ThisType SmoothDampVolume(float volume, float duration)
         {
-            VolumeFactor = Mathf.SmoothDamp(VolumeFactor, volume, ref volumeAdjustVelocity, duration);
+            Volume = Mathf.SmoothDamp(Volume, volume, ref volumeAdjustVelocity, duration);
             return this as ThisType;
         }
         

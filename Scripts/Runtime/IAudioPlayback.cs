@@ -11,8 +11,8 @@ namespace RoyTheunissen.FMODSyntax
         string SearchKeywords { get; }
         bool IsOneshot { get; }
         float NormalizedProgress { get; }
-        float Volume { get; }
-        
+        float Volume { get; set; }
+
         /// <summary>
         /// Cleanup is responsible for finalizing playback and de-allocating whatever resources were used. 
         /// </summary>

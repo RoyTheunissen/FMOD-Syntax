@@ -118,6 +118,12 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             if (time >= duration + Padding)
                 Stop();
         }
+        
+        public UnityAudioOneOffPlayback SetVolume(float volume)
+        {
+            Volume = volume;
+            return this;
+        }
 
         protected override void OnStop()
         {

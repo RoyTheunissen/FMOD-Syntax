@@ -100,9 +100,9 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             timePrevious = time;
         }
 
-        public UnityAudioLoopingPlayback SetVolumeFactor(float volumeFactor)
+        public UnityAudioLoopingPlayback SetVolume(float volume)
         {
-            VolumeFactor = volumeFactor;
+            Volume = volume;
             return this;
         }
 
