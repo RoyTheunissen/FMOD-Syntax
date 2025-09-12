@@ -44,6 +44,8 @@ namespace RoyTheunissen.FMODSyntax
             
             initializedUnityAudioSyntaxSystem = true;
             cachedUnityAudioSyntaxSystem = new UnityAudioSyntaxSystem();
+            cachedUnityAudioSyntaxSystem.Initialize(
+                AudioSyntaxSettings.Instance.AudioSourcePooledPrefab, AudioSyntaxSettings.Instance.DefaultMixerGroup);
         }
 #endif // UNITY_AUDIO_SYNTAX
         

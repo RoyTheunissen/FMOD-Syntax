@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,12 +8,27 @@ namespace RoyTheunissen.FMODSyntax
     /// Draws a button for re-generating FMOD code.
     /// </summary>
     [CustomEditor(typeof(AudioSyntaxSettings))]
-    public class FmodSyntaxSettingsEditor : Editor
+    public class AudioSyntaxSettingsEditor : Editor
     {
+        private SerializedProperty audioSourcePooledPrefabProperty;
+        private SerializedProperty defaultMixerGroupProperty;
+
+        private void OnEnable()
+        {
+            audioSourcePooledPrefabProperty = serializedObject.FindProperty("audioSourcePooledPrefab");
+            defaultMixerGroupProperty = serializedObject.FindProperty("defaultMixerGroup");
+        }
+
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
             base.OnInspectorGUI();
+
+#if UNITY_AUDIO_SYNTAX
+            EditorGUILayout.PropertyField(audioSourcePooledPrefabProperty);
+            EditorGUILayout.PropertyField(defaultMixerGroupProperty);
+#endif // UNITY_AUDIO_SYNTAX
+            
             serializedObject.ApplyModifiedProperties();
             
             // Draw a button to generate FMOD code. This is particularly useful to have here because once you are done

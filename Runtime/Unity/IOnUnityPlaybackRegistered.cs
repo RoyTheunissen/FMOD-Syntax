@@ -1,3 +1,5 @@
+#if UNITY_AUDIO_SYNTAX
+
 namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 {
     /// <summary>
@@ -9,3 +11,5 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         void OnUnityPlaybackUnregistered(UnityAudioPlayback playback);
     }
 }
+
+#endif // UNITY_AUDIO_SYNTAX

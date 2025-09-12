@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.Serialization;
 
 #if UNITY_EDITOR
@@ -47,6 +48,13 @@ namespace RoyTheunissen.FMODSyntax
                  "require more typing.")]
         [SerializeField] private SyntaxFormats syntaxFormat = SyntaxFormats.Flat;
         public SyntaxFormats SyntaxFormat => syntaxFormat;
+
+        [Header("Unity")]
+        [SerializeField, HideInInspector] private AudioSource audioSourcePooledPrefab;
+        public AudioSource AudioSourcePooledPrefab => audioSourcePooledPrefab;
+
+        [SerializeField, HideInInspector] private AudioMixerGroup defaultMixerGroup;
+        public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
 
         [NonSerialized] private static AudioSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;

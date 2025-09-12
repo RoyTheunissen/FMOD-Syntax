@@ -1,3 +1,5 @@
+#if UNITY_AUDIO_SYNTAX
+
 using System;
 using System.Collections.Generic;
 using RoyTheunissen.FMODSyntax.Utilities;
@@ -146,3 +148,5 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         }
     }
 }
+
+#endif // UNITY_AUDIO_SYNTAX

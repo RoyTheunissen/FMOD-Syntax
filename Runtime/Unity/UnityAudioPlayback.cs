@@ -1,3 +1,5 @@
+#if UNITY_AUDIO_SYNTAX
+
 using System;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -372,3 +374,5 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         // }
     }
 }
+
+#endif // UNITY_AUDIO_SYNTAX
