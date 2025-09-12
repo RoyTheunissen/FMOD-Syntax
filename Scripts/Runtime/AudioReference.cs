@@ -108,47 +108,30 @@ namespace RoyTheunissen.FMODSyntax
         }
 #endif // UNITY_AUDIO_SYNTAX
         
-// CASE 0: Only FMOD is active. Then the generic Play method returns FmodParameterlessAudioPlayback.
-#if FMOD_AUDIO_SYNTAX && !UNITY_AUDIO_SYNTAX
-        public FmodParameterlessAudioPlayback Play(Transform source = null)
-        {
-            return PlayFMOD(source);
-        }
-
-        IAudioPlayback IAudioConfig.Play(Transform source) => Play(source);
-
-        // CASE 1: Only FMOD is active. Then the generic Play method returns FmodParameterlessAudioPlayback.
-#elif !FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX
-
-        public UnityAudioPlayback Play(Transform source = null)
-        {
-            return PlayUnity(source);
-        }
-
-        IAudioPlayback IAudioConfig.Play(Transform source) => Play(source);
-
-// CASE 2: Both FMOD and Unity solutions are active. Then the generic Play method returns IAudioPlayback.
-#elif FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX
         public IAudioPlayback Play(Transform source = null)
         {
             switch (Mode)
             {
-                case Modes.Unity: return PlayUnity(source);
-                case Modes.FMOD: return PlayFMOD(source);
+                case Modes.Unity:
+#if UNITY_AUDIO_SYNTAX
+                    return PlayUnity(source);
+#else
+                    Debug.LogError("Trying to play a Unity Audio Reference while the project is not configured for "+
+                                    "Unity native audio. Is the UNITY_AUDIO_SYNTAX scripting define symbol missing?");
+                    return null;
+#endif
+                case Modes.FMOD:
+#if FMOD_AUDIO_SYNTAX
+                    return PlayFMOD(source);
+#else
+                    Debug.LogError("Trying to play an FMOD Audio Reference while the project is not configured for "+
+                                    "FMOD. Is the FMOD_AUDIO_SYNTAX scripting define symbol missing?");
+                    return null;
+#endif
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-// CASE 3: Neither FMOD nor Unity solutions is active. This is an invalid configuration.
-#else
-        public IAudioPlayback Play(Transform source = null)
-        {
-            Debug.LogError("You tried to play an Audio reference but neither FMOD nor Unity audio is enabled. "+
-            "This is an invalid project configuration. Please add FMOD_AUDIO_SYNTAX , UNITY_AUDIO_SYNTAX, "+
-            "or both to your scripting define symbols.");
-        }
-#endif // FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
