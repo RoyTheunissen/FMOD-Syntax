@@ -58,6 +58,8 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public abstract class FmodSnapshotPlayback : FmodSnapshotPlaybackBase, IFmodPlayback
     {
+        public bool IsOneshot => false;
+
         public void Play(EventDescription eventDescription)
         {
             eventDescription.getPath(out string path);

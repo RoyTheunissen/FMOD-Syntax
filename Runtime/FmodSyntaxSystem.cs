@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using RoyTheunissen.FMODSyntax.Callbacks;
 
+#if UNITY_AUDIO_SYNTAX
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+#endif // UNITY_AUDIO_SYNTAX
+
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
@@ -9,13 +13,35 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public static class FmodSyntaxSystem
     {
-        private static readonly List<FmodAudioPlayback> activeEventPlaybacks = new List<FmodAudioPlayback>();
-        public static List<FmodAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
+        private static readonly List<IAudioPlayback> activeEventPlaybacks = new List<IAudioPlayback>();
+        public static List<IAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
 
         private static readonly List<IOnFmodPlayback> onEventPlaybackCallbackReceivers = new List<IOnFmodPlayback>();
         
         private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new List<FmodSnapshotPlayback>();
         public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
+        
+#if UNITY_AUDIO_SYNTAX
+        [NonSerialized] private static UnityAudioSyntaxSystem cachedUnityAudioSyntaxSystem;
+        [NonSerialized] private static bool initializedUnityAudioSyntaxSystem;
+        public static UnityAudioSyntaxSystem UnityAudioSyntaxSystem
+        {
+            get
+            {
+                InitializeUnityAudioSyntaxSystem();
+                return cachedUnityAudioSyntaxSystem;
+            }
+        }
+
+        public static void InitializeUnityAudioSyntaxSystem()
+        {
+            if (initializedUnityAudioSyntaxSystem)
+                return;
+            
+            initializedUnityAudioSyntaxSystem = true;
+            cachedUnityAudioSyntaxSystem = new UnityAudioSyntaxSystem();
+        }
+#endif // UNITY_AUDIO_SYNTAX
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
@@ -79,7 +105,7 @@ namespace RoyTheunissen.FMODSyntax
             // Cull any events that are ready to be cleaned up.
             for (int i = activeEventPlaybacks.Count - 1; i >= 0; i--)
             {
-                IFmodPlayback activeEvent = activeEventPlaybacks[i];
+                IAudioPlayback activeEvent = activeEventPlaybacks[i];
                 if (activeEvent.CanBeCleanedUp)
                     activeEvent.Cleanup();
             }

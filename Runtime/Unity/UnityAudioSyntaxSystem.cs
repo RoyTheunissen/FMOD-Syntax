@@ -1,0 +1,116 @@
+using System;
+using System.Collections.Generic;
+using RoyTheunissen.FMODSyntax.Utilities;
+using UnityEngine;
+using UnityEngine.Audio;
+using Object = UnityEngine.Object;
+
+namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+{
+    /// <summary>
+    /// System to be able to play back Unity native audio with a syntax similar to FMOD-Syntax.
+    /// </summary>
+    public sealed class UnityAudioSyntaxSystem 
+    {
+        private Pool<AudioSource> audioSourcesPool;
+        
+        private Transform cachedAudioSourceContainer;
+        private bool didCacheAudioSourceContainer;
+        private Transform AudioSourceContainer
+        {
+            get
+            {
+                if (!didCacheAudioSourceContainer)
+                {
+                    didCacheAudioSourceContainer = true;
+                    cachedAudioSourceContainer = new GameObject("Audio Sources").transform;
+                    Object.DontDestroyOnLoad(cachedAudioSourceContainer.gameObject);
+                }
+                return cachedAudioSourceContainer;
+            }
+        }
+
+        public static UnityAudioSyntaxSystem Instance => FmodSyntaxSystem.UnityAudioSyntaxSystem;
+        
+        [NonSerialized] private AudioSource audioSourcePooledPrefab;
+        [NonSerialized] private AudioMixerGroup defaultMixerGroup;
+        
+        [NonSerialized] private readonly List<UnityAudioPlayback> activePlaybacks = new();
+
+        [NonSerialized] private bool didInitialize;
+
+        public void Initialize(AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup)
+        {
+            if (!didInitialize)
+                return;
+
+            didInitialize = true;
+
+            this.audioSourcePooledPrefab = audioSourcePooledPrefab;
+            this.defaultMixerGroup = defaultMixerGroup;
+            
+            audioSourcesPool = new Pool<AudioSource>(() =>
+            {
+                AudioSource audioSource = Object.Instantiate(audioSourcePooledPrefab, AudioSourceContainer);
+
+#if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
+                audioSource.name = "AudioSource - (Unused)";
+#endif
+                return audioSource;
+            });
+        }
+        
+        public AudioSource GetAudioSourceForPlayback(UnityAudioConfigBase audioConfig)
+        {
+            AudioSource audioSource = audioSourcesPool.Get();
+            
+            // Assign the mixer group.
+            if (audioConfig.MixerGroup == null)
+                audioSource.outputAudioMixerGroup = defaultMixerGroup;
+            else
+                audioSource.outputAudioMixerGroup = audioConfig.MixerGroup;
+            
+            // Reset these to the default Unity values, just in case...
+            audioSource.clip = null;
+            audioSource.pitch = 1.0f;
+            audioSource.volume = 1.0f;
+            audioSource.loop = false;
+            audioSource.bypassEffects = false;
+            audioSource.bypassListenerEffects = false;
+            audioSource.bypassReverbZones = false;
+            audioSource.maxDistance = 500;
+            audioSource.rolloffMode = AudioRolloffMode.Logarithmic;
+            audioSource.minDistance = 1;
+
+            return audioSource;
+        }
+        
+        public void ReturnAudioSourceForPlayback(AudioSource audioSource)
+        {
+            audioSourcesPool.Return(audioSource);
+            
+#if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
+            audioSource.name = "AudioSource - AVAILABLE";
+#endif // DEBUG_AUDIO_SOURCE_POOLING
+        }
+
+        public void RegisterPlayback(UnityAudioPlayback audioPlayback)
+        {
+            activePlaybacks.Add(audioPlayback);
+        }
+        
+        public void UnregisterPlayback(UnityAudioPlayback audioPlayback)
+        {
+            activePlaybacks.Remove(audioPlayback);
+        }
+        
+        public void ClearPlaybacks()
+        {
+            for (int i = activePlaybacks.Count - 1; i >= 0; i--)
+            {
+                activePlaybacks[i].Cleanup();
+            }
+            activePlaybacks.Clear();
+        }
+    }
+}
