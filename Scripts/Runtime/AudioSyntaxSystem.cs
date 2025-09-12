@@ -140,10 +140,24 @@ namespace RoyTheunissen.FMODSyntax
         }
 
         /// <summary>
-        /// Culls playbacks that are no longer necessary. You should perform this logic continuously.
-        /// You can either call this or use the ActivePlaybacks list / playback callbacks to do it in your own system.
+        /// It used to be required for users to call this every frame from somewhere in their game. Now that we wish to
+        /// do other functionality there as well, it has been renamed to Update. You should be calling that instead.
         /// </summary>
+        [Obsolete("This method is obsolete. Please call AudioSyntaxSystem.Update instead which will also cull playbacks.")]
         public static void CullPlaybacks()
+        {
+            Update();
+        }
+
+        /// <summary>
+        /// Call this every frame from your game and it will update the system as necessary.
+        /// </summary>
+        public static void Update()
+        {
+            CullPlaybacksInternal();
+        }
+        
+        private static void CullPlaybacksInternal()
         {
             // Cull any events that are ready to be cleaned up.
             for (int i = activeEventPlaybacks.Count - 1; i >= 0; i--)
