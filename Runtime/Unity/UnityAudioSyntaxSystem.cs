@@ -36,15 +36,27 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         [NonSerialized] private AudioMixerGroup defaultMixerGroup;
         
         [NonSerialized] private readonly List<UnityAudioPlayback> activePlaybacks = new();
+        
+        private static readonly List<IOnUnityPlaybackRegistered> onEventPlaybackCallbackReceivers = new();
 
         [NonSerialized] private bool didInitialize;
-
+        
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        private static void EditorInitializeOnload()
+        {
+            onEventPlaybackCallbackReceivers.Clear();
+        }
+#endif // UNITY_EDITOR
+        
         public void Initialize(AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup)
         {
             if (!didInitialize)
                 return;
 
             didInitialize = true;
+            
+            onEventPlaybackCallbackReceivers.Clear();
 
             this.audioSourcePooledPrefab = audioSourcePooledPrefab;
             this.defaultMixerGroup = defaultMixerGroup;
@@ -94,14 +106,24 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 #endif // DEBUG_AUDIO_SOURCE_POOLING
         }
 
-        public void RegisterPlayback(UnityAudioPlayback audioPlayback)
+        public void OnActiveEventPlaybackRegistered(UnityAudioPlayback playback)
         {
-            activePlaybacks.Add(audioPlayback);
+            activePlaybacks.Add(playback);
+            
+            for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
+            {
+                onEventPlaybackCallbackReceivers[i].OnUnityPlaybackRegistered(playback);
+            }
         }
         
-        public void UnregisterPlayback(UnityAudioPlayback audioPlayback)
+        public void OnActiveEventPlaybackUnregistered(UnityAudioPlayback playback)
         {
-            activePlaybacks.Remove(audioPlayback);
+            activePlaybacks.Remove(playback);
+            
+            for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
+            {
+                onEventPlaybackCallbackReceivers[i].OnUnityPlaybackUnregistered(playback);
+            }
         }
         
         public void ClearPlaybacks()
@@ -111,6 +133,16 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 activePlaybacks[i].Cleanup();
             }
             activePlaybacks.Clear();
+        }
+        
+        public static void RegisterEventPlaybackCallbackReceiver(IOnUnityPlaybackRegistered callbackReceiver)
+        {
+            onEventPlaybackCallbackReceivers.Add(callbackReceiver);
+        }
+        
+        public static void UnregisterEventPlaybackCallbackReceiver(IOnUnityPlaybackRegistered callbackReceiver)
+        {
+            onEventPlaybackCallbackReceivers.Remove(callbackReceiver);
         }
     }
 }

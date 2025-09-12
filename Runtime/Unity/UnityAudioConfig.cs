@@ -44,7 +44,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             audioSource.name = "AudioSource - " + playback;
 #endif // DEBUG_AUDIO_SOURCE_POOLING
 
-            UnityAudioSyntaxSystem.Instance.RegisterPlayback(playback);
+            AudioSyntaxSystem.RegisterActiveEventPlayback(playback);
 
             return playback;
         }

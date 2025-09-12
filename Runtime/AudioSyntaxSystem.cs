@@ -20,7 +20,7 @@ namespace RoyTheunissen.FMODSyntax
         private static readonly List<IAudioPlayback> activeEventPlaybacks = new List<IAudioPlayback>();
         public static List<IAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
 
-        private static readonly List<IOnFmodPlayback> onEventPlaybackCallbackReceivers = new List<IOnFmodPlayback>();
+        private static readonly List<IOnAudioPlaybackRegistration> onEventPlaybackCallbackReceivers = new();
         
         private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new List<FmodSnapshotPlayback>();
         public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
@@ -71,7 +71,7 @@ namespace RoyTheunissen.FMODSyntax
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
-        private static void Initialize()
+        private static void EditorInitializeOnload()
         {
             activeEventPlaybacks.Clear();
             onEventPlaybackCallbackReceivers.Clear();
@@ -84,24 +84,39 @@ namespace RoyTheunissen.FMODSyntax
             StopAllActiveSnapshotPlaybacks();
         }
         
-        public static void RegisterActiveEventPlayback(FmodAudioPlayback playback)
+        public static void RegisterActiveEventPlayback(IAudioPlayback playback)
         {
             activeEventPlaybacks.Add(playback);
             
             for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
             {
-                onEventPlaybackCallbackReceivers[i].OnFmodPlaybackRegistered(playback);
+                onEventPlaybackCallbackReceivers[i].OnAudioPlaybackRegistered(playback);
             }
+            
+#if FMOD_AUDIO_SYNTAX
+            if (playback is FmodAudioPlayback fmodAudioPlayback)
+                FmodAudioSyntaxSystem.OnActiveEventPlaybackRegistered(fmodAudioPlayback);
+#endif // FMOD_AUDIO_SYNTAX
+            
+#if UNITY_AUDIO_SYNTAX
+            if (playback is UnityAudioPlayback unityAudioPlayback)
+                UnityAudioSyntaxSystem.OnActiveEventPlaybackRegistered(unityAudioPlayback);
+#endif // UNITY_AUDIO_SYNTAX
         }
         
-        public static void UnregisterActiveEventPlayback(FmodAudioPlayback playback)
+        public static void UnregisterActiveEventPlayback(IAudioPlayback playback)
         {
             activeEventPlaybacks.Remove(playback);
             
             for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
             {
-                onEventPlaybackCallbackReceivers[i].OnFmodPlaybackUnregistered(playback);
+                onEventPlaybackCallbackReceivers[i].OnAudioPlaybackUnregistered(playback);
             }
+            
+#if FMOD_AUDIO_SYNTAX
+            if (playback is FmodAudioPlayback fmodAudioPlayback)
+                FmodAudioSyntaxSystem.OnActiveEventPlaybackUnregistered(fmodAudioPlayback);
+#endif // FMOD_AUDIO_SYNTAX
         }
         
         public static void StopAllActiveEventPlaybacks()
@@ -155,24 +170,24 @@ namespace RoyTheunissen.FMODSyntax
         
         [Obsolete("This method is being renamed for disambiguation. " +
                   "Please use RegisterEventPlaybackCallbackReceiver instead.")]
-        public static void RegisterPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
+        public static void RegisterPlaybackCallbackReceiver(IOnAudioPlaybackRegistration callbackReceiver)
         {
             RegisterEventPlaybackCallbackReceiver(callbackReceiver);
         }
         
         [Obsolete("This method is being renamed for disambiguation. " +
                   "Please use UnregisterEventPlaybackCallbackReceiver instead.")]
-        public static void UnregisterPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
+        public static void UnregisterPlaybackCallbackReceiver(IOnAudioPlaybackRegistration callbackReceiver)
         {
             UnregisterEventPlaybackCallbackReceiver(callbackReceiver);
         }
         
-        public static void RegisterEventPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
+        public static void RegisterEventPlaybackCallbackReceiver(IOnAudioPlaybackRegistration callbackReceiver)
         {
             onEventPlaybackCallbackReceivers.Add(callbackReceiver);
         }
         
-        public static void UnregisterEventPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
+        public static void UnregisterEventPlaybackCallbackReceiver(IOnAudioPlaybackRegistration callbackReceiver)
         {
             onEventPlaybackCallbackReceivers.Remove(callbackReceiver);
         }
