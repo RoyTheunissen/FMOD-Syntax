@@ -3,6 +3,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Serialization;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -55,6 +56,9 @@ namespace RoyTheunissen.FMODSyntax
 
         [SerializeField, HideInInspector] private AudioMixerGroup defaultMixerGroup;
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
+        
+        [SerializeField, HideInInspector] private FolderReference unityAudioConfigRootFolder;
+        public FolderReference UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
 
         [NonSerialized] private static AudioSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;

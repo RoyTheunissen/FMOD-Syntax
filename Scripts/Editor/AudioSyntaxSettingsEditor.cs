@@ -12,11 +12,13 @@ namespace RoyTheunissen.FMODSyntax
     {
         private SerializedProperty audioSourcePooledPrefabProperty;
         private SerializedProperty defaultMixerGroupProperty;
+        private SerializedProperty unityAudioConfigRootFolderProperty;
 
         private void OnEnable()
         {
             audioSourcePooledPrefabProperty = serializedObject.FindProperty("audioSourcePooledPrefab");
             defaultMixerGroupProperty = serializedObject.FindProperty("defaultMixerGroup");
+            unityAudioConfigRootFolderProperty = serializedObject.FindProperty("unityAudioConfigRootFolder");
         }
 
         public override void OnInspectorGUI()
@@ -27,6 +29,7 @@ namespace RoyTheunissen.FMODSyntax
 #if UNITY_AUDIO_SYNTAX
             EditorGUILayout.PropertyField(audioSourcePooledPrefabProperty);
             EditorGUILayout.PropertyField(defaultMixerGroupProperty);
+            EditorGUILayout.PropertyField(unityAudioConfigRootFolderProperty);
 #endif // UNITY_AUDIO_SYNTAX
             
             serializedObject.ApplyModifiedProperties();
