@@ -84,10 +84,11 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             get;
         }
 
-        public abstract float NormalizedProgress
-        {
-            get;
-        }
+        protected float time;
+        protected float timePrevious;
+
+        protected float normalizedProgress;
+        public float NormalizedProgress => normalizedProgress;
 
         public void Initialize(
             UnityAudioConfigBase audioConfig, Transform origin, float volumeFactorOverride, AudioSource audioSource)
@@ -118,6 +119,11 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         }
 
         protected abstract void OnStart();
+        
+        public virtual void Update()
+        {
+            
+        }
 
         /// <summary>
         /// Stop is used to indicate that the audio is finished and should commence the stopping behaviour, which may

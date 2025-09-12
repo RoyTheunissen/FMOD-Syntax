@@ -27,13 +27,9 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
     /// </summary>
     public class UnityAudioLoopingPlayback : UnityAudioPlaybackGeneric<UnityAudioLoopingConfig, UnityAudioLoopingPlayback>
     {
-        private Coroutine updateRoutine;
-
         protected override bool ShouldFireEventsOnlyOnce => false;
 
         public override bool IsOneshot => false;
-
-        public override float NormalizedProgress => 0.0f;
 
         protected override void OnStart()
         {
@@ -57,54 +53,50 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 eventsToFire.AddRange(Config.LoopingAudioClip.Events);
             
             // TODO: Also support events for the loop's Start and Stop audio.
-
-            // TODO: Come up with a solution for this that does not require us to copy over Routine
-            // Routine.Start(ref updateRoutine, UpdateRoutine());
         }
 
-        private IEnumerator UpdateRoutine()
+        public override void Update()
         {
+            base.Update();
+            
             // Keep updating the volume and the sound's position until we're told to stop.
-            float time = 0.0f, timePrevious = 0.0f;
-            float loopLength = Config.LoopingAudioClip.AudioClip.length;
+            float duration = Config.LoopingAudioClip.AudioClip.length;
             int sampleLength = Source.clip.samples;
-            while (true)
+            int numberOfSamples = Source.timeSamples;
+            
+            time = (float)numberOfSamples / sampleLength * duration;
+
+            // If the current time is smaller than the previous time, that means we've looped around. Make sure
+            // that we also handle the last segment.
+            if (time < timePrevious)
             {
-                int numberOfSamples = Source.timeSamples;
-                time = (float)numberOfSamples / sampleLength * loopLength;
+                // First handle any events from where we were, to where the current time would correspond 'beyond'
+                // the loop. This is necessary to catch events that are all the way at the end of the track.
+                TryFiringRemainingEvents(timePrevious, duration);
 
-                // If the current time is smaller than the previous time, that means we've looped around. Make sure
-                // that we also handle the last segment.
-                while (time < timePrevious)
-                {
-                    // First handle any events from where we were, to where the current time would correspond 'beyond'
-                    // the loop. This is necessary to catch events that are all the way at the end of the track.
-                    TryFiringRemainingEvents(timePrevious, loopLength);
-
-                    timePrevious -= loopLength;
-                }
-                
-                TryFiringRemainingEvents(timePrevious, time);
-                
-                // Make sure the sound comes from the specified transform.
-                if (IsLocal)
-                {
-                    if (Origin != null)
-                        Source.transform.position = Origin.position;
-                    else
-                    {
-                        // Audio loop was started on an object but the object was destroyed. Clean up the audio loop
-                        // too to prevent it from sticking around.
-                        Cleanup();
-                    }
-                }
-
-                UpdateAudioSourceVolume();
-
-                timePrevious = time;
-
-                yield return null;
+                timePrevious -= duration;
             }
+                
+            TryFiringRemainingEvents(timePrevious, time);
+                
+            // Make sure the sound comes from the specified transform.
+            if (IsLocal)
+            {
+                if (Origin != null)
+                {
+                    Source.transform.position = Origin.position;
+                }
+                else
+                {
+                    // Audio loop was started on an object but the object was destroyed. Clean up the audio loop
+                    // too to prevent it from sticking around.
+                    Cleanup();
+                }
+            }
+
+            UpdateAudioSourceVolume();
+
+            timePrevious = time;
         }
 
         public UnityAudioLoopingPlayback SetVolumeFactor(float volumeFactor)
@@ -123,8 +115,6 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         protected override void OnCleanup()
         {
-            // TODO: Come up with a solution for this that does not require us to copy over Routine
-            // Routine.Stop(ref updateRoutine);
         }
         
         public override string ToString()

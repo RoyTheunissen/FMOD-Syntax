@@ -154,6 +154,10 @@ namespace RoyTheunissen.FMODSyntax
         /// </summary>
         public static void Update()
         {
+#if UNITY_AUDIO_SYNTAX
+            UnityAudioSyntaxSystem.Update();
+#endif // UNITY_AUDIO_SYNTAX
+            
             CullPlaybacksInternal();
         }
         

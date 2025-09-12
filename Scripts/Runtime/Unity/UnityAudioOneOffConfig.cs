@@ -59,17 +59,10 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         /// To make sure nothing gets cut-off prematurely.
         /// </summary>
         private const float Padding = 0.05f;
-        
-        private Coroutine updateRoutine;
-
-        private static WaitForSecondsRealtime paddingYieldInstruction = new WaitForSecondsRealtime(Padding);
 
         protected override bool ShouldFireEventsOnlyOnce => true;
 
         public override bool IsOneshot => true;
-
-        private float normalizedProgress;
-        public override float NormalizedProgress => normalizedProgress;
 
         protected override void OnStart()
         {
@@ -97,34 +90,31 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             // settings on the audio source immediately afterwards and have it apply correctly to the sound, like
             // reverb and roll-off settings.
             Source.Play();
-
-            // TODO: Come up with a solution for this that does not require us to copy over Routine
-            // Routine.Start(ref updateRoutine, UpdateRoutine(clip));
         }
 
-        private IEnumerator UpdateRoutine(AudioClip clip)
+        public override void Update()
         {
-            float time = 0.0f, timePrevious = 0.0f;
-            float length = clip.length;
-            while (time < length)
+            base.Update();
+            
+            float duration = Source.clip.length;
+            
+            time += Time.deltaTime;
+            
+            if (time < duration)
             {
-                time += Time.deltaTime;
-                normalizedProgress = (time / length).Saturate();
+                normalizedProgress = (time / duration).Saturate();
 
                 // Make sure the sound comes from the specified transform.
                 if (IsLocal && Origin != null)
                     Source.transform.position = Origin.position;
                 
                 TryFiringRemainingEvents(timePrevious, time);
-                
-                timePrevious = time;
-                
-                yield return null;
             }
-
-            yield return paddingYieldInstruction;
             
-            Stop();
+            timePrevious = time;
+
+            if (time >= duration + Padding)
+                Stop();
         }
 
         protected override void OnStop()
@@ -133,8 +123,6 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         
         protected override void OnCleanup()
         {
-            // TODO: Come up with a solution for this that does not require us to copy over Routine
-            // Routine.Stop(ref updateRoutine);
         }
         
         public override string ToString()

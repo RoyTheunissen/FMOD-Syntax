@@ -74,6 +74,14 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             });
         }
         
+        public void Update()
+        {
+            for (int i = 0; i < activePlaybacks.Count; i++)
+            {
+                activePlaybacks[i].Update();
+            }
+        }
+        
         public AudioSource GetAudioSourceForPlayback(UnityAudioConfigBase audioConfig)
         {
             AudioSource audioSource = audioSourcesPool.Get();
