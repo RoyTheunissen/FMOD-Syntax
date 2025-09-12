@@ -1,6 +1,7 @@
 #if UNITY_AUDIO_SYNTAX
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -214,16 +215,14 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         protected abstract bool ShouldFireEventsOnlyOnce { get; }
         
-        // TODO: Add support for events back
-        // protected readonly List<AudioClipEvent> eventsToFire = new List<AudioClipEvent>(0);
-        // private Dictionary<AudioClipEventId, AudioClipEventHandler> eventIdToHandlers;
-        //
-        // public delegate void AudioClipEventHandler(ThisType audioPlayback, AudioClipEventId eventId);
+        protected readonly List<AudioClipEvent> eventsToFire = new(0);
+        private Dictionary<AudioClipEventId, AudioClipEventHandler> eventIdToHandlers;
+        
+        public delegate void AudioClipEventHandler(ThisType audioPlayback, AudioClipEventId eventId);
 
         protected override void OnCleanupInternal()
         {
-            // TODO: Add support for events back
-            //eventIdToHandlers?.Clear();
+            eventIdToHandlers?.Clear();
             
             // TODO: Add support for tweens back?
             //cachedVolumeTween.Cleanup();
@@ -233,27 +232,26 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         {
             Source.volume = VolumeFactorOverride * Config.VolumeFactor * VolumeFactor;
         }
-
-        // TODO: Add support for events back
-        // protected void TryFiringRemainingEvents(float timePrevious, float timeCurrent)
-        // {
-        //     if (eventsToFire == null)
-        //         return;
-        //
-        //     for (int i = eventsToFire.Count - 1; i >= 0; i--)
-        //     {
-        //         if (!(timePrevious.EqualOrSmaller(eventsToFire[i].Time) &&
-        //               timeCurrent.EqualOrGreater(eventsToFire[i].Time) && !timePrevious.Equal(timeCurrent)))
-        //         {
-        //             continue;
-        //         }
-        //         
-        //         FireEvent(eventsToFire[i].Id);
-        //             
-        //         if (ShouldFireEventsOnlyOnce)
-        //             eventsToFire.RemoveAt(i);
-        //     }
-        // }
+        
+        protected void TryFiringRemainingEvents(float timePrevious, float timeCurrent)
+        {
+            if (eventsToFire == null)
+                return;
+        
+            for (int i = eventsToFire.Count - 1; i >= 0; i--)
+            {
+                if (!(timePrevious.EqualOrSmaller(eventsToFire[i].Time) &&
+                      timeCurrent.EqualOrGreater(eventsToFire[i].Time) && !timePrevious.Equal(timeCurrent)))
+                {
+                    continue;
+                }
+                
+                FireEvent(eventsToFire[i].Id);
+                    
+                if (ShouldFireEventsOnlyOnce)
+                    eventsToFire.RemoveAt(i);
+            }
+        }
 
         // NOTE: Fluid initialization methods can be done on the generic level like this, having it still return the
         // actual type of the playback class itself.
@@ -340,38 +338,37 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             Source.outputAudioMixerGroup = mixerGroup;
             return this as ThisType;
         }
-
-        // TODO: Add support for events back
-        // public ThisType AddEventHandler(AudioClipEventId @event, AudioClipEventHandler handler)
-        // {
-        //     if (eventIdToHandlers == null)
-        //         eventIdToHandlers = new Dictionary<AudioClipEventId, AudioClipEventHandler>();
-        //     
-        //     bool existed = eventIdToHandlers.ContainsKey(@event);
-        //     if (!existed)
-        //         eventIdToHandlers[@event] = handler;
-        //     else
-        //         eventIdToHandlers[@event] += handler;
-        //     return this as ThisType;
-        // }
-        //
-        // public ThisType ClearAllEventHandlers()
-        // {
-        //     eventsToFire?.Clear();
-        //     eventIdToHandlers?.Clear();
-        //
-        //     return this as ThisType;
-        // }
-        //
-        // protected void FireEvent(AudioClipEventId @event)
-        // {
-        //     if (eventIdToHandlers == null)
-        //         return;
-        //     
-        //     bool existed = eventIdToHandlers.TryGetValue(@event, out AudioClipEventHandler handler);
-        //     if (existed)
-        //         handler(this as ThisType, @event);
-        // }
+        
+        public ThisType AddEventHandler(AudioClipEventId @event, AudioClipEventHandler handler)
+        {
+            if (eventIdToHandlers == null)
+                eventIdToHandlers = new Dictionary<AudioClipEventId, AudioClipEventHandler>();
+            
+            bool existed = eventIdToHandlers.ContainsKey(@event);
+            if (!existed)
+                eventIdToHandlers[@event] = handler;
+            else
+                eventIdToHandlers[@event] += handler;
+            return this as ThisType;
+        }
+        
+        public ThisType ClearAllEventHandlers()
+        {
+            eventsToFire?.Clear();
+            eventIdToHandlers?.Clear();
+        
+            return this as ThisType;
+        }
+        
+        protected void FireEvent(AudioClipEventId @event)
+        {
+            if (eventIdToHandlers == null)
+                return;
+            
+            bool existed = eventIdToHandlers.TryGetValue(@event, out AudioClipEventHandler handler);
+            if (existed)
+                handler(this as ThisType, @event);
+        }
     }
 }
 
