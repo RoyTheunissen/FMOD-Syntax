@@ -20,6 +20,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         // [FormerlySerializedAs("audioTags")]
         // [SerializeField] private CollectionItemPicker<AudioTag> tags = new CollectionItemPicker<AudioTag>();
         // public CollectionItemPicker<AudioTag> Tags => tags;
+
+        public abstract UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f);
     }
     
     /// <summary>
@@ -50,7 +52,16 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
             return playback;
         }
+
+        public override UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f)
+        {
+            return Play(source, volumeFactor);
+        }
     }
 }
 
-#endif // UNITY_AUDIO_SYNTAX
+#else
+public abstract class UnityAudioConfigBase : UnityEngine.ScriptableObject
+{
+}
+#endif // !UNITY_AUDIO_SYNTAX

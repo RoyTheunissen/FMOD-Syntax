@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
 using UnityEngine;
 
 namespace RoyTheunissen.FMODSyntax
@@ -12,6 +13,21 @@ namespace RoyTheunissen.FMODSyntax
     [Serializable]
     public class AudioReference : IAudioConfig
     {
+        public enum Modes
+        {
+            Unity,
+            FMOD,
+        }
+        
+#if FMOD_AUDIO_SYNTAX
+        [SerializeField] private Modes mode = Modes.FMOD;
+#else
+        [SerializeField] private Modes mode = Modes.Unity;
+#endif // FMOD
+        
+        [SerializeField] private UnityAudioConfigBase unityAudioConfig;
+        public UnityAudioConfigBase UnityAudioConfig => unityAudioConfig;
+
         [SerializeField] private string fmodEventGuid;
         
         [NonSerialized] private FmodParameterlessAudioConfig cachedFmodAudioConfig;
@@ -34,24 +50,81 @@ namespace RoyTheunissen.FMODSyntax
             }
         }
 
-        public bool IsAssigned => FmodAudioConfig != null;
+        public bool IsAssigned
+        {
+            get
+            {
+                switch (mode)
+                {
+                    case Modes.Unity: return UnityAudioConfig != null;
+                    case Modes.FMOD: return FmodAudioConfig != null;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
         public string Name => IsAssigned ? FmodAudioConfig.Name : "";
         public string Path => IsAssigned ? FmodAudioConfig.Path : "";
 
         [NonSerialized] private static bool didCacheParameterlessEvents;
-        private static readonly Dictionary<string, FmodParameterlessAudioConfig> parameterlessEventsByGuid =
-            new Dictionary<string, FmodParameterlessAudioConfig>();
+        private static readonly Dictionary<string, FmodParameterlessAudioConfig> parameterlessEventsByGuid = new();
 
-        public FmodParameterlessAudioPlayback Play(Transform source = null)
+#if FMOD_AUDIO_SYNTAX
+        public FmodParameterlessAudioPlayback PlayFMOD(Transform source = null)
         {
             return FmodAudioConfig.Play(source);
         }
+#endif // FMOD_AUDIO_SYNTAX
         
-        IAudioPlayback IAudioConfig.Play(Transform source)
+#if UNITY_AUDIO_SYNTAX
+        public UnityAudioPlayback PlayUnity(Transform source = null, float volumeFactor = 1.0f)
         {
-            return Play(source);
+            return UnityAudioConfig.PlayGeneric(source, volumeFactor);
         }
+#endif // UNITY_AUDIO_SYNTAX
+        
+// CASE 0: Only FMOD is active. Then the generic Play method returns FmodParameterlessAudioPlayback.
+#if FMOD_AUDIO_SYNTAX && !UNITY_AUDIO_SYNTAX
+        public FmodParameterlessAudioPlayback Play(Transform source = null)
+        {
+            return PlayFMOD(source);
+        }
+
+        IAudioPlayback IAudioConfig.Play(Transform source) => Play(source);
+
+        // CASE 1: Only FMOD is active. Then the generic Play method returns FmodParameterlessAudioPlayback.
+#elif !FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX
+
+        public UnityAudioPlayback Play(Transform source = null)
+        {
+            return PlayUnity(source);
+        }
+
+        IAudioPlayback IAudioConfig.Play(Transform source) => Play(source);
+
+// CASE 2: Both FMOD and Unity solutions are active. Then the generic Play method returns IAudioPlayback.
+#elif FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX
+        public IAudioPlayback Play(Transform source = null)
+        {
+            switch (mode)
+            {
+                case Modes.Unity: return PlayUnity(source);
+                case Modes.FMOD: return PlayFMOD(source);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+// CASE 3: Neither FMOD nor Unity solutions is active. This is an invalid configuration.
+#else
+        public IAudioPlayback Play(Transform source = null)
+        {
+            Debug.LogError("You tried to play an Audio reference but neither FMOD nor Unity audio is enabled. "+
+            "This is an invalid project configuration. Please add FMOD_AUDIO_SYNTAX , UNITY_AUDIO_SYNTAX, "+
+            "or both to your scripting define symbols.");
+        }
+#endif // FMOD_AUDIO_SYNTAX && UNITY_AUDIO_SYNTAX
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
