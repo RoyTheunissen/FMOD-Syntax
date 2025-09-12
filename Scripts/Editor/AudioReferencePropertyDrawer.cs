@@ -12,6 +12,15 @@ namespace RoyTheunissen.FMODSyntax
     [CustomPropertyDrawer(typeof(AudioReference))]
     public class AudioReferencePropertyDrawer : PropertyDrawer
     {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+#if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
+            return EditorGUIUtility.singleLineHeight * 2 + EditorGUIUtility.standardVerticalSpacing;
+#else
+            return base.GetPropertyHeight(property, label);
+#endif
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             // If this is an array, it would just show "Element 0" as the label which takes up a lot of space and is
@@ -37,14 +46,27 @@ namespace RoyTheunissen.FMODSyntax
                 displayedText = eventRef.GetDisplayName();
             }
 
+            Rect configRect;
+#if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
+            SerializedProperty modeProperty = property.FindPropertyRelative("mode");
+            Rect modeRect = position.GetControlFirstRect();
+            EditorGUI.PropertyField(modeRect, modeProperty, label);
+            label = GUIContent.none;
+            
+            configRect = modeRect.GetControlNextRect().GetLabelRectRemainder();
+            configRect.xMin += 2;
+#else
+            configRect = position;
+#endif
+
             // Draw a dropdown button to select the audio config.
-            EditorGUI.BeginProperty(position, label, audioConfigProperty);
-            Rect valueRect = EditorGUI.PrefixLabel(position, label);
+            EditorGUI.BeginProperty(configRect, label, audioConfigProperty);
+            Rect valueRect = EditorGUI.PrefixLabel(configRect, label);
             bool didPress = EditorGUI.DropdownButton(
                 valueRect, new GUIContent(displayedText), FocusType.Keyboard);
             if (didPress)
             {
-                Rect dropDownRect = position;
+                Rect dropDownRect = configRect;
                 dropDownRect.xMax += 200;
                 
                 AudioReferenceDropdown menu = new AudioReferenceDropdown(new AdvancedDropdownState(), audioConfigProperty);
