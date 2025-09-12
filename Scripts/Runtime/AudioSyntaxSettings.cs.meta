@@ -3,7 +3,10 @@ guid: b66f732db3a804e4eb5ef4765f45f02f
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - audioSourcePooledPrefab: {fileID: 2717309069985723922, guid: dbc94fd4dcfcddc42b214b0929284176,
+      type: 3}
+  - defaultMixerGroup: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
