@@ -57,7 +57,10 @@ namespace RoyTheunissen.FMODSyntax
         [SerializeField, HideInInspector] private AudioMixerGroup defaultMixerGroup;
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
         
-        [SerializeField] private FolderReference unityAudioConfigRootFolder;
+        [Tooltip("Use this to specify the root folder in which all your Unity Audio Configs are located. " +
+                 "If you don't do this, it will try and infer what the location is using well-known Unity project " +
+                 "structures, but this is not guaranteed to work.")]
+        [SerializeField, HideInInspector] private FolderReference unityAudioConfigRootFolder;
         public FolderReference UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
 
         [NonSerialized] private static AudioSyntaxSettings cachedInstance;

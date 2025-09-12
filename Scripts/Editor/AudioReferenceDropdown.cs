@@ -66,6 +66,15 @@ namespace RoyTheunissen.FMODSyntax
             return result;
         }
 
+        private string RemoveFirstDirectoryFromPath(string path)
+        {
+            int firstSlashIndex = path.IndexOf("/", StringComparison.OrdinalIgnoreCase);
+            if (firstSlashIndex == -1)
+                return path;
+
+            return path.Substring(firstSlashIndex + 1);
+        }
+
         private string GetDropdownPathForUnityAudioConfig(string assetPath, bool multipleAudioSystemsActive)
         {
             string dropdownPath = assetPath.RemoveSuffix(".asset");
@@ -78,6 +87,35 @@ namespace RoyTheunissen.FMODSyntax
                 
                 // Determine the path relative to the specified folder.
                 dropdownPath = dropdownPath.RemovePrefix(basePath);
+            }
+            else
+            {
+                // No base folder was defined. Let's TRY and have some intelligent filtering.
+
+                // No use in specifying that it's in the Assets folder. We know. 
+                dropdownPath = dropdownPath.RemoveAssetsPrefix();
+
+                // It's common for the main project folder to start with a _ or a [ so it is alphabetically first.
+                // If that's the case here, then we know we're in the main folder and we can leave that part out too.
+                // By the way, you should use _ instead of [ because Git LFS does not like it when you use [
+                if (dropdownPath.StartsWith("_") || dropdownPath.StartsWith("["))
+                    dropdownPath = RemoveFirstDirectoryFromPath(dropdownPath);
+                
+                // If we're in the main project folder, then check if we're in some kind of Configs folder.
+                // At least, I know that that's a common structure to use.
+                if (dropdownPath.StartsWith("Configs/") || dropdownPath.StartsWith("Configuration/") ||
+                    dropdownPath.StartsWith("Configurations/") || dropdownPath.StartsWith("Data/")
+                    || dropdownPath.StartsWith("Database/"))
+                {
+                    dropdownPath = RemoveFirstDirectoryFromPath(dropdownPath);
+                }
+                
+                // It might also have a subfolder specifically for audio. We can filter that out because it's all audio.
+                if (dropdownPath.StartsWith("Audio/"))
+                    dropdownPath = RemoveFirstDirectoryFromPath(dropdownPath);
+                
+                // Now, if you use common Unity project structures, chances are you will get a short and reasonable
+                // path. If not, well then specify the base folder yourself in the Audio Syntax Settings asset.
             }
             
             // Specify the audio system if multiple are active.
