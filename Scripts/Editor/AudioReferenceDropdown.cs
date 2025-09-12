@@ -1,8 +1,11 @@
 using System;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
-using FMODUnity;
 using System.Linq;
+
+#if FMOD_AUDIO_SYNTAX
+using FMODUnity;
+#endif
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -40,7 +43,8 @@ namespace RoyTheunissen.FMODSyntax
 #endif
             
             root.AddChildByPath("None", "None");
-
+            
+#if FMOD_AUDIO_SYNTAX
             if (supportedSystems.HasFlag(SupportedSystems.FMOD))
             {
                 const string fmodSectionName = "FMOD";
@@ -75,6 +79,7 @@ namespace RoyTheunissen.FMODSyntax
                     root.AddChildByPath(guids[i], paths[i]);
                 }
             }
+#endif
 
             return root;
         }
