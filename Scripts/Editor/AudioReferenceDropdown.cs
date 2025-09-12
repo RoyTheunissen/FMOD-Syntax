@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using FMODUnity;
@@ -10,6 +11,13 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public sealed class AudioReferenceDropdown : AdvancedDropdown
     {
+        [Flags]
+        private enum SupportedSystems
+        {
+            Unity = 1 << 0,
+            FMOD = 1 << 1,
+        }
+        
         private readonly SerializedProperty serializedProperty;
 
         public AudioReferenceDropdown(AdvancedDropdownState state, SerializedProperty serializedProperty)
@@ -23,28 +31,49 @@ namespace RoyTheunissen.FMODSyntax
             AudioConfigDropdownItem root = new AudioConfigDropdownItem(
                 this, string.Empty, "Audio Configs", string.Empty);
 
-            EditorEventRef[] parameterlessEvents = EventManager.Events
-                .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix) && e.LocalParameters.Count == 0)
-                .OrderBy(e => e.Path)
-                .ToArray();
-            string[] paths = new string[parameterlessEvents.Length];
-            string[] guids = new string[parameterlessEvents.Length];
+            SupportedSystems supportedSystems = 0;
+#if UNITY_AUDIO_SYNTAX
+            supportedSystems |= SupportedSystems.Unity;
+#endif
+#if FMOD_AUDIO_SYNTAX
+            supportedSystems |= SupportedSystems.FMOD;
+#endif
             
             root.AddChildByPath("None", "None");
 
-            for (int i = 0; i < parameterlessEvents.Length; i++)
+            if (supportedSystems.HasFlag(SupportedSystems.FMOD))
             {
-                // Remove the event prefix otherwise it gets treated as a folder.
-                string path = parameterlessEvents[i].Path;
-                path = path.RemovePrefix(EditorEventRefExtensions.EventPrefix);
-                paths[i] = path;
-                
-                guids[i] = parameterlessEvents[i].Guid.ToString();
-            }
+                const string fmodSectionName = "FMOD";
 
-            for (int i = 0; i < paths.Length; i++)
-            {
-                root.AddChildByPath(guids[i], paths[i]);
+                bool multipleAudioSystemsActive = supportedSystems.HasFlag(SupportedSystems.Unity) &&
+                                              supportedSystems.HasFlag(SupportedSystems.FMOD);
+            
+                EditorEventRef[] parameterlessEvents = EventManager.Events
+                    .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix) && e.LocalParameters.Count == 0)
+                    .OrderBy(e => e.Path)
+                    .ToArray();
+                string[] paths = new string[parameterlessEvents.Length];
+                string[] guids = new string[parameterlessEvents.Length];
+
+                for (int i = 0; i < parameterlessEvents.Length; i++)
+                {
+                    // Remove the event prefix otherwise it gets treated as a folder.
+                    string path = parameterlessEvents[i].Path;
+                    path = path.RemovePrefix(EditorEventRefExtensions.EventPrefix);
+                    
+                    // Specify the audio system if multiple are active.
+                    if (multipleAudioSystemsActive)
+                        path = fmodSectionName + "/" + path;
+                    
+                    paths[i] = path;
+                
+                    guids[i] = parameterlessEvents[i].Guid.ToString();
+                }
+
+                for (int i = 0; i < paths.Length; i++)
+                {
+                    root.AddChildByPath(guids[i], paths[i]);
+                }
             }
 
             return root;
@@ -95,14 +124,25 @@ namespace RoyTheunissen.FMODSyntax
         private AudioConfigDropdownItem GetOrCreateChild(string guid, string name)
         {
             // Find a child with the specified name.
-            foreach (AdvancedDropdownItem child in children)
-            {
-                if (child.name == name)
-                    return (AudioConfigDropdownItem)child;
-            }
+            AudioConfigDropdownItem existingChild = GetChild(name);
+            if (existingChild != null)
+                return existingChild;
 
             // Add a new one if it didn't exist yet.
             return AddChild(guid, name);
+        }
+
+        public AudioConfigDropdownItem GetChild(string name)
+        {
+            foreach (AdvancedDropdownItem child in children)
+            {
+                if (child.name == name)
+                {
+                    return (AudioConfigDropdownItem)child;
+                }
+            }
+
+            return default;
         }
 
         public void AddChildByPath(string guid, string relativePath)

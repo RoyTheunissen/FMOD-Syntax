@@ -70,7 +70,7 @@ namespace RoyTheunissen.FMODSyntax
                 dropDownRect.xMax += 200;
                 
                 AudioReferenceDropdown menu = new AudioReferenceDropdown(new AdvancedDropdownState(), audioConfigProperty);
-                menu.Show(dropDownRect);
+                menu.Show(dropDownRect, 200);
             }
             EditorGUI.EndProperty();
         }
