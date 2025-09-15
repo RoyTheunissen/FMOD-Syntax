@@ -1,6 +1,15 @@
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+
 namespace RoyTheunissen.FMODSyntax
 {
-    public interface IFmodPlayback : IAudioPlayback
+    public interface IFmodPlayback
+    {
+        bool CanBeCleanedUp { get; }
+        
+        void Cleanup();
+    }
+    
+    public interface IFmodAudioPlayback : IFmodPlayback, IAudioPlayback
     {
     }
     

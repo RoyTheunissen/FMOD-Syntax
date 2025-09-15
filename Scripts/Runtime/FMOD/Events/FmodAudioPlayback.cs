@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
@@ -11,9 +12,10 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
-    /// Non-generic base class for AudioFmodPlayback to apply as a type constraint.
+    /// Playback for a playable FMOD audio event. Allows you to update its parameters.
+    /// Produced by calling Play() on an AudioFmodConfig, which are specified in FmodEvents.AudioEvents
     /// </summary>
-    public abstract class FmodAudioPlaybackBase : FmodPlayablePlaybackBase
+    public abstract class FmodAudioPlayback : FmodPlayablePlaybackBase, IFmodAudioPlayback
     {
         private bool isOneshot = false;
         public bool IsOneshot
@@ -21,14 +23,7 @@ namespace RoyTheunissen.FMODSyntax
             get => isOneshot;
             protected set => isOneshot = value;
         }
-    }
-    
-    /// <summary>
-    /// Playback for a playable FMOD audio event. Allows you to update its parameters.
-    /// Produced by calling Play() on an AudioFmodConfig, which are specified in FmodEvents.AudioEvents
-    /// </summary>
-    public abstract class FmodAudioPlayback : FmodAudioPlaybackBase, IAudioPlayback
-    {
+        
         public delegate void TimelineMarkerReachedHandler(FmodAudioPlayback playback, string markerName);
         private int timelineMarkerListenerCount;
         private event TimelineMarkerReachedHandler timelineMarkerReachedEvent;
