@@ -110,12 +110,18 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         public void ReturnAudioSourceForPlayback(AudioSource audioSource)
         {
             audioSourcesPool.Return(audioSource);
-            
+
+            audioSource.clip = null;
+
 #if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
             audioSource.name = "AudioSource - AVAILABLE";
 #endif // DEBUG_AUDIO_SOURCE_POOLING
         }
 
+        /// <summary>
+        /// Do not call this yourself. Call AudioSyntaxSystem.RegisterActiveEventPlayback instead.
+        /// Your application is preferably agnostic about the underlying audio implementation.
+        /// </summary>
         public void OnActiveEventPlaybackRegistered(UnityAudioPlayback playback)
         {
             activePlaybacks.Add(playback);
@@ -126,6 +132,10 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             }
         }
         
+        /// <summary>
+        /// Do not call this yourself. Call AudioSyntaxSystem.UnregisterActiveEventPlayback instead.
+        /// Your application is preferably agnostic about the underlying audio implementation.
+        /// </summary>
         public void OnActiveEventPlaybackUnregistered(UnityAudioPlayback playback)
         {
             activePlaybacks.Remove(playback);

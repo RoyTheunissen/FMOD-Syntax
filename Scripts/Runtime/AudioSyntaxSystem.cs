@@ -119,6 +119,10 @@ namespace RoyTheunissen.FMODSyntax
             if (playback is FmodAudioPlayback fmodAudioPlayback)
                 FmodAudioSyntaxSystem.OnActiveEventPlaybackUnregistered(fmodAudioPlayback);
 #endif // FMOD_AUDIO_SYNTAX
+#if UNITY_AUDIO_SYNTAX
+            if (playback is UnityAudioPlayback unityAudioPlayback)
+                UnityAudioSyntaxSystem.OnActiveEventPlaybackUnregistered(unityAudioPlayback);
+#endif // UNITY_AUDIO_SYNTAX
         }
         
         public static void StopAllActiveEventPlaybacks()
@@ -154,11 +158,11 @@ namespace RoyTheunissen.FMODSyntax
         /// </summary>
         public static void Update()
         {
+            CullPlaybacksInternal();
+            
 #if UNITY_AUDIO_SYNTAX
             UnityAudioSyntaxSystem.Update();
 #endif // UNITY_AUDIO_SYNTAX
-            
-            CullPlaybacksInternal();
         }
         
         private static void CullPlaybacksInternal()
