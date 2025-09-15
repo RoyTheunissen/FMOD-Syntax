@@ -260,7 +260,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         protected abstract bool ShouldFireEventsOnlyOnce { get; }
         
-        protected readonly List<AudioClipEvent> eventsToFire = new(0);
+        protected readonly List<AudioClipTimelineEvent> timelineEventsToFire = new(0);
         private Dictionary<AudioTimelineEventId, AudioClipEventHandler> timelineEventIdToHandlers;
         
         public delegate void AudioClipEventHandler(ThisType audioPlayback, AudioTimelineEventId eventId);
@@ -278,29 +278,30 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             Source.volume = VolumeFactorOverride * Config.VolumeFactor * Volume;
         }
         
-        protected void TryFiringRemainingEvents(List<AudioClipEvent> eventsToFire, float timePrevious, float timeCurrent)
+        protected void TryFiringRemainingEvents(
+            List<AudioClipTimelineEvent> timelineEventsToFire, float timePrevious, float timeCurrent)
         {
-            if (eventsToFire == null)
+            if (timelineEventsToFire == null)
                 return;
         
-            for (int i = eventsToFire.Count - 1; i >= 0; i--)
+            for (int i = timelineEventsToFire.Count - 1; i >= 0; i--)
             {
-                if (!(timePrevious.EqualOrSmaller(eventsToFire[i].Time) &&
-                      timeCurrent.EqualOrGreater(eventsToFire[i].Time) && !timePrevious.Equal(timeCurrent)))
+                if (!(timePrevious.EqualOrSmaller(timelineEventsToFire[i].Time) &&
+                      timeCurrent.EqualOrGreater(timelineEventsToFire[i].Time) && !timePrevious.Equal(timeCurrent)))
                 {
                     continue;
                 }
                 
-                FireTimelineEvent(eventsToFire[i].Id);
+                FireTimelineEvent(timelineEventsToFire[i].Id);
                     
                 if (ShouldFireEventsOnlyOnce)
-                    eventsToFire.RemoveAt(i);
+                    timelineEventsToFire.RemoveAt(i);
             }
         }
         
         protected void TryFiringRemainingEvents(float timePrevious, float timeCurrent)
         {
-            TryFiringRemainingEvents(eventsToFire, timePrevious, timeCurrent);
+            TryFiringRemainingEvents(timelineEventsToFire, timePrevious, timeCurrent);
         }
 
         // NOTE: Fluid initialization methods can be done on the generic level like this, having it still return the
@@ -404,7 +405,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         
         public ThisType ClearAllTimelineEventHandlers()
         {
-            eventsToFire?.Clear();
+            timelineEventsToFire?.Clear();
             timelineEventIdToHandlers?.Clear();
         
             return this as ThisType;

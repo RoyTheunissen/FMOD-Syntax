@@ -14,8 +14,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         [SerializeField, HideInInspector] private AudioClip audioClip;
         public AudioClip AudioClip => audioClip;
         
-        [SerializeField] private List<AudioClipEvent> events = new List<AudioClipEvent>();
-        public List<AudioClipEvent> Events => events;
+        [SerializeField] private List<AudioClipTimelineEvent> timelineEvents = new();
+        public List<AudioClipTimelineEvent> TimelineEvents => timelineEvents;
 
         public static implicit operator AudioClip(AudioClipMetaData audioClipMetaData)
         {

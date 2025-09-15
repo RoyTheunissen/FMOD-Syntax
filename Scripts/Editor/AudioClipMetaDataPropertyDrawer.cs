@@ -15,7 +15,7 @@ namespace RoyTheunissen.FMODSyntax
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializedProperty audioClipProperty = property.FindPropertyRelative("audioClip");
-            SerializedProperty eventsProperty = property.FindPropertyRelative("events");
+            SerializedProperty eventsProperty = property.FindPropertyRelative("timelineEvents");
             
             Rect foldoutRect = position.GetControlFirstRect();
             Rect eventsRect = foldoutRect.GetControlNextRect();

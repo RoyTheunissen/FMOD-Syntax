@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace RoyTheunissen.FMODSyntax
 {
-    [CustomPropertyDrawer(typeof(AudioClipEvent))]
-    public class AudioClipEventPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(AudioClipTimelineEvent))]
+    public class AudioClipTimelineEventPropertyDrawer : PropertyDrawer
     {
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -22,7 +22,8 @@ namespace RoyTheunissen.FMODSyntax
 
             EditorGUI.PropertyField(labelRect, idProperty, GUIContent.none);
 
-            // First figure out if this event is relative to a specific audio clip. If so we can draw a nice slider.
+            // First figure out if this timeline event is relative to a specific audio clip.
+            // If so we can draw a nice slider.
             AudioClip audioClip = null;
             SerializedProperty parentProperty = property.GetParent();
             string path = parentProperty.propertyPath;
@@ -38,8 +39,8 @@ namespace RoyTheunissen.FMODSyntax
                 }
             }
 
-            // If we know that this event is for a specific audio clip, then draw a nice slider instead of a float
-            // field because that's easier to work with.
+            // If we know that this timeline event is for a specific audio clip, then draw a nice slider instead of a
+            // float field because that's easier to work with.
             if (audioClip != null)
             {
                 EditorGUI.BeginProperty(valueRect, GUIContent.none, timeProperty);

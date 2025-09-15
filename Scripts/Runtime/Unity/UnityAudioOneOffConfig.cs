@@ -77,8 +77,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             Source.clip = clip;
             
             // Find the events associated with the clip that we decided to play, and add them to the list of events.
-            if (clip.Events != null)
-                eventsToFire.AddRange(clip.Events);
+            if (clip.TimelineEvents != null)
+                timelineEventsToFire.AddRange(clip.TimelineEvents);
 
             if (Config.RandomizePitch)
                 Source.pitch = 1.0f + Random.Range(-Config.RandomPitchOffset, Config.RandomPitchOffset);

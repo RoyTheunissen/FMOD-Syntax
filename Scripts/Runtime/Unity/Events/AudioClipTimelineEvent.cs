@@ -7,8 +7,11 @@ using BrunoMikoski.ScriptableObjectCollections;
 
 namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 {
+    /// <summary>
+    /// Specifies a Timeline Event inside an Audio Clip.
+    /// </summary>
     [Serializable]
-    public class AudioClipEvent
+    public class AudioClipTimelineEvent
     {
         [SerializeField]
 #if SCRIPTABLE_OBJECT_COLLECTION

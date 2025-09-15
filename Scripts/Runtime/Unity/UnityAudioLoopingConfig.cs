@@ -35,11 +35,11 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         public override bool IsOneshot => false;
 
         private bool hasStartAudioTimelineEvents;
-        private List<AudioClipEvent> startAudioTimelineEvents;
+        private List<AudioClipTimelineEvent> startAudioTimelineEvents;
         private float startAudioTime;
         
         private bool hasEndAudioTimelineEvents;
-        private List<AudioClipEvent> endAudioTimelineEvents;
+        private List<AudioClipTimelineEvent> endAudioTimelineEvents;
         private float endAudioTime;
 
         protected override void OnStart()
@@ -60,14 +60,14 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 Source.PlayOneShot(Config.StartAudio.Clip, VolumeFactorOverride * Config.StartAudio.VolumeFactor);
                 
                 // You're allowed to specify timeline events for the start audio clip too. 
-                if (Config.StartAudio.Clip?.Events != null && Config.StartAudio.Clip?.Events.Count > 0)
+                if (Config.StartAudio.Clip?.TimelineEvents != null && Config.StartAudio.Clip?.TimelineEvents.Count > 0)
                 {
                     hasStartAudioTimelineEvents = true;
                     if (startAudioTimelineEvents == null)
-                        startAudioTimelineEvents = new List<AudioClipEvent>();
+                        startAudioTimelineEvents = new List<AudioClipTimelineEvent>();
                     else
                         startAudioTimelineEvents.Clear();
-                    startAudioTimelineEvents.AddRange(Config.StartAudio.Clip?.Events);
+                    startAudioTimelineEvents.AddRange(Config.StartAudio.Clip?.TimelineEvents);
                 }
             }
 
@@ -78,8 +78,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             Source.Play();
 
             // Find the events associated with the clip that we decided to play, and add them to the list of events.
-            if (Config.LoopingAudioClip?.Events != null)
-                eventsToFire.AddRange(Config.LoopingAudioClip.Events);
+            if (Config.LoopingAudioClip?.TimelineEvents != null)
+                timelineEventsToFire.AddRange(Config.LoopingAudioClip.TimelineEvents);
             
             // TODO: Also support events for the loop's Start and Stop audio.
         }
@@ -189,14 +189,14 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 Source.PlayOneShot(Config.EndAudio.Clip, VolumeFactorOverride * Config.EndAudio.VolumeFactor);
                 
                 // You're allowed to specify timeline events for the end audio clip too. 
-                if (Config.EndAudio.Clip?.Events != null && Config.EndAudio.Clip?.Events.Count > 0)
+                if (Config.EndAudio.Clip?.TimelineEvents != null && Config.EndAudio.Clip?.TimelineEvents.Count > 0)
                 {
                     hasEndAudioTimelineEvents = true;
                     if (endAudioTimelineEvents == null)
-                        endAudioTimelineEvents = new List<AudioClipEvent>();
+                        endAudioTimelineEvents = new List<AudioClipTimelineEvent>();
                     else
                         endAudioTimelineEvents.Clear();
-                    endAudioTimelineEvents.AddRange(Config.EndAudio.Clip?.Events);
+                    endAudioTimelineEvents.AddRange(Config.EndAudio.Clip?.TimelineEvents);
                 }
             }
             else
