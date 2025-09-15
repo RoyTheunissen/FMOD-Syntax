@@ -278,7 +278,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             Source.volume = VolumeFactorOverride * Config.VolumeFactor * Volume;
         }
         
-        protected void TryFiringRemainingEvents(float timePrevious, float timeCurrent)
+        protected void TryFiringRemainingEvents(List<AudioClipEvent> eventsToFire, float timePrevious, float timeCurrent)
         {
             if (eventsToFire == null)
                 return;
@@ -296,6 +296,11 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 if (ShouldFireEventsOnlyOnce)
                     eventsToFire.RemoveAt(i);
             }
+        }
+        
+        protected void TryFiringRemainingEvents(float timePrevious, float timeCurrent)
+        {
+            TryFiringRemainingEvents(eventsToFire, timePrevious, timeCurrent);
         }
 
         // NOTE: Fluid initialization methods can be done on the generic level like this, having it still return the
