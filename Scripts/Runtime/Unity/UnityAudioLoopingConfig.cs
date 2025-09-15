@@ -70,6 +70,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             int numberOfSamples = Source.timeSamples;
             
             time = (float)numberOfSamples / sampleLength * duration;
+            
+            normalizedProgress = (time / duration).Saturate();
 
             // If the current time is smaller than the previous time, that means we've looped around. Make sure
             // that we also handle the last segment.
