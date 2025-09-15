@@ -40,7 +40,7 @@ namespace RoyTheunissen.FMODSyntax
         
         [NonSerialized] private FmodParameterlessAudioConfig cachedFmodAudioConfig;
         [NonSerialized] private string guidFmodAudioConfigIsCachedFor;
-        private FmodParameterlessAudioConfig FmodAudioConfig
+        public FmodParameterlessAudioConfig FmodAudioConfig
         {
             get
             {
