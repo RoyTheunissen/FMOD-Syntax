@@ -6,7 +6,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
     [Serializable]
     public class AudioLoopBookendConfig
     {
-        [SerializeField] private bool enabled;
+        [SerializeField, HideInInspector] private bool enabled;
         
         [SerializeField] private AudioClipMetaData audioClip;
         public AudioClipMetaData Clip => audioClip;

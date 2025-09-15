@@ -150,5 +150,18 @@ namespace RoyTheunissen.FMODSyntax
         {
             return new Rect(child.x + rect.x, child.y + rect.y, child.width, child.height);
         }
+        
+        public static float GetCombinedHeight(params float[] heights)
+        {
+            float combinedHeight = 0.0f;
+            for (int i = 0; i < heights.Length; i++)
+            {
+                combinedHeight += heights[i];
+                
+                if (i < heights.Length - 1)
+                    combinedHeight += EditorGUIUtility.standardVerticalSpacing;
+            }
+            return combinedHeight;
+        }
     }
 }
