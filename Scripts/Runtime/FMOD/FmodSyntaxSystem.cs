@@ -31,7 +31,7 @@ namespace RoyTheunissen.FMODSyntax
 #endif // UNITY_EDITOR
         public void Initialize()
         {
-            if (!didInitialize)
+            if (didInitialize)
                 return;
 
             didInitialize = true;

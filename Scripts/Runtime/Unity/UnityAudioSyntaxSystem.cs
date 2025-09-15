@@ -53,7 +53,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         
         public void Initialize(AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup)
         {
-            if (!didInitialize)
+            if (didInitialize)
                 return;
 
             didInitialize = true;
