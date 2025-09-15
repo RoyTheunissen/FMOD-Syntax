@@ -7,6 +7,9 @@ using BrunoMikoski.ScriptableObjectCollections;
 
 namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 {
+#if !SCRIPTABLE_OBJECT_COLLECTION
+    [CreateAssetMenu(fileName = "AudioClipEventId", menuName = MenuPaths.CreateScriptableObject + "Audio/Audio Clip Event ID")]
+#endif // !SCRIPTABLE_OBJECT_COLLECTION
     public sealed class AudioClipEventId : ScriptableObject
 #if SCRIPTABLE_OBJECT_COLLECTION
         , ISOCItem
