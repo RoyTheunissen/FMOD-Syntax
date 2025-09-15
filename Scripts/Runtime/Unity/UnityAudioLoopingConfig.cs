@@ -124,6 +124,10 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             if (Config.EndAudio.ShouldPlay)
             {
                 waitForEndSoundToFinish = true;
+                
+                // Make sure we don't handle any looping clip timeline events any more.
+                ClearAllTimelineEventHandlers();
+                
                 Source.Stop();
                 Source.PlayOneShot(Config.EndAudio.Clip, VolumeFactorOverride * Config.EndAudio.VolumeFactor);
             }
