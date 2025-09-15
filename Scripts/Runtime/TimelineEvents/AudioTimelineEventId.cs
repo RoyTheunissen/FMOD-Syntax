@@ -19,7 +19,7 @@ namespace RoyTheunissen.FMODSyntax.TimelineEvents
     /// package. I can recommend doing it this way though.
     /// </summary>
 #if !SCRIPTABLE_OBJECT_COLLECTION
-    [CreateAssetMenu(fileName = "AudioTimelineEventId", menuName = MenuPaths.CreateScriptableObject + "Audio/Audio Timeline Event ID")]
+    [CreateAssetMenu(fileName = "AudioTimelineEventId", menuName = MenuPaths.CreateScriptableObject + "Audio Timeline Event ID")]
 #endif // !SCRIPTABLE_OBJECT_COLLECTION
     public sealed class AudioTimelineEventId : ScriptableObject
 #if SCRIPTABLE_OBJECT_COLLECTION
