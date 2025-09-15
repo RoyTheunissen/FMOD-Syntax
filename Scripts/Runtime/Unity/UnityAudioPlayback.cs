@@ -66,18 +66,15 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 {
                     didCacheSearchKeywords = true;
                     
+                    searchKeywords += Name;
+                    
                     // Add a keyword for every tag.
                     for (int i = 0; i < Tags.Count; i++)
                     {
-                        searchKeywords += Tags[i].name;
-                        if (i < Tags.Count - 1)
-                            searchKeywords += ",";
-                    }
-                    
-                    // Also add the name itself.
-                    if (Tags.Count > 0)
                         searchKeywords += ",";
-                    searchKeywords += Name;
+                        
+                        searchKeywords += Tags[i].name;
+                    }
                 }
                 return searchKeywords;
             }
