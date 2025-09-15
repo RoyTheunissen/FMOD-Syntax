@@ -17,6 +17,10 @@ namespace RoyTheunissen.FMODSyntax
     {
         string Name { get; }
         bool CanBeCleanedUp { get; }
+        
+        /// <summary>
+        /// Useful for things like quickly filtering out a subgroup of active events while debugging.
+        /// </summary>
         string SearchKeywords { get; }
         bool IsOneshot { get; }
         float NormalizedProgress { get; }

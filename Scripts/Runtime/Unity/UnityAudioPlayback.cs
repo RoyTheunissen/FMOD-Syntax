@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using RoyTheunissen.FMODSyntax.TimelineEvents;
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax.Tags;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -14,9 +15,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
     public abstract class UnityAudioPlayback : IAudioPlayback
     {
         protected UnityAudioConfigBase baseConfig;
-
-        // TODO: Support tags again
-        // private CollectionItemPicker<AudioTag> Tags => baseConfig.Tags;
+        
+        private IList<UnityAudioTag> Tags => baseConfig.Tags;
 
         private float volumeFactorOverride;
         public float VolumeFactorOverride => volumeFactorOverride;
@@ -54,6 +54,10 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         [NonSerialized] private bool didCacheSearchKeywords;
         [NonSerialized] private string searchKeywords;
+        
+        /// <summary>
+        /// Useful for things like quickly filtering out a subgroup of active events while debugging.
+        /// </summary>
         public string SearchKeywords
         {
             get
@@ -62,18 +66,17 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 {
                     didCacheSearchKeywords = true;
                     
-                    // TODO: Support tags again
                     // Add a keyword for every tag.
-                    // for (int i = 0; i < Tags.Count; i++)
-                    // {
-                    //     searchKeywords += Tags[i].name;
-                    //     if (i < Tags.Count - 1)
-                    //         searchKeywords += ",";
-                    // }
+                    for (int i = 0; i < Tags.Count; i++)
+                    {
+                        searchKeywords += Tags[i].name;
+                        if (i < Tags.Count - 1)
+                            searchKeywords += ",";
+                    }
                     
                     // Also add the name itself.
-                    // if (Tags.Count > 0)
-                    //     searchKeywords += ",";
+                    if (Tags.Count > 0)
+                        searchKeywords += ",";
                     searchKeywords += Name;
                 }
                 return searchKeywords;

@@ -42,6 +42,9 @@ namespace RoyTheunissen.FMODSyntax
         }
 
         private string searchKeywords;
+        /// <summary>
+        /// Useful for things like quickly filtering out a subgroup of active events while debugging.
+        /// </summary>
         public string SearchKeywords
         {
             get => searchKeywords;

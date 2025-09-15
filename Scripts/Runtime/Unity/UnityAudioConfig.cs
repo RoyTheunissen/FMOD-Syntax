@@ -1,7 +1,13 @@
 #if UNITY_AUDIO_SYNTAX
 
+using System.Collections.Generic;
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax.Tags;
 using UnityEngine;
 using UnityEngine.Audio;
+
+#if SCRIPTABLE_OBJECT_COLLECTION && USE_COLLECTION_ITEM_PICKER_FOR_TAGS
+using BrunoMikoski.ScriptableObjectCollections.Picker;
+#endif
 
 namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 {
@@ -16,10 +22,12 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         [SerializeField] private float volumeFactor = 1.0f;
         public float VolumeFactor => volumeFactor;
         
-        // TODO: Support this again
-        // [FormerlySerializedAs("audioTags")]
-        // [SerializeField] private CollectionItemPicker<AudioTag> tags = new CollectionItemPicker<AudioTag>();
-        // public CollectionItemPicker<AudioTag> Tags => tags;
+#if SCRIPTABLE_OBJECT_COLLECTION && USE_COLLECTION_ITEM_PICKER_FOR_TAGS
+        [SerializeField] private CollectionItemPicker<UnityAudioTag> tags = new();
+#else
+        [SerializeField] private List<UnityAudioTag> tags = new();
+#endif
+        public IList<UnityAudioTag> Tags => tags;
 
         public abstract UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f);
     }
