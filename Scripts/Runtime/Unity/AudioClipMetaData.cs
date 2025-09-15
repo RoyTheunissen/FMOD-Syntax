@@ -11,10 +11,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
     [Serializable]
     public class AudioClipMetaData
     {
-        [SerializeField] private bool expand;
-        public bool Expand => expand;
-
-        [SerializeField] private AudioClip audioClip;
+        [SerializeField, HideInInspector] private AudioClip audioClip;
         public AudioClip AudioClip => audioClip;
         
         [SerializeField] private List<AudioClipEvent> events = new List<AudioClipEvent>();
