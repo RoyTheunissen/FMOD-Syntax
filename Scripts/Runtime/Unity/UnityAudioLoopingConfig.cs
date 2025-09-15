@@ -14,7 +14,6 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         [SerializeField] private AudioLoopBookendConfig startAudio;
         public AudioLoopBookendConfig StartAudio => startAudio;
         
-        [Header("Looping Audio")]
         [SerializeField] private AudioClipMetaData loopingAudioClip;
         public AudioClipMetaData LoopingAudioClip => loopingAudioClip;
 
