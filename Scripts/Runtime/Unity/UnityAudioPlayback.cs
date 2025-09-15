@@ -14,6 +14,12 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
     /// </summary>
     public abstract class UnityAudioPlayback : IAudioPlayback
     {
+        public enum FadeVolumeTypes
+        {
+            Linear,
+            SmoothDamp,
+        }
+        
         protected UnityAudioConfigBase baseConfig;
         
         private IList<UnityAudioTag> Tags => baseConfig.Tags;
@@ -51,6 +57,11 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         public bool CanBeCleanedUp => canBeCleanedUp;
 
         public string Name => baseConfig.name;
+
+        public abstract bool IsFadingOut
+        {
+            get;
+        }
 
         [NonSerialized] private bool didCacheSearchKeywords;
         [NonSerialized] private string searchKeywords;
@@ -246,32 +257,65 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             get => Source.pitch;
             set => Source.pitch = value;
         }
-        
-        // TODO: Add support for tweens back?
-        // private Tween cachedVolumeTween;
-        // public Tween VolumeTween
-        // {
-        //     get
-        //     {
-        //         if (cachedVolumeTween == null)
-        //             cachedVolumeTween = new Tween(f => VolumeFactor = f).SkipTo(VolumeFactor);
-        //         return cachedVolumeTween;
-        //     }
-        // }
+
+        private bool isTweeningVolume;
+        private FadeVolumeTypes volumeTweenType;
+        private float volumeTweenTarget;
+        private float volumeTweenDuration;
+        private float volumeTweenVelocity;
+        private bool isFadingOut;
+        public override bool IsFadingOut => isFadingOut;
 
         protected abstract bool ShouldFireEventsOnlyOnce { get; }
         
         protected readonly List<AudioClipTimelineEvent> timelineEventsToFire = new(0);
         private Dictionary<AudioTimelineEventId, AudioClipEventHandler> timelineEventIdToHandlers;
-        
+
         public delegate void AudioClipEventHandler(ThisType audioPlayback, AudioTimelineEventId eventId);
+
+        public override void Update()
+        {
+            base.Update();
+
+            UpdateVolumeTween();
+            UpdateAudioSourceVolume();
+        }
 
         protected override void OnCleanupInternal()
         {
             timelineEventIdToHandlers?.Clear();
-            
-            // TODO: Add support for tweens back?
-            //cachedVolumeTween.Cleanup();
+        }
+
+        private void UpdateVolumeTween()
+        {
+            // Tween towards a specified value.
+            if (isTweeningVolume)
+            {
+                // We support doing that linearly or with smooth damping.
+                switch (volumeTweenType)
+                {
+                    case FadeVolumeTypes.Linear:
+                        Volume = Mathf.MoveTowards(Volume, volumeTweenTarget, Time.deltaTime / volumeTweenDuration);
+                        break;
+                    
+                    case FadeVolumeTypes.SmoothDamp:
+                        Volume = Mathf.SmoothDamp(Volume, volumeTweenTarget, ref volumeTweenVelocity, volumeTweenDuration);
+                        break;
+                    
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                // If we've reached our target then we may want to stop the event completely, if requested.
+                if (Mathf.Approximately(Volume, volumeTweenTarget))
+                {
+                    Volume = volumeTweenTarget;
+                    isTweeningVolume = false;
+                    
+                    if (isFadingOut && Volume.Approximately(0.0f))
+                        Stop();
+                }
+            }
         }
         
         protected void UpdateAudioSourceVolume()
@@ -425,6 +469,48 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             bool existed = timelineEventIdToHandlers.TryGetValue(@event, out AudioClipEventHandler handler);
             if (existed)
                 handler(this as ThisType, @event);
+        }
+
+        public ThisType SetFadeVolumeType(FadeVolumeTypes fadeVolumeType)
+        {
+            volumeTweenType = fadeVolumeType;
+            return this as ThisType;
+        }
+
+        private ThisType FadeVolumeToInternal(float value, float duration)
+        {
+            if (Volume.Approximately(value))
+                return this as ThisType;
+            
+            isTweeningVolume = true;
+            volumeTweenDuration = duration;
+            volumeTweenTarget = value;
+            
+            return this as ThisType;
+        }
+        
+        public ThisType FadeVolumeTo(float value, float duration)
+        {
+            isFadingOut = false;
+            
+            return FadeVolumeToInternal(value, duration);
+        }
+        
+        public ThisType FadeIn(float duration, bool startAtZeroVolume = true)
+        {
+            isFadingOut = false;
+            
+            if (startAtZeroVolume)
+                Volume = 0.0f;
+            
+            return FadeVolumeToInternal(1.0f, duration);
+        }
+        
+        public ThisType FadeOut(float duration, bool stopWhenFullyFadedOut = true)
+        {
+            isFadingOut = stopWhenFullyFadedOut;
+            
+            return FadeVolumeToInternal(0.0f, duration);
         }
     }
 }

@@ -135,12 +135,6 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         {
             return Config.name + $" ({Source.clip.name})";
         }
-
-        public void FadeOut(float duration)
-        {
-            // TODO: Add support for tweens back?
-            // VolumeTween.TweenOut(duration);
-        }
     }
 }
 

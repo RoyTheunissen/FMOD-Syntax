@@ -107,8 +107,6 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 }
             }
 
-            UpdateAudioSourceVolume();
-
             timePrevious = time;
         }
 
