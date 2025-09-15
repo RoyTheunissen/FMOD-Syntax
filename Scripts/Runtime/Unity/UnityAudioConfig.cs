@@ -5,8 +5,12 @@ using RoyTheunissen.FMODSyntax.UnityAudioSyntax.Tags;
 using UnityEngine;
 using UnityEngine.Audio;
 
-#if SCRIPTABLE_OBJECT_COLLECTION && USE_COLLECTION_ITEM_PICKER_FOR_TAGS
-using BrunoMikoski.ScriptableObjectCollections.Picker;
+#if SCRIPTABLE_OBJECT_COLLECTION
+using BrunoMikoski.ScriptableObjectCollections;
+
+    #if USE_COLLECTION_ITEM_PICKER_FOR_TAGS
+    using BrunoMikoski.ScriptableObjectCollections.Picker;
+    #endif
 #endif
 
 namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
@@ -25,6 +29,9 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 #if SCRIPTABLE_OBJECT_COLLECTION && USE_COLLECTION_ITEM_PICKER_FOR_TAGS
         [SerializeField] private CollectionItemPicker<UnityAudioTag> tags = new();
 #else
+        #if SCRIPTABLE_OBJECT_COLLECTION
+        [SOCItemEditorOptions(ShouldDrawGotoButton = false, ShouldDrawPreviewButton = false, LabelMode = LabelMode.NoLabel)]
+        #endif // SCRIPTABLE_OBJECT_COLLECTION
         [SerializeField] private List<UnityAudioTag> tags = new();
 #endif
         public IList<UnityAudioTag> Tags => tags;
