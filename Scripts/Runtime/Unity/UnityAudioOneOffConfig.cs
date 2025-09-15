@@ -102,16 +102,13 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             
             time += Time.deltaTime;
             
-            if (time < duration)
-            {
-                normalizedProgress = (time / duration).Saturate();
+            normalizedProgress = (time / duration).Saturate();
 
-                // Make sure the sound comes from the specified transform.
-                if (IsLocal && Origin != null)
-                    Source.transform.position = Origin.position;
+            // Make sure the sound comes from the specified transform.
+            if (IsLocal && Origin != null)
+                Source.transform.position = Origin.position;
                 
-                TryFiringRemainingEvents(timePrevious, time);
-            }
+            TryFiringRemainingEvents(timePrevious, time);
             
             timePrevious = time;
 
