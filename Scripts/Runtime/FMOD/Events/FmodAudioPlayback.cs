@@ -132,6 +132,8 @@ namespace RoyTheunissen.FMODSyntax
         /// <summary>
         /// Fluid method for subscribing to timeline events so you don't have to save the playback to a variable first
         /// if you don't want to (for example for one-off sounds).
+        /// NOTE: Consider using AddTimelineEventHandler which lets you specify which event you are interested in,
+        /// and also it is compatible across both the Unity and FMOD audio systems.
         /// </summary>
         public FmodAudioPlayback SubscribeToTimelineMarkerReachedEvent(TimelineMarkerReachedHandler handler)
         {
@@ -142,6 +144,8 @@ namespace RoyTheunissen.FMODSyntax
         /// <summary>
         /// Fluid method for unsubscribing from timeline events so you don't have to save the playback to a variable
         /// first if you don't want to (for example for one-off sounds).
+        /// NOTE: Consider using AddTimelineEventHandler which lets you specify which event you are interested in,
+        /// and also it is compatible across both the Unity and FMOD audio systems.
         /// </summary>
         public FmodAudioPlayback UnsubscribeFromTimelineMarkerReachedEvent(TimelineMarkerReachedHandler handler)
         {
@@ -168,7 +172,7 @@ namespace RoyTheunissen.FMODSyntax
             return RESULT.OK;
         }
 
-        IAudioPlayback IAudioPlayback.AddTimelineEventHandler(
+        public IAudioPlayback AddTimelineEventHandler(
             AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
         {
             if (timelineEventIdToHandlers == null)
@@ -186,7 +190,7 @@ namespace RoyTheunissen.FMODSyntax
             return this;
         }
 
-        IAudioPlayback IAudioPlayback.RemoveTimelineEventHandler(
+        public IAudioPlayback RemoveTimelineEventHandler(
             AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
         {
             string id = @event.Id;
