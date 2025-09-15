@@ -138,15 +138,11 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             isPlaying = false;
             
             OnStop();
-            
-            // Return the audio source to the pool AFTER the derived class has had a chance to stop. This allows looping
-            // sounds to squeeze in a cheeky one-off end sound before the audio source is returned.
-            MarkForCleanup();
         }
         
         protected abstract void OnStop();
 
-        private void MarkForCleanup()
+        protected void MarkForCleanup()
         {
             canBeCleanedUp = true;
         }

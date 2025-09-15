@@ -127,6 +127,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         protected override void OnStop()
         {
+            MarkForCleanup();
         }
         
         protected override void OnCleanup()

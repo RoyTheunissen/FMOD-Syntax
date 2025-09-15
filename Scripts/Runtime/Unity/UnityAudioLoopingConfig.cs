@@ -29,6 +29,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
     public class UnityAudioLoopingPlayback : UnityAudioPlaybackGeneric<UnityAudioLoopingConfig, UnityAudioLoopingPlayback>
     {
         protected override bool ShouldFireEventsOnlyOnce => false;
+        
+        private bool waitForEndSoundToFinish;
 
         public override bool IsOneshot => false;
 
@@ -39,6 +41,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 Debug.LogError($"Audio loop config {Config} did not have a valid looping audio clip...");
                 return;
             }
+            
+            waitForEndSoundToFinish = false;
             
             if (Config.StartAudio.ShouldPlay)
                 Source.PlayOneShot(Config.StartAudio.Clip, VolumeFactorOverride * Config.StartAudio.VolumeFactor);
@@ -97,6 +101,12 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
             UpdateAudioSourceVolume();
 
+            if (waitForEndSoundToFinish && !Source.isPlaying)
+            {
+                waitForEndSoundToFinish = false;
+                MarkForCleanup();
+            }
+
             timePrevious = time;
         }
 
@@ -108,10 +118,19 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         protected override void OnStop()
         {
-            // Squeeze in some cheeky End audio, if specified.
-            // TODO: Do we need to wait for this finish before returning the audio source into the pool?
+            // Squeeze in some cheeky End audio, if specified. If so we also need to wait for it to finish before
+            // we return our Audio Source to the pool.
             if (Config.EndAudio.ShouldPlay)
+            {
+                waitForEndSoundToFinish = true;
+                Source.Stop();
                 Source.PlayOneShot(Config.EndAudio.Clip, VolumeFactorOverride * Config.EndAudio.VolumeFactor);
+            }
+            else
+            {
+                waitForEndSoundToFinish = false;
+                MarkForCleanup();
+            }
         }
 
         protected override void OnCleanup()
