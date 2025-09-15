@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using FMOD;
@@ -33,19 +34,21 @@ namespace RoyTheunissen.FMODSyntax
             {
                 timelineMarkerReachedEvent += value;
                 timelineMarkerListenerCount++;
-                
-                if (timelineMarkerListenerCount == 1)
-                    Instance.setCallback(OnTimelineMarkerReached, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+
+                UpdateTimelineMarkerCallbackState();
             }
             remove
             {
                 timelineMarkerReachedEvent -= value;
                 timelineMarkerListenerCount--;
                 
-                if (timelineMarkerListenerCount == 0)
-                    Instance.setCallback(null, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+                UpdateTimelineMarkerCallbackState();
             }
         }
+
+        [NonSerialized] private bool hasRegisteredTimelineMarkerReachedCallback;
+
+        private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
         
         public void Play(EventDescription eventDescription, Transform source)
         {
@@ -112,6 +115,19 @@ namespace RoyTheunissen.FMODSyntax
 
             AudioSyntaxSystem.UnregisterActiveEventPlayback(this);
         }
+        
+        private void UpdateTimelineMarkerCallbackState()
+        {
+            bool shouldRegisterTimelineMarkerReachedCallback = timelineMarkerListenerCount > 0 ||
+                                            (genericEventIdToHandlers != null && genericEventIdToHandlers.Count > 0);
+            
+            if (!hasRegisteredTimelineMarkerReachedCallback && shouldRegisterTimelineMarkerReachedCallback)
+                Instance.setCallback(OnTimelineMarkerReached, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+            else if (hasRegisteredTimelineMarkerReachedCallback && !hasRegisteredTimelineMarkerReachedCallback)
+                Instance.setCallback(null, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+
+            hasRegisteredTimelineMarkerReachedCallback = shouldRegisterTimelineMarkerReachedCallback;
+        }
 
         /// <summary>
         /// Fluid method for subscribing to timeline events so you don't have to save the playback to a variable first
@@ -137,10 +153,55 @@ namespace RoyTheunissen.FMODSyntax
         {
             TIMELINE_MARKER_PROPERTIES parameter = (TIMELINE_MARKER_PROPERTIES)Marshal.PtrToStructure(
                 parameterPtr, typeof(TIMELINE_MARKER_PROPERTIES));
+
+            string id = parameter.name;
             
-            timelineMarkerReachedEvent?.Invoke(this, parameter.name);
+            timelineMarkerReachedEvent?.Invoke(this, id);
+
+            // If a generic event ID handler was registered for this type, then fire those now. 
+            if (genericEventIdToHandlers != null && genericEventIdToHandlers.TryGetValue(
+                    id, out IAudioPlayback.AudioClipGenericEventHandler handlers))
+            {
+                handlers?.Invoke(this, id);
+            }
             
             return RESULT.OK;
+        }
+
+        IAudioPlayback IAudioPlayback.AddEventHandler(
+            AudioClipEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
+        {
+            if (genericEventIdToHandlers == null)
+                genericEventIdToHandlers = new Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler>();
+
+            string id = @event.Id;
+            bool existed = genericEventIdToHandlers.ContainsKey(id);
+            if (!existed)
+                genericEventIdToHandlers[id] = handler;
+            else
+                genericEventIdToHandlers[id] += handler;
+            
+            UpdateTimelineMarkerCallbackState();
+            
+            return this;
+        }
+
+        IAudioPlayback IAudioPlayback.RemoveEventHandler(
+            AudioClipEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
+        {
+            string id = @event.Id;
+
+            bool existed = genericEventIdToHandlers.ContainsKey(id);
+            if (existed)
+            {
+                genericEventIdToHandlers[id] -= handler;
+                if (genericEventIdToHandlers[id] == null)
+                    genericEventIdToHandlers.Remove(id);
+            }
+
+            UpdateTimelineMarkerCallbackState();
+
+            return this;
         }
     }
 }

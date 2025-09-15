@@ -15,6 +15,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         , ISOCItem
 #endif // SCRIPTABLE_OBJECT_COLLECTION
     {
+        public string Id => name;
+        
 #if SCRIPTABLE_OBJECT_COLLECTION
         [SerializeField, HideInInspector]
         private LongGuid guid;

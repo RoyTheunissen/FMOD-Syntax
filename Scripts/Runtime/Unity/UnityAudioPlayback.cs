@@ -89,6 +89,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         protected float normalizedProgress;
         public float NormalizedProgress => normalizedProgress;
+        
+        private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
 
         public void Initialize(
             UnityAudioConfigBase audioConfig, Transform origin, float volumeFactorOverride, AudioSource audioSource)
@@ -173,6 +175,49 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         protected abstract void OnCleanupInternal();
 
         protected abstract void OnCleanup();
+
+        IAudioPlayback IAudioPlayback.AddEventHandler(
+            AudioClipEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
+        {
+            if (genericEventIdToHandlers == null)
+                genericEventIdToHandlers = new Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler>();
+
+            string id = @event.Id;
+            bool existed = genericEventIdToHandlers.ContainsKey(id);
+            if (!existed)
+                genericEventIdToHandlers[id] = handler;
+            else
+                genericEventIdToHandlers[id] += handler;
+            
+            return this;
+        }
+        
+        IAudioPlayback IAudioPlayback.RemoveEventHandler(
+            AudioClipEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
+        {
+            string id = @event.Id;
+
+            bool existed = genericEventIdToHandlers.ContainsKey(id);
+            if (existed)
+            {
+                genericEventIdToHandlers[id] -= handler;
+                if (genericEventIdToHandlers[id] == null)
+                    genericEventIdToHandlers.Remove(id);
+            }
+
+            return this;
+        }
+        
+        protected virtual void FireEvent(AudioClipEventId @event)
+        {
+            if (genericEventIdToHandlers == null)
+                return;
+
+            bool existed = genericEventIdToHandlers.TryGetValue(
+                @event.Id, out IAudioPlayback.AudioClipGenericEventHandler handler);
+            if (existed)
+                handler(this, @event.Id);
+        }
     }
     
     public abstract class UnityAudioPlaybackGeneric<AudioConfigType, ThisType> : UnityAudioPlayback
@@ -359,9 +404,14 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         
             return this as ThisType;
         }
-        
-        protected void FireEvent(AudioClipEventId @event)
+
+        protected override void FireEvent(AudioClipEventId @event)
         {
+            base.FireEvent(@event);
+            
+            // The base class supports events that use a string identifier, that's the solution that works for both
+            // FMOD and Unity. We in turn support a version that uses AudioClipEventId Scriptable Objects as the ID.
+            // That's a bit nicer to work with.
             if (eventIdToHandlers == null)
                 return;
             

@@ -28,5 +28,10 @@ namespace RoyTheunissen.FMODSyntax
         void Cleanup();
 
         void Stop();
+        
+        public delegate void AudioClipGenericEventHandler(IAudioPlayback audioPlayback, string eventId);
+
+        IAudioPlayback AddEventHandler(AudioClipEventId @event, AudioClipGenericEventHandler handler);
+        IAudioPlayback RemoveEventHandler(AudioClipEventId @event, AudioClipGenericEventHandler handler);
     }
 }
