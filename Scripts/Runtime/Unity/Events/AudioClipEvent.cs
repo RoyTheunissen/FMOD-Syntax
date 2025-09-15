@@ -14,8 +14,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 #if SCRIPTABLE_OBJECT_COLLECTION
         [SOCItemEditorOptions(ShouldDrawGotoButton = false, ShouldDrawPreviewButton = false)]
 #endif // SCRIPTABLE_OBJECT_COLLECTION
-        private AudioClipEventId id;
-        public AudioClipEventId Id => id;
+        private AudioTimelineEventId id;
+        public AudioTimelineEventId Id => id;
 
         [SerializeField] private float time;
         public float Time => time;

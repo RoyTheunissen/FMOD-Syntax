@@ -7,10 +7,21 @@ using BrunoMikoski.ScriptableObjectCollections;
 
 namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 {
+    /// <summary>
+    /// Scriptable Object that functions as an ID for a timeline event. Both in the FMOD and the Unity solutions you can
+    /// define specific times within an audio event at which a "timeline event" is dispatched. You could refer to it by
+    /// name but it's smarter to refer to it via a strongly typed Scriptable Object instead so the reference doesn't
+    /// break so easily (you can for example rename the event just by renaming the ID asset).
+    ///
+    /// Optionally you can use the Scriptable Object Collection package by Bruno Mikoski to manage these identifiers,
+    /// then as a bonus you can have static access code generated so that you can access events from C# code using
+    /// syntax like `AudioTimelineEventIds.End`. This part is optional so as not to have a hard dependency on another
+    /// package. I can recommend doing it this way though.
+    /// </summary>
 #if !SCRIPTABLE_OBJECT_COLLECTION
-    [CreateAssetMenu(fileName = "AudioClipEventId", menuName = MenuPaths.CreateScriptableObject + "Audio/Audio Clip Event ID")]
+    [CreateAssetMenu(fileName = "AudioTimelineEventId", menuName = MenuPaths.CreateScriptableObject + "Audio/Audio Timeline Event ID")]
 #endif // !SCRIPTABLE_OBJECT_COLLECTION
-    public sealed class AudioClipEventId : ScriptableObject
+    public sealed class AudioTimelineEventId : ScriptableObject
 #if SCRIPTABLE_OBJECT_COLLECTION
         , ISOCItem
 #endif // SCRIPTABLE_OBJECT_COLLECTION

@@ -176,8 +176,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
 
         protected abstract void OnCleanup();
 
-        IAudioPlayback IAudioPlayback.AddEventHandler(
-            AudioClipEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
+        IAudioPlayback IAudioPlayback.AddTimelineEventHandler(
+            AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
         {
             if (genericEventIdToHandlers == null)
                 genericEventIdToHandlers = new Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler>();
@@ -192,8 +192,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             return this;
         }
         
-        IAudioPlayback IAudioPlayback.RemoveEventHandler(
-            AudioClipEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
+        IAudioPlayback IAudioPlayback.RemoveTimelineEventHandler(
+            AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
         {
             string id = @event.Id;
 
@@ -208,7 +208,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             return this;
         }
         
-        protected virtual void FireEvent(AudioClipEventId @event)
+        protected virtual void FireTimelineEvent(AudioTimelineEventId @event)
         {
             if (genericEventIdToHandlers == null)
                 return;
@@ -261,13 +261,13 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         protected abstract bool ShouldFireEventsOnlyOnce { get; }
         
         protected readonly List<AudioClipEvent> eventsToFire = new(0);
-        private Dictionary<AudioClipEventId, AudioClipEventHandler> eventIdToHandlers;
+        private Dictionary<AudioTimelineEventId, AudioClipEventHandler> timelineEventIdToHandlers;
         
-        public delegate void AudioClipEventHandler(ThisType audioPlayback, AudioClipEventId eventId);
+        public delegate void AudioClipEventHandler(ThisType audioPlayback, AudioTimelineEventId eventId);
 
         protected override void OnCleanupInternal()
         {
-            eventIdToHandlers?.Clear();
+            timelineEventIdToHandlers?.Clear();
             
             // TODO: Add support for tweens back?
             //cachedVolumeTween.Cleanup();
@@ -291,7 +291,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                     continue;
                 }
                 
-                FireEvent(eventsToFire[i].Id);
+                FireTimelineEvent(eventsToFire[i].Id);
                     
                 if (ShouldFireEventsOnlyOnce)
                     eventsToFire.RemoveAt(i);
@@ -384,38 +384,38 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             return this as ThisType;
         }
         
-        public ThisType AddEventHandler(AudioClipEventId @event, AudioClipEventHandler handler)
+        public ThisType AddTimelineEventHandler(AudioTimelineEventId @event, AudioClipEventHandler handler)
         {
-            if (eventIdToHandlers == null)
-                eventIdToHandlers = new Dictionary<AudioClipEventId, AudioClipEventHandler>();
+            if (timelineEventIdToHandlers == null)
+                timelineEventIdToHandlers = new Dictionary<AudioTimelineEventId, AudioClipEventHandler>();
             
-            bool existed = eventIdToHandlers.ContainsKey(@event);
+            bool existed = timelineEventIdToHandlers.ContainsKey(@event);
             if (!existed)
-                eventIdToHandlers[@event] = handler;
+                timelineEventIdToHandlers[@event] = handler;
             else
-                eventIdToHandlers[@event] += handler;
+                timelineEventIdToHandlers[@event] += handler;
             return this as ThisType;
         }
         
-        public ThisType ClearAllEventHandlers()
+        public ThisType ClearAllTimelineEventHandlers()
         {
             eventsToFire?.Clear();
-            eventIdToHandlers?.Clear();
+            timelineEventIdToHandlers?.Clear();
         
             return this as ThisType;
         }
 
-        protected override void FireEvent(AudioClipEventId @event)
+        protected override void FireTimelineEvent(AudioTimelineEventId @event)
         {
-            base.FireEvent(@event);
+            base.FireTimelineEvent(@event);
             
             // The base class supports events that use a string identifier, that's the solution that works for both
             // FMOD and Unity. We in turn support a version that uses AudioClipEventId Scriptable Objects as the ID.
             // That's a bit nicer to work with.
-            if (eventIdToHandlers == null)
+            if (timelineEventIdToHandlers == null)
                 return;
             
-            bool existed = eventIdToHandlers.TryGetValue(@event, out AudioClipEventHandler handler);
+            bool existed = timelineEventIdToHandlers.TryGetValue(@event, out AudioClipEventHandler handler);
             if (existed)
                 handler(this as ThisType, @event);
         }
