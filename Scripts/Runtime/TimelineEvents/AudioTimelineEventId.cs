@@ -5,7 +5,7 @@ using UnityEngine;
 using BrunoMikoski.ScriptableObjectCollections;
 #endif // SCRIPTABLE_OBJECT_COLLECTION
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.FMODSyntax.TimelineEvents
 {
     /// <summary>
     /// Scriptable Object that functions as an ID for a timeline event. Both in the FMOD and the Unity solutions you can

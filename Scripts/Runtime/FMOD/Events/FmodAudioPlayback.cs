@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+using RoyTheunissen.FMODSyntax.TimelineEvents;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;

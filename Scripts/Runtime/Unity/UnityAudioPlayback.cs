@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using RoyTheunissen.FMODSyntax.TimelineEvents;
 using UnityEngine;
 using UnityEngine.Audio;
 

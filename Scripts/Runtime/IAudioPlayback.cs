@@ -1,4 +1,4 @@
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+using RoyTheunissen.FMODSyntax.TimelineEvents;
 
 namespace RoyTheunissen.FMODSyntax
 {

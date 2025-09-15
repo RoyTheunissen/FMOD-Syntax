@@ -1,4 +1,5 @@
 using System;
+using RoyTheunissen.FMODSyntax.TimelineEvents;
 using UnityEngine;
 
 #if SCRIPTABLE_OBJECT_COLLECTION
