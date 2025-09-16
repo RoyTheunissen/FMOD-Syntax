@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Config for a looping sound effect as played back by Unity's native audio system.

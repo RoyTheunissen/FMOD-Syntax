@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Random = UnityEngine.Random;
 
-namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Config for a simple one-off sound effect as played back by Unity's native audio system.

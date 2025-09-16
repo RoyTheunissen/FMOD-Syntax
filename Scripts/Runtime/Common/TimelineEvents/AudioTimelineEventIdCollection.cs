@@ -3,7 +3,7 @@
 using UnityEngine;
 using BrunoMikoski.ScriptableObjectCollections;
 
-namespace RoyTheunissen.AudioSyntax.TimelineEvents
+namespace RoyTheunissen.AudioSyntax
 {
     [CreateAssetMenu(menuName = AudioSyntaxMenuPaths.CreateSocItem + "Create Audio Timeline Event ID Collection", fileName = "AudioTimelineEventIdCollection", order = 0)]
     public class AudioTimelineEventIdCollection : ScriptableObjectCollection<AudioTimelineEventId>

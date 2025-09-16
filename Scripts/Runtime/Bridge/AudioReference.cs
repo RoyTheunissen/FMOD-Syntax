@@ -4,10 +4,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-#if UNITY_AUDIO_SYNTAX
-using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
-#endif // UNITY_AUDIO_SYNTAX
-
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>

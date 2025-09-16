@@ -6,7 +6,6 @@ using System.Linq;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace RoyTheunissen.AudioSyntax
 {

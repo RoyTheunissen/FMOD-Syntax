@@ -2,14 +2,6 @@ using System;
 using System.Collections.Generic;
 using RoyTheunissen.AudioSyntax.Callbacks;
 
-#if UNITY_AUDIO_SYNTAX
-using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
-#endif // UNITY_AUDIO_SYNTAX
-
-#if FMOD_AUDIO_SYNTAX
-using RoyTheunissen.AudioSyntax;
-#endif // FMOD_AUDIO_SYNTAX
-
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>

@@ -2,7 +2,6 @@ using System;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using System.Linq;
-using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
 
 #if FMOD_AUDIO_SYNTAX
 using FMODUnity;

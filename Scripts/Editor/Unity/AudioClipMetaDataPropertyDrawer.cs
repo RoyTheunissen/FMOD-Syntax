@@ -1,4 +1,3 @@
-using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
 using UnityEditor;
 using UnityEngine;
 

@@ -1,5 +1,3 @@
-using RoyTheunissen.AudioSyntax.TimelineEvents;
-
 namespace RoyTheunissen.AudioSyntax
 {
     public interface IFmodPlayback

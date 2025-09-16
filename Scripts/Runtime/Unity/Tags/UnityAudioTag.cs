@@ -4,7 +4,7 @@
 using BrunoMikoski.ScriptableObjectCollections;
 #endif // SCRIPTABLE_OBJECT_COLLECTION
 
-namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax.Tags
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Scriptable Object that functions as a tag to organize events. In the Unity solution you can attach tags to an
