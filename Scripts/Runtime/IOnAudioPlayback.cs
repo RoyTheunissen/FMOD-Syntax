@@ -1,4 +1,4 @@
-namespace RoyTheunissen.AudioSyntax.Callbacks
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Interface to use when you want a callback whenever an audio event playback is (un)registered.
