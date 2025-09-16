@@ -265,6 +265,9 @@ namespace RoyTheunissen.FMODSyntax
         {
             labelParameterNameToUserSpecifiedType.Clear();
             didCacheUserSpecifiedEnums = false;
+            
+            AudioSyntaxSettings.RequestCodeRegenerationEvent -= HandleAudioSyntaxSettingsRequestCodeRegenerationEvent;
+            AudioSyntaxSettings.RequestCodeRegenerationEvent += HandleAudioSyntaxSettingsRequestCodeRegenerationEvent;
 
             // NOTE: For this to work, SourceFilesChangedEvent and BankRefreshEvent events need to be added to FMOD.
 #if FMOD_AUTO_REGENERATE_CODE
@@ -277,6 +280,13 @@ namespace RoyTheunissen.FMODSyntax
             BankRefresher.BankRefreshEvent -= HandleBankRefreshEvent;
             BankRefresher.BankRefreshEvent += HandleBankRefreshEvent;
 #endif // FMOD_AUTO_REGENERATE_CODE
+        }
+
+        private static void HandleAudioSyntaxSettingsRequestCodeRegenerationEvent()
+        {
+            AudioSyntaxSettings.RequestCodeRegenerationEvent -= HandleAudioSyntaxSettingsRequestCodeRegenerationEvent;
+            
+            GenerateCode();
         }
 
 #if FMOD_AUTO_REGENERATE_CODE
@@ -765,6 +775,7 @@ namespace RoyTheunissen.FMODSyntax
         }
 
         [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
+        [MenuItem(AudioSyntaxMenuPaths.Root + "Generate FMOD Code", false, 999999999)]
         public static void GenerateCode()
         {
             ParseMetaData();
