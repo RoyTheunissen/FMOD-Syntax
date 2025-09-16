@@ -24,13 +24,7 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly Color WarningColor = Color.Lerp(Color.yellow, Color.red, 0.0f);
         private static readonly Color SuccessColor = Color.green;
         
-        private const string ResourcesFolderSuffix = "Resources/";
-        
-        private string settingsFolderPath = string.Empty;
-        private string generatedScriptsFolderPath = "Generated/Scripts/Audio";
-        
-        private string namespaceForGeneratedCode;
-        private bool shouldGenerateAssemblyDefinition = true;
+        private const string ResourcesFolderSuffix = "Resources";
 
         [NonSerialized] private bool didDetectFMOD;
         [NonSerialized] private bool didDetectAudioSyntaxConfig;
@@ -68,11 +62,32 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        private string createUnitySyntaxSettingsAssetFolderPath = string.Empty;
+        private string settingsFolderPath = string.Empty;
+        private string generatedScriptsFolderPath = "Generated/Scripts/Audio";
+        
+        private string namespaceForGeneratedCode;
+        private bool shouldGenerateAssemblyDefinition = true;
+        
+        private string createUnitySyntaxSettingsAssetResourcesFolderPath = string.Empty;
         private AudioSource audioSourcePooledPrefab;
         private AudioMixerGroup defaultMixerGroup;
 
-        private bool CanInitialize => supportedSystems != 0 && audioSourcePooledPrefab != null;
+        private bool CanInitialize
+        {
+            get
+            {
+                if (supportedSystems == 0)
+                    return false;
+
+                if (supportedSystems.HasFlag(SupportedSystems.UnityNativeAudio)
+                    && (audioSourcePooledPrefab == null || IsUnitySettingsFolderASubfolderOfResources()))
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
 
         [InitializeOnLoadMethod]
         private static void Initialize()
@@ -209,7 +224,7 @@ namespace RoyTheunissen.AudioSyntax
             {
                 bool shouldInitialize = GUILayout.Button("Initialize", GUILayout.Height(40));
                 if (shouldInitialize)
-                    InitializeFmodSyntaxSystem();
+                    InitializeAudioSyntaxSystem();
             }
             
             EditorGUILayout.Space();
@@ -320,18 +335,31 @@ namespace RoyTheunissen.AudioSyntax
             {
                 // Decide where to create the asset
                 EditorGUILayout.LabelField(
-                    $"Where do you want to place the settings asset? It must be in a Resources folder.");
+                    $"Where do you want to place the settings asset? It must be a Resources folder.");
 
-                createUnitySyntaxSettingsAssetFolderPath = DrawFolderPathField(
-                    createUnitySyntaxSettingsAssetFolderPath, "Config Resources Folder",
-                    "Which Resources folder to create the Unity Audio Syntax Settings file inside that has all the settings in it.");
-                string absolutePath = createUnitySyntaxSettingsAssetFolderPath.GetAbsolutePath();
-                if (!absolutePath.EndsWith("/"))
-                    absolutePath += "/";
-                if (!absolutePath.EndsWith(ResourcesFolderSuffix))
-                    absolutePath += ResourcesFolderSuffix;
-                absolutePath += UnityAudioSyntaxSettings.PathSuffix;
-                EditorGUILayout.LabelField(absolutePath, EditorStyles.miniLabel);
+                // Specify which Resources folder you want to place the asset in, but it must not be a subfolder of a 
+                // Resources folder because then the Resources load would fail.
+                bool isSubfolderOfResourcesFolder = IsUnitySettingsFolderASubfolderOfResources();
+                BeginValidityChecks(!isSubfolderOfResourcesFolder);
+                createUnitySyntaxSettingsAssetResourcesFolderPath = DrawFolderPathField(
+                    createUnitySyntaxSettingsAssetResourcesFolderPath, "Config Resources Folder",
+                    "Which Resources folder to create the Unity Audio Syntax Settings file inside that has all the " +
+                    "settings in it.");
+                if (isSubfolderOfResourcesFolder)
+                {
+                    EditorGUILayout.LabelField(
+                        "Please specify a Resources folder, and not a subfolder of a Resources folder.",
+                        EditorStyles.miniLabel);
+                }
+                EndValidityChecks();
+
+                // Draw the current path, if it was valid.
+                if (!isSubfolderOfResourcesFolder)
+                {
+                    string relativePath = GetUnitySyntaxSettingsAssetFolderPath();
+                    string absolutePath = relativePath.GetAbsolutePath();
+                    EditorGUILayout.LabelField(absolutePath, EditorStyles.miniLabel);
+                }
                 
                 EditorGUILayout.Space();
                 
@@ -348,7 +376,57 @@ namespace RoyTheunissen.AudioSyntax
             EndSettingsBox();
         }
 
-        private void InitializeFmodSyntaxSystem()
+        private bool IsUnitySettingsFolderASubfolderOfResources()
+        {
+            string path = createUnitySyntaxSettingsAssetResourcesFolderPath.ToUnityPath();
+            
+            // Don't specify a subfolder of a Resources folder...
+            if (path.Contains(ResourcesFolderSuffix + "/") && !path.EndsWith(ResourcesFolderSuffix + "/"))
+                return true;
+
+            return false;
+        }
+
+        private string GetUnitySyntaxSettingsAssetFolderPath()
+        {
+            string path = createUnitySyntaxSettingsAssetResourcesFolderPath.ToUnityPath();
+
+            if (string.Equals(path, ResourcesFolderSuffix, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(path, ResourcesFolderSuffix + "/", StringComparison.OrdinalIgnoreCase))
+            {
+                // Already good
+            }
+            else if (string.IsNullOrEmpty(path))
+            {
+                path += ResourcesFolderSuffix;
+            }
+            else if (!path.EndsWith("/" + ResourcesFolderSuffix))
+            {
+                if (!path.EndsWith("/"))
+                    path += "/";
+                
+                path += ResourcesFolderSuffix;
+            }
+
+            if (!path.EndsWith("/"))
+                path += "/";
+
+            path += UnityAudioSyntaxSettings.PathRelativeToResources;
+            return path;
+        }
+
+        private void InitializeAudioSyntaxSystem()
+        {
+            if (!didDetectAudioSyntaxConfig)
+                CreateAudioSyntaxSettingsFile();
+            
+            if (!didDetectUnityAudioSyntaxConfig && supportedSystems.HasFlag(SupportedSystems.UnityNativeAudio))
+                CreateUnityAudioSyntaxSettingsFile();
+
+            Close();
+        }
+
+        private void CreateAudioSyntaxSettingsFile()
         {
             AudioSyntaxSettings settings = CreateScriptableObject<AudioSyntaxSettings>(
                 settingsFolderPath, nameof(AudioSyntaxSettings));
@@ -358,8 +436,20 @@ namespace RoyTheunissen.AudioSyntax
             
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
+        }
+        
+        private void CreateUnityAudioSyntaxSettingsFile()
+        {
+            string fileName = UnityAudioSyntaxSettings.SettingsFilename;
+            string path = GetUnitySyntaxSettingsAssetFolderPath().RemoveSuffix(fileName);
+
+            fileName = Path.GetFileNameWithoutExtension(fileName);
+            UnityAudioSyntaxSettings settings = CreateScriptableObject<UnityAudioSyntaxSettings>(path, fileName);
             
-            Close();
+            settings.InitializeFromWizard(audioSourcePooledPrefab, defaultMixerGroup);
+            
+            EditorUtility.SetDirty(settings);
+            AssetDatabase.SaveAssets();
         }
 
         private static void EnsureFolderExists(string path)

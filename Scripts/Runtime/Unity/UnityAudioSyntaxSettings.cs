@@ -16,7 +16,8 @@ namespace RoyTheunissen.AudioSyntax
         fileName = nameof(UnityAudioSyntaxSettings))]
     public sealed class UnityAudioSyntaxSettings : ScriptableObject 
     {
-        public static readonly string PathSuffix = $"AudioSyntax/{nameof(UnityAudioSyntaxSettings)}.asset";
+        public static readonly string SettingsFilename = $"{nameof(UnityAudioSyntaxSettings)}.asset";
+        public static readonly string PathRelativeToResources = $"AudioSyntax/" + SettingsFilename;
         
         [SerializeField] private AudioSource audioSourcePooledPrefab;
         public AudioSource AudioSourcePooledPrefab => audioSourcePooledPrefab;
@@ -47,11 +48,17 @@ namespace RoyTheunissen.AudioSyntax
                         didCacheInstance = cachedInstance != null;
                     }
 #else
-                    cachedInstance = Resources.Load<UnityAudioSyntaxSettings>(PathSuffix);
+                    cachedInstance = Resources.Load<UnityAudioSyntaxSettings>(PathRelativeToResources);
 #endif // UNITY_EDITOR
                 }
                 return cachedInstance;
             }
+        }
+
+        public void InitializeFromWizard(AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup)
+        {
+            this.audioSourcePooledPrefab = audioSourcePooledPrefab;
+            this.defaultMixerGroup = defaultMixerGroup;
         }
     }
 }
