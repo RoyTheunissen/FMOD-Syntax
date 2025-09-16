@@ -1,3 +1,5 @@
+#if FMOD_AUDIO_SYNTAX
+
 using RoyTheunissen.AudioSyntax;
 
 namespace FMODUnity
@@ -31,3 +33,5 @@ namespace FMODUnity
         }
     }
 }
+
+#endif // FMOD_AUDIO_SYNTAX

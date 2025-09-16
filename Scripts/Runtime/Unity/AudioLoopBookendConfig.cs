@@ -1,3 +1,5 @@
+#if UNITY_AUDIO_SYNTAX
+
 using System;
 using UnityEngine;
 
@@ -17,3 +19,4 @@ namespace RoyTheunissen.AudioSyntax
         public bool ShouldPlay => enabled && audioClip != null;
     }
 }
+#endif // UNITY_AUDIO_SYNTAX

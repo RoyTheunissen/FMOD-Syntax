@@ -1,3 +1,5 @@
+#if FMOD_AUDIO_SYNTAX
+
 using FMODUnity;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -55,3 +57,4 @@ namespace RoyTheunissen.AudioSyntax
         }
     }
 }
+#endif // FMOD_AUDIO_SYNTAX

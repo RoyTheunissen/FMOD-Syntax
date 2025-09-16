@@ -1,3 +1,5 @@
+#if UNITY_AUDIO_SYNTAX
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,3 +25,4 @@ namespace RoyTheunissen.AudioSyntax
         }
     }
 }
+#endif // UNITY_AUDIO_SYNTAX

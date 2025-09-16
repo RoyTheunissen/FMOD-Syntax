@@ -1,3 +1,5 @@
+#if FMOD_AUDIO_SYNTAX
+
 using System;
 
 namespace RoyTheunissen.AudioSyntax
@@ -16,3 +18,5 @@ namespace RoyTheunissen.AudioSyntax
         void OnFmodPlaybackUnregistered(FmodAudioPlayback playback);
     }
 }
+#endif // FMOD_AUDIO_SYNTAX
+

@@ -1,3 +1,5 @@
+#if UNITY_AUDIO_SYNTAX
+
 using UnityEditor;
 using UnityEngine;
 
@@ -46,3 +48,4 @@ namespace RoyTheunissen.AudioSyntax
         }
     }
 }
+#endif // UNITY_AUDIO_SYNTAX

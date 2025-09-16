@@ -1,3 +1,5 @@
+#if FMOD_AUDIO_SYNTAX
+
 using FMOD.Studio;
 using UnityEngine;
 
@@ -105,3 +107,5 @@ namespace RoyTheunissen.AudioSyntax
         public abstract void Cleanup();
     }
 }
+#endif // FMOD_AUDIO_SYNTAX
+

@@ -1,3 +1,5 @@
+#if FMOD_AUDIO_SYNTAX
+
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
@@ -7,3 +9,5 @@ namespace RoyTheunissen.AudioSyntax
     {
     }
 }
+
+#endif // FMOD_AUDIO_SYNTAX

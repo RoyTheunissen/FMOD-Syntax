@@ -1,3 +1,5 @@
+#if FMOD_AUDIO_SYNTAX
+
 namespace FMOD.Studio
 {
     /// <summary>
@@ -12,3 +14,5 @@ namespace FMOD.Studio
         }
     }
 }
+
+#endif // FMOD_AUDIO_SYNTAX

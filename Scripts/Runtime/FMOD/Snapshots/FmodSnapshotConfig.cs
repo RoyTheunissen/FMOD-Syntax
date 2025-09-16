@@ -1,3 +1,4 @@
+#if FMOD_AUDIO_SYNTAX
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
@@ -30,3 +31,5 @@ namespace RoyTheunissen.AudioSyntax
         public override FmodSnapshotPlayback PlayGeneric() => Play();
     }
 }
+#endif // FMOD_AUDIO_SYNTAX
+

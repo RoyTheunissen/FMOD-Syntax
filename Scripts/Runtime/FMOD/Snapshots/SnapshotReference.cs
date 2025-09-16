@@ -1,3 +1,4 @@
+#if FMOD_AUDIO_SYNTAX
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,3 +106,4 @@ namespace RoyTheunissen.AudioSyntax
         }
     }
 }
+#endif // FMOD_AUDIO_SYNTAX

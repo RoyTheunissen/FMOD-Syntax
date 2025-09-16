@@ -1,3 +1,5 @@
+#if UNITY_AUDIO_SYNTAX
+
 using System;
 using UnityEngine;
 
@@ -24,3 +26,4 @@ namespace RoyTheunissen.AudioSyntax
         public float Time => time;
     }
 }
+#endif // UNITY_AUDIO_SYNTAX
