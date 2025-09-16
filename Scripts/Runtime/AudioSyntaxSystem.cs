@@ -15,63 +15,12 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Class to use to expose information, help manage playback instances, that sort of thing.
     /// </summary>
-    public static class AudioSyntaxSystem
+    public static partial class AudioSyntaxSystem
     {
         private static readonly List<IAudioPlayback> activeEventPlaybacks = new List<IAudioPlayback>();
         public static List<IAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
 
         private static readonly List<IOnAudioPlaybackRegistration> onEventPlaybackCallbackReceivers = new();
-        
-#if FMOD_AUDIO_SYNTAX
-        private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new List<FmodSnapshotPlayback>();
-        public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
-#endif // FMOD_AUDIO_SYNTAX
-        
-#if UNITY_AUDIO_SYNTAX
-        [NonSerialized] private static UnityAudioSyntaxSystem cachedUnityAudioSyntaxSystem;
-        [NonSerialized] private static bool initializedUnityAudioSyntaxSystem;
-        public static UnityAudioSyntaxSystem UnityAudioSyntaxSystem
-        {
-            get
-            {
-                InitializeUnityAudioSyntaxSystem();
-                return cachedUnityAudioSyntaxSystem;
-            }
-        }
-
-        public static void InitializeUnityAudioSyntaxSystem()
-        {
-            if (initializedUnityAudioSyntaxSystem)
-                return;
-            
-            initializedUnityAudioSyntaxSystem = true;
-            cachedUnityAudioSyntaxSystem = new UnityAudioSyntaxSystem();
-            cachedUnityAudioSyntaxSystem.Initialize(
-                AudioSyntaxSettings.Instance.AudioSourcePooledPrefab, AudioSyntaxSettings.Instance.DefaultMixerGroup);
-        }
-#endif // UNITY_AUDIO_SYNTAX
-        
-#if FMOD_AUDIO_SYNTAX
-        [NonSerialized] private static FmodAudioSyntaxSystem cachedFmodAudioSyntaxSystem;
-        [NonSerialized] private static bool initializedFmodAudioSyntaxSystem;
-        public static FmodAudioSyntaxSystem FmodAudioSyntaxSystem
-        {
-            get
-            {
-                InitializeFmodAudioSyntaxSystem();
-                return cachedFmodAudioSyntaxSystem;
-            }
-        }
-
-        public static void InitializeFmodAudioSyntaxSystem()
-        {
-            if (initializedFmodAudioSyntaxSystem)
-                return;
-            
-            initializedFmodAudioSyntaxSystem = true;
-            cachedFmodAudioSyntaxSystem = new FmodAudioSyntaxSystem();
-        }
-#endif // FMOD_AUDIO_SYNTAX
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
@@ -137,18 +86,6 @@ namespace RoyTheunissen.FMODSyntax
                 activeEventPlaybacks[i].Stop();
             }
         }
-        
-#if FMOD_AUDIO_SYNTAX
-        public static void RegisterActiveSnapshotPlayback(FmodSnapshotPlayback playback)
-        {
-            activeSnapshotPlaybacks.Add(playback);
-        }
-        
-        public static void UnregisterActiveSnapshotPlayback(FmodSnapshotPlayback playback)
-        {
-            activeSnapshotPlaybacks.Remove(playback);
-        }
-#endif // FMOD_AUDIO_SYNTAX
 
         /// <summary>
         /// It used to be required for users to call this every frame from somewhere in their game. Now that we wish to
@@ -192,16 +129,6 @@ namespace RoyTheunissen.FMODSyntax
             }
 #endif // FMOD_AUDIO_SYNTAX
         }
-
-#if FMOD_AUDIO_SYNTAX
-        public static void StopAllActiveSnapshotPlaybacks()
-        {
-            for (int i = activeSnapshotPlaybacks.Count - 1; i >= 0; i--)
-            {
-                activeSnapshotPlaybacks[i].Stop();
-            }
-        }
-#endif // FMOD_AUDIO_SYNTAX
         
         [Obsolete("This method is being renamed for disambiguation. " +
                   "Please use RegisterEventPlaybackCallbackReceiver instead.")]
