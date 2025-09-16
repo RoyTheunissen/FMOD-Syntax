@@ -52,7 +52,11 @@ namespace RoyTheunissen.AudioSyntax
             onEventPlaybackCallbackReceivers.Clear();
         }
         
-        public static void RegisterActiveEventPlayback(FmodAudioPlayback playback)
+        /// <summary>
+        /// Do not call this yourself. Call AudioSyntaxSystem.RegisterActiveEventPlayback instead.
+        /// Your application is preferably agnostic about the underlying audio implementation.
+        /// </summary>
+        public static void OnActiveEventPlaybackRegistered(FmodAudioPlayback playback)
         {
             activeEventPlaybacks.Add(playback);
             
@@ -62,7 +66,11 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public static void UnregisterActiveEventPlayback(FmodAudioPlayback playback)
+        /// <summary>
+        /// Do not call this yourself. Call AudioSyntaxSystem.UnregisterActiveEventPlayback instead.
+        /// Your application is preferably agnostic about the underlying audio implementation.
+        /// </summary>
+        public static void OnActiveEventPlaybackUnregistered(FmodAudioPlayback playback)
         {
             activeEventPlaybacks.Remove(playback);
             

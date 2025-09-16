@@ -129,7 +129,11 @@ namespace RoyTheunissen.AudioSyntax
 #endif // DEBUG_AUDIO_SOURCE_POOLING
         }
         
-        public static void RegisterActiveEventPlayback(UnityAudioPlayback playback)
+        /// <summary>
+        /// Do not call this yourself. Call AudioSyntaxSystem.RegisterActiveEventPlayback instead.
+        /// Your application is preferably agnostic about the underlying audio implementation.
+        /// </summary>
+        public static void OnActiveEventPlaybackRegistered(UnityAudioPlayback playback)
         {
             activePlaybacks.Add(playback);
             
@@ -139,7 +143,11 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public static void UnregisterActiveEventPlayback(UnityAudioPlayback playback)
+        /// <summary>
+        /// Do not call this yourself. Call AudioSyntaxSystem.UnregisterActiveEventPlayback instead.
+        /// Your application is preferably agnostic about the underlying audio implementation.
+        /// </summary>
+        public static void OnActiveEventPlaybackUnregistered(UnityAudioPlayback playback)
         {
             activePlaybacks.Remove(playback);
             
@@ -149,7 +157,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public void ClearPlaybacks()
+        public static void ClearPlaybacks()
         {
             for (int i = activePlaybacks.Count - 1; i >= 0; i--)
             {

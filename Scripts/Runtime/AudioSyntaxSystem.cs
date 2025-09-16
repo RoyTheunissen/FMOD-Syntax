@@ -42,12 +42,12 @@ namespace RoyTheunissen.AudioSyntax
             
 #if FMOD_AUDIO_SYNTAX
             if (playback is FmodAudioPlayback fmodAudioPlayback)
-                FmodAudioSyntaxSystem.RegisterActiveEventPlayback(fmodAudioPlayback);
+                FmodAudioSyntaxSystem.OnActiveEventPlaybackRegistered(fmodAudioPlayback);
 #endif // FMOD_AUDIO_SYNTAX
             
 #if UNITY_AUDIO_SYNTAX
             if (playback is UnityAudioPlayback unityAudioPlayback)
-                UnityAudioSyntaxSystem.RegisterActiveEventPlayback(unityAudioPlayback);
+                UnityAudioSyntaxSystem.OnActiveEventPlaybackRegistered(unityAudioPlayback);
 #endif // UNITY_AUDIO_SYNTAX
         }
         
@@ -62,11 +62,11 @@ namespace RoyTheunissen.AudioSyntax
             
 #if FMOD_AUDIO_SYNTAX
             if (playback is FmodAudioPlayback fmodAudioPlayback)
-                FmodAudioSyntaxSystem.UnregisterActiveEventPlayback(fmodAudioPlayback);
+                FmodAudioSyntaxSystem.OnActiveEventPlaybackUnregistered(fmodAudioPlayback);
 #endif // FMOD_AUDIO_SYNTAX
 #if UNITY_AUDIO_SYNTAX
             if (playback is UnityAudioPlayback unityAudioPlayback)
-                UnityAudioSyntaxSystem.UnregisterActiveEventPlayback(unityAudioPlayback);
+                UnityAudioSyntaxSystem.OnActiveEventPlaybackUnregistered(unityAudioPlayback);
 #endif // UNITY_AUDIO_SYNTAX
         }
         
