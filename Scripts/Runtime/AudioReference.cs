@@ -4,6 +4,10 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
+#if UNITY_AUDIO_SYNTAX
+using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+#endif // UNITY_AUDIO_SYNTAX
+
 #if FMOD_AUDIO_SYNTAX
 using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
 #endif // FMOD_AUDIO_SYNTAX
@@ -72,14 +76,14 @@ namespace RoyTheunissen.FMODSyntax
                 {
                     case Modes.Unity: 
 #if UNITY_AUDIO_SYNTAX
-                        return UnityAudioConfig != null;
+                        return UnityAudioConfig;
 #else
                         return null;
 #endif // !UNITY_AUDIO_SYNTAX
                     
                     case Modes.FMOD: 
 #if FMOD_AUDIO_SYNTAX
-                        return FmodAudioConfig != null;
+                        return FmodAudioConfig;
 #else
                         return null;
 #endif // !FMOD_AUDIO_SYNTAX

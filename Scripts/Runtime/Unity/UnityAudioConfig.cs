@@ -18,7 +18,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
     /// <summary>
     /// Base class for one-off and continuous Unity audio configs.
     /// </summary>
-    public abstract class UnityAudioConfigBase : ScriptableObject
+    public abstract class UnityAudioConfigBase : ScriptableObject, IAudioConfig
     {
         [SerializeField] private AudioMixerGroup mixerGroup;
         public AudioMixerGroup MixerGroup => mixerGroup;
@@ -35,6 +35,22 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         [SerializeField] private List<UnityAudioTag> tags = new();
 #endif
         public IList<UnityAudioTag> Tags => tags;
+
+        public string Name => name;
+
+        public string Path
+        {
+            get
+            {
+                // TODO: Do we need to support this for Unity Audio Events?
+                throw new System.NotImplementedException();
+            }
+        }
+
+        IAudioPlayback IAudioConfig.Play(Transform source)
+        {
+            return PlayGeneric(source);
+        }
 
         public abstract UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f);
     }

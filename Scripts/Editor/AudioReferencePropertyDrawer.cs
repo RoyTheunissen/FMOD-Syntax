@@ -36,7 +36,7 @@ namespace RoyTheunissen.FMODSyntax
 #if UNITY_AUDIO_SYNTAX
         private string GetUnityDisplayText(bool supportsBothSystems, UnityAudioConfigBase unityAudioConfig)
         {
-            displayText = unityAudioConfig == null ? "" : unityAudioConfig.name;
+            string displayText = unityAudioConfig == null ? "" : unityAudioConfig.name;
             if (supportsBothSystems)
                 displayText += " (Unity)";
             return displayText;
