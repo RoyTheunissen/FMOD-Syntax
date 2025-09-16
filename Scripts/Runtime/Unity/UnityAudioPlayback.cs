@@ -177,7 +177,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 Source.Stop();
 
                 UnityAudioSyntaxSystem.Instance.ReturnAudioSourceForPlayback(Source);
-                AudioSyntaxSystem.UnregisterActiveEventPlayback(this);
+                UnityAudioSyntaxSystem.UnregisterActiveEventPlayback(this);
             }
 
             OnCleanupInternal();

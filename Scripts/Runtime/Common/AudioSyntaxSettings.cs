@@ -84,6 +84,10 @@ namespace RoyTheunissen.FMODSyntax
                 return cachedInstance;
             }
         }
+        
+        // TODO: FMOD Code Generator needs to subscribe to this and regenerate code when requested.
+        public delegate void RequestCodeRegenerationHandler();
+        public static event RequestCodeRegenerationHandler RequestCodeRegenerationEvent;
 
         public void InitializeFromWizard(
             string generatedScriptsFolderPath, string namespaceForGeneratedCode, bool shouldGenerateAssemblyDefinition)
@@ -97,6 +101,11 @@ namespace RoyTheunissen.FMODSyntax
             this.namespaceForGeneratedCode = namespaceForGeneratedCode;
 
             this.shouldGenerateAssemblyDefinition = shouldGenerateAssemblyDefinition;
+        }
+
+        public static void RequestCodeRegeneration()
+        {
+            RequestCodeRegenerationEvent?.Invoke();
         }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax.Tags
 {
-    [CreateAssetMenu(menuName = MenuPaths.CreateSocItem + "Create Unity Audio Tag Collection", fileName = "UnityAudioTagCollection", order = 0)]
+    [CreateAssetMenu(menuName = AudioSyntaxMenuPaths.CreateSocItem + "Create Unity Audio Tag Collection", fileName = "UnityAudioTagCollection", order = 0)]
     public class UnityAudioTagCollection : ScriptableObjectCollection<UnityAudioTag>
     {
     }

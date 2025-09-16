@@ -31,17 +31,29 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
                 return cachedAudioSourceContainer;
             }
         }
-
-        public static UnityAudioSyntaxSystem Instance => AudioSyntaxSystem.UnityAudioSyntaxSystem;
         
         [NonSerialized] private AudioSource audioSourcePooledPrefab;
         [NonSerialized] private AudioMixerGroup defaultMixerGroup;
         
-        [NonSerialized] private readonly List<UnityAudioPlayback> activePlaybacks = new();
+        [NonSerialized] private static readonly List<UnityAudioPlayback> activePlaybacks = new();
         
         private static readonly List<IOnUnityPlaybackRegistered> onEventPlaybackCallbackReceivers = new();
 
         [NonSerialized] private bool didInitialize;
+        
+        [NonSerialized] private static UnityAudioSyntaxSystem cachedInstance;
+        public static UnityAudioSyntaxSystem Instance
+        {
+            get
+            {
+                if (cachedInstance == null)
+                {
+                    cachedInstance = new UnityAudioSyntaxSystem();
+                    cachedInstance.Initialize();
+                }
+                return cachedInstance;
+            }
+        }
         
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
@@ -51,7 +63,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
         }
 #endif // UNITY_EDITOR
         
-        public void Initialize(AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup)
+        public void Initialize()
         {
             if (didInitialize)
                 return;
@@ -60,8 +72,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             
             onEventPlaybackCallbackReceivers.Clear();
 
-            this.audioSourcePooledPrefab = audioSourcePooledPrefab;
-            this.defaultMixerGroup = defaultMixerGroup;
+            this.audioSourcePooledPrefab = AudioSyntaxSettings.Instance.AudioSourcePooledPrefab;
+            this.defaultMixerGroup = AudioSyntaxSettings.Instance.DefaultMixerGroup;
             
             audioSourcesPool = new Pool<AudioSource>(() =>
             {
@@ -117,12 +129,8 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             audioSource.name = "AudioSource - AVAILABLE";
 #endif // DEBUG_AUDIO_SOURCE_POOLING
         }
-
-        /// <summary>
-        /// Do not call this yourself. Call AudioSyntaxSystem.RegisterActiveEventPlayback instead.
-        /// Your application is preferably agnostic about the underlying audio implementation.
-        /// </summary>
-        public void OnActiveEventPlaybackRegistered(UnityAudioPlayback playback)
+        
+        public static void RegisterActiveEventPlayback(UnityAudioPlayback playback)
         {
             activePlaybacks.Add(playback);
             
@@ -132,11 +140,7 @@ namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
             }
         }
         
-        /// <summary>
-        /// Do not call this yourself. Call AudioSyntaxSystem.UnregisterActiveEventPlayback instead.
-        /// Your application is preferably agnostic about the underlying audio implementation.
-        /// </summary>
-        public void OnActiveEventPlaybackUnregistered(UnityAudioPlayback playback)
+        public static void UnregisterActiveEventPlayback(UnityAudioPlayback playback)
         {
             activePlaybacks.Remove(playback);
             

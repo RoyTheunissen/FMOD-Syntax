@@ -24,7 +24,7 @@ namespace RoyTheunissen.FMODSyntax
 
             FMOD.GUID id = FMOD.GUID.Parse(fmodEventGuid);
             EditorEventRef eventRef = EventManager.EventFromGUID(id);
-            displayText = eventRef.GetDisplayName();
+            string displayText = eventRef.GetDisplayName();
                     
             if (supportsBothSystems)
                 displayText += " (FMOD)";

@@ -1,9 +1,10 @@
 {
-    "name": "RoyTheunissen.FMODSyntax.FMOD",
+    "name": "RoyTheunissen.FMODSyntax.Unity",
     "rootNamespace": "",
     "references": [
-        "GUID:0c752da273b17c547ae705acf0f2adf2",
         "GUID:3fa7a62d8daf3354eb6f4ee3bbbab1a7",
+        "GUID:343deaaf83e0cee4ca978e7df0b80d21",
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab",
         "GUID:435719c11c6f941d98c6110929b03789"
     ],
     "includePlatforms": [],
@@ -13,7 +14,7 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [
-        "FMOD_AUDIO_SYNTAX"
+        "UNITY_AUDIO_SYNTAX"
     ],
     "versionDefines": [
         {

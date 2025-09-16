@@ -5,7 +5,7 @@ using BrunoMikoski.ScriptableObjectCollections;
 
 namespace RoyTheunissen.FMODSyntax.TimelineEvents
 {
-    [CreateAssetMenu(menuName = MenuPaths.CreateSocItem + "Create Audio Timeline Event ID Collection", fileName = "AudioTimelineEventIdCollection", order = 0)]
+    [CreateAssetMenu(menuName = AudioSyntaxMenuPaths.CreateSocItem + "Create Audio Timeline Event ID Collection", fileName = "AudioTimelineEventIdCollection", order = 0)]
     public class AudioTimelineEventIdCollection : ScriptableObjectCollection<AudioTimelineEventId>
     {
     }

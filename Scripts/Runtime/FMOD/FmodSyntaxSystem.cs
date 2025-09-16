@@ -1,10 +1,6 @@
 using System;
 using System.Collections.Generic;
 using RoyTheunissen.FMODSyntax.Callbacks;
-using RoyTheunissen.FMODSyntax.Utilities;
-using UnityEngine;
-using UnityEngine.Audio;
-using Object = System.Object;
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -16,11 +12,26 @@ namespace RoyTheunissen.FMODSyntax
         private static readonly List<IAudioPlayback> activeEventPlaybacks = new();
         public static List<IAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
         
-        public static FmodAudioSyntaxSystem Instance => AudioSyntaxSystem.FmodAudioSyntaxSystem;
+        private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new();
+        public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
         
         private static readonly List<IOnFmodPlaybackRegistered> onEventPlaybackCallbackReceivers = new();
         
         [NonSerialized] private bool didInitialize;
+        
+        [NonSerialized] private static FmodAudioSyntaxSystem cachedInstance;
+        public static FmodAudioSyntaxSystem Instance
+        {
+            get
+            {
+                if (cachedInstance == null)
+                {
+                    cachedInstance = new FmodAudioSyntaxSystem();
+                    cachedInstance.Initialize();
+                }
+                return cachedInstance;
+            }
+        }
         
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
@@ -29,6 +40,7 @@ namespace RoyTheunissen.FMODSyntax
             onEventPlaybackCallbackReceivers.Clear();
         }
 #endif // UNITY_EDITOR
+        
         public void Initialize()
         {
             if (didInitialize)
@@ -39,11 +51,7 @@ namespace RoyTheunissen.FMODSyntax
             onEventPlaybackCallbackReceivers.Clear();
         }
         
-        /// <summary>
-        /// Do not call this yourself. Call AudioSyntaxSystem.RegisterActiveEventPlayback instead.
-        /// Your application is preferably agnostic about the underlying audio implementation.
-        /// </summary>
-        public static void OnActiveEventPlaybackRegistered(FmodAudioPlayback playback)
+        public static void RegisterActiveEventPlayback(FmodAudioPlayback playback)
         {
             activeEventPlaybacks.Add(playback);
             
@@ -53,17 +61,31 @@ namespace RoyTheunissen.FMODSyntax
             }
         }
         
-        /// <summary>
-        /// Do not call this yourself. Call AudioSyntaxSystem.UnregisterActiveEventPlayback instead.
-        /// Your application is preferably agnostic about the underlying audio implementation.
-        /// </summary>
-        public static void OnActiveEventPlaybackUnregistered(FmodAudioPlayback playback)
+        public static void UnregisterActiveEventPlayback(FmodAudioPlayback playback)
         {
             activeEventPlaybacks.Remove(playback);
             
             for (int i = 0; i < onEventPlaybackCallbackReceivers.Count; i++)
             {
                 onEventPlaybackCallbackReceivers[i].OnFmodPlaybackUnregistered(playback);
+            }
+        }
+        
+        public static void RegisterActiveSnapshotPlayback(FmodSnapshotPlayback playback)
+        {
+            activeSnapshotPlaybacks.Add(playback);
+        }
+        
+        public static void UnregisterActiveSnapshotPlayback(FmodSnapshotPlayback playback)
+        {
+            activeSnapshotPlaybacks.Remove(playback);
+        }
+        
+        public static void StopAllActiveSnapshotPlaybacks()
+        {
+            for (int i = activeSnapshotPlaybacks.Count - 1; i >= 0; i--)
+            {
+                activeSnapshotPlaybacks[i].Stop();
             }
         }
         

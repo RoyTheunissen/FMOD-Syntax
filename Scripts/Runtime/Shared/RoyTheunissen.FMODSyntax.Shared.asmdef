@@ -1,0 +1,21 @@
+{
+    "name": "RoyTheunissen.FMODSyntax.Shared",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3fa7a62d8daf3354eb6f4ee3bbbab1a7",
+        "GUID:ff5cbe5ae99ecaa4bb4d67636ae50229",
+        "GUID:8dd2b3a2a95ad3348b697e84a020cac7",
+        "GUID:0c752da273b17c547ae705acf0f2adf2",
+        "GUID:343deaaf83e0cee4ca978e7df0b80d21",
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

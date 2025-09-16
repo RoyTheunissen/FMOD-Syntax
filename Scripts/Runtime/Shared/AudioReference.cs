@@ -8,10 +8,6 @@ using UnityEngine;
 using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
 #endif // UNITY_AUDIO_SYNTAX
 
-#if FMOD_AUDIO_SYNTAX
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
-#endif // FMOD_AUDIO_SYNTAX
-
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>

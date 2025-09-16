@@ -41,7 +41,7 @@ namespace RoyTheunissen.FMODSyntax
             if (shouldGenerateCode)
             {
 #if FMOD_AUDIO_SYNTAX
-                FmodCodeGenerator.GenerateCode();
+                AudioSyntaxSettings.RequestCodeRegeneration();
 #endif // FMOD_AUDIO_SYNTAX
             }
         }

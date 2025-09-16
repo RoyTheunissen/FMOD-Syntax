@@ -4,7 +4,9 @@
     "references": [
         "FMODUnity",
         "BrunoMikoski.ScriptableObjectCollection",
-        "RoyTheunissen.FMODSyntax.FMOD"
+        "RoyTheunissen.FMODSyntax.FMOD",
+        "RoyTheunissen.FMODSyntax.Unity",
+        "RoyTheunissen.FMODSyntax.Common"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
