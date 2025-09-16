@@ -3,7 +3,8 @@
     "rootNamespace": "RoyTheunissen.FMODSyntax",
     "references": [
         "FMODUnity",
-        "BrunoMikoski.ScriptableObjectCollection"
+        "BrunoMikoski.ScriptableObjectCollection",
+        "RoyTheunissen.FMODSyntax.FMOD"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -22,8 +22,10 @@ namespace RoyTheunissen.FMODSyntax
 
         private static readonly List<IOnAudioPlaybackRegistration> onEventPlaybackCallbackReceivers = new();
         
+#if FMOD_AUDIO_SYNTAX
         private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new List<FmodSnapshotPlayback>();
         public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
+#endif // FMOD_AUDIO_SYNTAX
         
 #if UNITY_AUDIO_SYNTAX
         [NonSerialized] private static UnityAudioSyntaxSystem cachedUnityAudioSyntaxSystem;
@@ -83,7 +85,10 @@ namespace RoyTheunissen.FMODSyntax
         public static void StopAllActivePlaybacks()
         {
             StopAllActiveEventPlaybacks();
+            
+#if FMOD_AUDIO_SYNTAX
             StopAllActiveSnapshotPlaybacks();
+#endif // FMOD_AUDIO_SYNTAX
         }
         
         public static void RegisterActiveEventPlayback(IAudioPlayback playback)
@@ -133,6 +138,7 @@ namespace RoyTheunissen.FMODSyntax
             }
         }
         
+#if FMOD_AUDIO_SYNTAX
         public static void RegisterActiveSnapshotPlayback(FmodSnapshotPlayback playback)
         {
             activeSnapshotPlaybacks.Add(playback);
@@ -142,6 +148,7 @@ namespace RoyTheunissen.FMODSyntax
         {
             activeSnapshotPlaybacks.Remove(playback);
         }
+#endif // FMOD_AUDIO_SYNTAX
 
         /// <summary>
         /// It used to be required for users to call this every frame from somewhere in their game. Now that we wish to
@@ -175,6 +182,7 @@ namespace RoyTheunissen.FMODSyntax
                     activeEvent.Cleanup();
             }
             
+#if FMOD_AUDIO_SYNTAX
             // Cull any snapshots that are ready to be cleaned up.
             for (int i = activeSnapshotPlaybacks.Count - 1; i >= 0; i--)
             {
@@ -182,8 +190,10 @@ namespace RoyTheunissen.FMODSyntax
                 if (activeSnapshot.CanBeCleanedUp)
                     activeSnapshot.Cleanup();
             }
+#endif // FMOD_AUDIO_SYNTAX
         }
 
+#if FMOD_AUDIO_SYNTAX
         public static void StopAllActiveSnapshotPlaybacks()
         {
             for (int i = activeSnapshotPlaybacks.Count - 1; i >= 0; i--)
@@ -191,6 +201,7 @@ namespace RoyTheunissen.FMODSyntax
                 activeSnapshotPlaybacks[i].Stop();
             }
         }
+#endif // FMOD_AUDIO_SYNTAX
         
         [Obsolete("This method is being renamed for disambiguation. " +
                   "Please use RegisterEventPlaybackCallbackReceiver instead.")]

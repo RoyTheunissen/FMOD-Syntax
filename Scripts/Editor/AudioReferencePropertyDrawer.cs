@@ -1,10 +1,12 @@
 using System;
-using FMODUnity;
 using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using GUID = FMOD.GUID;
+
+#if FMOD_AUDIO_SYNTAX
+using FMODUnity;
+#endif // FMOD_AUDIO_SYNTAX
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -14,40 +16,54 @@ namespace RoyTheunissen.FMODSyntax
     [CustomPropertyDrawer(typeof(AudioReference))]
     public class AudioReferencePropertyDrawer : PropertyDrawer
     {
+#if FMOD_AUDIO_SYNTAX
+        private string GetFmodDisplayText(bool supportsBothSystems, string fmodEventGuid)
+        {
+            if (string.IsNullOrEmpty(fmodEventGuid))
+                return "";
+
+            FMOD.GUID id = FMOD.GUID.Parse(fmodEventGuid);
+            EditorEventRef eventRef = EventManager.EventFromGUID(id);
+            displayText = eventRef.GetDisplayName();
+                    
+            if (supportsBothSystems)
+                displayText += " (FMOD)";
+
+            return displayText;
+        }
+#endif // FMOD_AUDIO_SYNTAX
+        
+#if UNITY_AUDIO_SYNTAX
+        private string GetUnityDisplayText(bool supportsBothSystems, UnityAudioConfigBase unityAudioConfig)
+        {
+            displayText = unityAudioConfig == null ? "" : unityAudioConfig.name;
+            if (supportsBothSystems)
+                displayText += " (Unity)";
+            return displayText;
+        }
+#endif // UNITY_AUDIO_SYNTAX
+        
         private string GetDisplayText(
             bool supportsBothSystems, AudioReference.Modes mode, UnityAudioConfigBase unityAudioConfig,
             string fmodEventGuid)
         {
-            string displayText;
+#if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
             switch (mode)
             {
-                case AudioReference.Modes.Unity:
-                    displayText = unityAudioConfig == null ? "" : unityAudioConfig.name;
-                    if (supportsBothSystems)
-                        displayText += " (Unity)";
-                    break;
+                case AudioReference.Modes.Unity: return GetUnityDisplayText(supportsBothSystems, unityAudioConfig);
 
-                case AudioReference.Modes.FMOD:
-                    if (string.IsNullOrEmpty(fmodEventGuid))
-                    {
-                        displayText = "";
-                        break;
-                    }
-
-                    GUID id = GUID.Parse(fmodEventGuid);
-                    EditorEventRef eventRef = EventManager.EventFromGUID(id);
-                    displayText = eventRef.GetDisplayName();
-                    
-                    if (supportsBothSystems)
-                        displayText += " (FMOD)";
-                    
-                    break;
+                case AudioReference.Modes.FMOD: return GetFmodDisplayText(supportsBothSystems, fmodEventGuid);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
-
-            return displayText;
+#elif UNITY_AUDIO_SYNTAX
+            return GetUnityDisplayText(supportsBothSystems, unityAudioConfig);
+#elif FMOD_AUDIO_SYNTAX
+            return GetFmodDisplayText(supportsBothSystems, fmodEventGuid);
+#else
+            return string.Empty;
+#endif // FMOD_AUDIO_SYNTAX
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
@@ -76,7 +92,7 @@ namespace RoyTheunissen.FMODSyntax
             audioConfigProperty = fmodAudioConfigProperty;
 #else
             audioConfigProperty = null;
-            EditorGUI.Label(position, "Select at least one audio system.");
+            EditorGUI.LabelField(position, "Select at least one audio system.");
             return;
 #endif
             

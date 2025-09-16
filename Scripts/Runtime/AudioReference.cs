@@ -37,6 +37,7 @@ namespace RoyTheunissen.FMODSyntax
 
         [SerializeField] private string fmodEventGuid;
         
+#if FMOD_AUDIO_SYNTAX
         [NonSerialized] private FmodParameterlessAudioConfig cachedFmodAudioConfig;
         [NonSerialized] private string guidFmodAudioConfigIsCachedFor;
         public FmodParameterlessAudioConfig FmodAudioConfig
@@ -56,28 +57,43 @@ namespace RoyTheunissen.FMODSyntax
                 return cachedFmodAudioConfig;
             }
         }
+#endif // FMOD_AUDIO_SYNTAX
 
-        public bool IsAssigned
+        public bool IsAssigned => Config != null;
+
+        public string Name => IsAssigned ? Config.Name : "";
+        public string Path => IsAssigned ? Config.Path : "";
+
+        private IAudioConfig Config
         {
             get
             {
                 switch (Mode)
                 {
-                    case Modes.Unity: return UnityAudioConfig != null;
-                    case Modes.FMOD: return FmodAudioConfig != null;
+                    case Modes.Unity: 
+#if UNITY_AUDIO_SYNTAX
+                        return UnityAudioConfig != null;
+#else
+                        return null;
+#endif // !UNITY_AUDIO_SYNTAX
+                    
+                    case Modes.FMOD: 
+#if FMOD_AUDIO_SYNTAX
+                        return FmodAudioConfig != null;
+#else
+                        return null;
+#endif // !FMOD_AUDIO_SYNTAX
+                    
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
         }
 
-        public string Name => IsAssigned ? FmodAudioConfig.Name : "";
-        public string Path => IsAssigned ? FmodAudioConfig.Path : "";
-
-        [NonSerialized] private static bool didCacheParameterlessEvents;
-        private static readonly Dictionary<string, FmodParameterlessAudioConfig> parameterlessEventsByGuid = new();
-
 #if FMOD_AUDIO_SYNTAX
+        [NonSerialized] private static bool didCacheParameterlessFmodEvents;
+        private static readonly Dictionary<string, FmodParameterlessAudioConfig> parameterlessFmodEventsByGuid = new();
+
         public FmodParameterlessAudioPlayback PlayFMOD(Transform source = null)
         {
             return FmodAudioConfig.Play(source);
@@ -120,30 +136,33 @@ namespace RoyTheunissen.FMODSyntax
         [UnityEditor.InitializeOnLoadMethod]
         private static void Initialize()
         {
-            parameterlessEventsByGuid.Clear();
-            didCacheParameterlessEvents = false;
+#if FMOD_AUDIO_SYNTAX
+            parameterlessFmodEventsByGuid.Clear();
+            didCacheParameterlessFmodEvents = false;
+#endif // FMOD_AUDIO_SYNTAX
         }
 #endif // UNITY_EDITOR
         
         
+#if FMOD_AUDIO_SYNTAX
         public static FmodParameterlessAudioConfig GetParameterlessEventConfig(string guid)
         {
-            CacheParameterlessEventConfigs();
+            CacheParameterlessFMODEventConfigs();
             
-            if (parameterlessEventsByGuid.TryGetValue(guid, out FmodParameterlessAudioConfig result))
+            if (parameterlessFmodEventsByGuid.TryGetValue(guid, out FmodParameterlessAudioConfig result))
                 return result;
 
             return null;
         }
         
-        private static void CacheParameterlessEventConfigs()
+        private static void CacheParameterlessFMODEventConfigs()
         {
-            if (didCacheParameterlessEvents)
+            if (didCacheParameterlessFmodEvents)
                 return;
 
-            didCacheParameterlessEvents = true;
+            didCacheParameterlessFmodEvents = true;
             
-            parameterlessEventsByGuid.Clear();
+            parameterlessFmodEventsByGuid.Clear();
             
             const string containerClassName = "AudioParameterlessEvents";
             IEnumerable<Type> containerTypes = AppDomain.CurrentDomain.GetAssemblies()
@@ -160,14 +179,15 @@ namespace RoyTheunissen.FMODSyntax
                 // Compile them all into one big dictionary.
                 foreach (KeyValuePair<string,FmodParameterlessAudioConfig> kvp in eventsByGuidDictionary)
                 {
-                    parameterlessEventsByGuid.Add(kvp.Key, kvp.Value);
+                    parameterlessFmodEventsByGuid.Add(kvp.Key, kvp.Value);
                 }
             }
         }
+#endif // FMOD_AUDIO_SYNTAX
 
         public override string ToString()
         {
-            FmodParameterlessAudioConfig config = FmodAudioConfig;
+            IAudioConfig config = Config;
             return config == null ? "" : config.ToString();
         }
     }

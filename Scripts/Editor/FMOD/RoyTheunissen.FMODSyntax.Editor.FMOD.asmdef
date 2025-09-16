@@ -1,0 +1,22 @@
+{
+    "name": "RoyTheunissen.FMODSyntax.Editor.FMOD",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f28b76e6ba53ea24ca2daf55c1581312",
+        "GUID:ff5cbe5ae99ecaa4bb4d67636ae50229",
+        ""
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "FMOD_AUDIO_SYNTAX"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

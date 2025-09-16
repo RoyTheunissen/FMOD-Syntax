@@ -39,7 +39,11 @@ namespace RoyTheunissen.FMODSyntax
             EditorGUILayout.Space();
             bool shouldGenerateCode = GUILayout.Button("Generate Code", GUILayout.Height(40));
             if (shouldGenerateCode)
+            {
+#if FMOD_AUDIO_SYNTAX
                 FmodCodeGenerator.GenerateCode();
+#endif // FMOD_AUDIO_SYNTAX
+            }
         }
     }
 }
