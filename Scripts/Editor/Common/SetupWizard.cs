@@ -39,17 +39,25 @@ namespace RoyTheunissen.FMODSyntax
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
-            string[] settingsAsset = AssetDatabase.FindAssets($"t:{nameof(AudioSyntaxSettings)}");
-            if (settingsAsset.Length > 0)
-                return;
-
             EditorApplication.delayCall += () =>
             {
-                SetupWizard setupWizard = GetWindow<SetupWizard>(true, "FMOD Syntax Setup Wizard");
-                setupWizard.minSize = setupWizard.maxSize = new Vector2(500, 270);
-                setupWizard.namespaceForGeneratedCode =
-                    $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.FMOD";
+                // See if a Settings config exists. If not, the system is seemingly not initialized and we ought to
+                // show the Setup Wizard.
+                string[] settingsAsset = AssetDatabase.FindAssets($"t:{nameof(AudioSyntaxSettings)}");
+                if (settingsAsset.Length > 0)
+                    return;
+
+                EditorApplication.delayCall += OpenSetupWizard;
             };
+        }
+
+        [MenuItem(AudioSyntaxMenuPaths.Root + "Open Setup Wizard")]
+        public static void OpenSetupWizard()
+        {
+            SetupWizard setupWizard = GetWindow<SetupWizard>(true, AudioSyntaxMenuPaths.ProjectName + " Setup Wizard");
+            setupWizard.minSize = setupWizard.maxSize = new Vector2(500, 270);
+            setupWizard.namespaceForGeneratedCode =
+                $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.FMOD";
         }
 
         private static string SanitizeNamespace(string @namespace)
@@ -65,7 +73,7 @@ namespace RoyTheunissen.FMODSyntax
             
             EditorGUILayout.Space();
             
-            EditorGUILayout.LabelField("Welcome! You've installed the FMOD Syntax package.");
+            EditorGUILayout.LabelField($"Welcome! You've installed the {AudioSyntaxMenuPaths.ProjectName} package.");
             
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Let's initialize the system with some default settings.");
