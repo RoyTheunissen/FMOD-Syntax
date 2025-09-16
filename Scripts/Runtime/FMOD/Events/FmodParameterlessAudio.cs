@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Playback of a simple FMOD event without any parameters.

@@ -1,6 +1,6 @@
 using System;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Attribute to let the FMOD Syntax system know that a custom type is used to represent a labelled parameter.

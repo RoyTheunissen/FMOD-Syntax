@@ -1,6 +1,6 @@
 using FMODUnity;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Useful extension methods for EditorEventRef.

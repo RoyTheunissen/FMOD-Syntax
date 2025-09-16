@@ -1,6 +1,6 @@
 #if UNITY_AUDIO_SYNTAX
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
 {
     /// <summary>
     /// Interface to use when you want a callback whenever a Unity audio event playback is (un)registered.

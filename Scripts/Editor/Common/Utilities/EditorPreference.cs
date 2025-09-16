@@ -5,7 +5,7 @@ using Object = UnityEngine.Object;
 using System;
 #endif // UNITY_EDITOR
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Utility class to simplify the workflow of using EditorPrefs-serialized fields.

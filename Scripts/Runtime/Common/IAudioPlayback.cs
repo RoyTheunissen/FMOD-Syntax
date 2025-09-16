@@ -1,6 +1,6 @@
-using RoyTheunissen.FMODSyntax.TimelineEvents;
+using RoyTheunissen.AudioSyntax.TimelineEvents;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     public interface IFmodPlayback
     {

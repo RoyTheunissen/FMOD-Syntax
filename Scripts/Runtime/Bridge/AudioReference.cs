@@ -5,10 +5,10 @@ using System.Reflection;
 using UnityEngine;
 
 #if UNITY_AUDIO_SYNTAX
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
 #endif // UNITY_AUDIO_SYNTAX
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Inspector reference to FMOD audio config. Can be used to get a simple parameterless audio config.

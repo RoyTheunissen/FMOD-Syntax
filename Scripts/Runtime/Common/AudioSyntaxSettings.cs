@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 using UnityEditor;
 #endif // UNITY_EDITOR
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Scriptable object that holds all the settings for the Audio Syntax system.

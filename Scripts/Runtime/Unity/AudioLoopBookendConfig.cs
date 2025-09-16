@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
 {
     [Serializable]
     public class AudioLoopBookendConfig

@@ -1,8 +1,8 @@
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
 using UnityEditor;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     [CustomPropertyDrawer(typeof(AudioClipMetaData))]
     public class AudioClipMetaDataPropertyDrawer : PropertyDrawer

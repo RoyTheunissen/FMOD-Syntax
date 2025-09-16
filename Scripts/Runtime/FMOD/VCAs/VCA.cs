@@ -1,7 +1,7 @@
 using FMOD.Studio;
 using FMODUnity;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Utility for accessing the VCAs more conveniently.

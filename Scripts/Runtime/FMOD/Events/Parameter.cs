@@ -6,7 +6,7 @@ using FMODUnity;
 using BrunoMikoski.ScriptableObjectCollections;
 #endif // SCRIPTABLE_OBJECT_COLLECTION
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Utility for setting FMOD parameters from code.

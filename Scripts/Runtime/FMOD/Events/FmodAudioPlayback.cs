@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
-using RoyTheunissen.FMODSyntax.TimelineEvents;
+using RoyTheunissen.AudioSyntax.TimelineEvents;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Playback for a playable FMOD audio event. Allows you to update its parameters.

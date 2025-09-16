@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace RoyTheunissen.FMODSyntax.Utilities
+namespace RoyTheunissen.AudioSyntax.Utilities
 {
     /// <summary>
     /// Generic construction for pooling resources of a certain kind.

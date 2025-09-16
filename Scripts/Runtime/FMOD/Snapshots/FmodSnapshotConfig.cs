@@ -1,4 +1,4 @@
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Non-generic base class for FmodSnapshotConfig to apply as a type constraint.

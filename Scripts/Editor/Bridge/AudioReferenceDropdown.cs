@@ -2,13 +2,13 @@ using System;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using System.Linq;
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
 
 #if FMOD_AUDIO_SYNTAX
 using FMODUnity;
 #endif
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Dropdown to pick audio references from a list in a searchable way / with subfolders.

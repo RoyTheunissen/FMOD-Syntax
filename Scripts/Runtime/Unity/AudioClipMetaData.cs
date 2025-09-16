@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
 {
     /// <summary>
     /// Used to wrap AudioClip references in AudioConfigs. Allows certain extra metadata to be kept with it, such as

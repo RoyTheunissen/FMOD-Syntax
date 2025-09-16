@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     public static class StringExtensions
     {

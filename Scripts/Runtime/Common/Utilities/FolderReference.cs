@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     [System.Serializable]
     public class FolderReference

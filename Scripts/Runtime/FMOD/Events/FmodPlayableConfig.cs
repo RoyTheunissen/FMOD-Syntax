@@ -3,7 +3,7 @@ using FMOD;
 using FMOD.Studio;
 using FMODUnity;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Base class for configs of Playables (Events and Snapshots).

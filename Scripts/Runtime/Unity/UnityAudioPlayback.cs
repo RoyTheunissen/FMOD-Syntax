@@ -2,12 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using RoyTheunissen.FMODSyntax.TimelineEvents;
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax.Tags;
+using RoyTheunissen.AudioSyntax.TimelineEvents;
+using RoyTheunissen.AudioSyntax.UnityAudioSyntax.Tags;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
 {
     /// <summary>
     /// Represents a sound that is being played. Returned when the audio system is told to play an audio config.

@@ -2,7 +2,7 @@ using System;
 using FMODUnity;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Useful extension methods for EditorParamRef.

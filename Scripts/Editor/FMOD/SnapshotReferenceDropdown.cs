@@ -3,7 +3,7 @@ using UnityEditor.IMGUI.Controls;
 using FMODUnity;
 using System.Linq;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Dropdown to pick snapshot references from a list in a searchable way / with subfolders.

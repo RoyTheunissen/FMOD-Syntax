@@ -4,7 +4,7 @@ using FMOD;
 using FMOD.Studio;
 using Debug = UnityEngine.Debug;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Non-generic base class for FmodSnapshotPlayback to apply as a type constraint.

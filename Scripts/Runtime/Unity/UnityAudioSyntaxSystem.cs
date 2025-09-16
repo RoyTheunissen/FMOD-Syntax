@@ -2,12 +2,12 @@
 
 using System;
 using System.Collections.Generic;
-using RoyTheunissen.FMODSyntax.Utilities;
+using RoyTheunissen.AudioSyntax.Utilities;
 using UnityEngine;
 using UnityEngine.Audio;
 using Object = UnityEngine.Object;
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
 {
     /// <summary>
     /// System to be able to play back Unity native audio with a syntax similar to FMOD-Syntax.

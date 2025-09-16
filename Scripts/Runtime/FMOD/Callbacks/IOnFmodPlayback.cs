@@ -1,6 +1,6 @@
 using System;
 
-namespace RoyTheunissen.FMODSyntax.Callbacks
+namespace RoyTheunissen.AudioSyntax.Callbacks
 {
     [Obsolete("IOnFmodPlayback has been renamed to IOnFmodPlaybackRegistered for clarity. Please use that instead.")]
     public interface IOnFmodPlayback : IOnFmodPlaybackRegistered

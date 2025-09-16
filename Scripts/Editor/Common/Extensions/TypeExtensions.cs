@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Useful extension methods for EditorParamRef.

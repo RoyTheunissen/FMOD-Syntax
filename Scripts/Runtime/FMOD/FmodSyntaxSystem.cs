@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using RoyTheunissen.FMODSyntax.Callbacks;
+using RoyTheunissen.AudioSyntax.Callbacks;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// FMOD-specific Audio Syntax System.

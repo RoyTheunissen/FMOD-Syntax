@@ -8,7 +8,7 @@ using FMODUnity;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Generates code for FMOD events & parameters.
@@ -229,7 +229,7 @@ namespace RoyTheunissen.FMODSyntax
             "System",
             "System.Collections.Generic",
             "FMOD.Studio",
-            "RoyTheunissen.FMODSyntax",
+            "RoyTheunissen.AudioSyntax",
             "UnityEngine",
             "UnityEngine.Scripting",
         };

@@ -1,5 +1,5 @@
 using System;
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -8,7 +8,7 @@ using UnityEngine;
 using FMODUnity;
 #endif // FMOD_AUDIO_SYNTAX
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Draws dropdowns for selecting an audio config. 

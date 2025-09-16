@@ -1,4 +1,4 @@
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Defines useful constants for menu paths so that we don't redefine those over and over.

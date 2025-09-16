@@ -1,7 +1,7 @@
 #if UNITY_AUDIO_SYNTAX
 
 using System.Collections.Generic;
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax.Tags;
+using RoyTheunissen.AudioSyntax.UnityAudioSyntax.Tags;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -13,7 +13,7 @@ using BrunoMikoski.ScriptableObjectCollections;
     #endif
 #endif
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
 {
     /// <summary>
     /// Base class for one-off and continuous Unity audio configs.

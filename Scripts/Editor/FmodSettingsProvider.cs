@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 
 #if FMOD_AUTO_REGENERATE_CODE
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Exposes serialized editor-time FMOD preferences. 

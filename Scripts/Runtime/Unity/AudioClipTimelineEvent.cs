@@ -1,12 +1,12 @@
 using System;
-using RoyTheunissen.FMODSyntax.TimelineEvents;
+using RoyTheunissen.AudioSyntax.TimelineEvents;
 using UnityEngine;
 
 #if SCRIPTABLE_OBJECT_COLLECTION
 using BrunoMikoski.ScriptableObjectCollections;
 #endif // SCRIPTABLE_OBJECT_COLLECTION
 
-namespace RoyTheunissen.FMODSyntax.UnityAudioSyntax
+namespace RoyTheunissen.AudioSyntax.UnityAudioSyntax
 {
     /// <summary>
     /// Specifies a Timeline Event inside an Audio Clip.

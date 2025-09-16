@@ -2,10 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using RoyTheunissen.FMODSyntax.Callbacks;
-using RoyTheunissen.FMODSyntax;
+using RoyTheunissen.AudioSyntax.Callbacks;
+using RoyTheunissen.AudioSyntax;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     // Contains all the fields, properties and methods that are entirely FMOD Audio-specific, for readability.
     public static partial class AudioSyntaxSystem

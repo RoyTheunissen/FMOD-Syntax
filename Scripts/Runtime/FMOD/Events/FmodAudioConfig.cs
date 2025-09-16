@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Non-generic base class for FmodAudioConfig to apply as a type constraint.

@@ -1,4 +1,4 @@
-using RoyTheunissen.FMODSyntax;
+using RoyTheunissen.AudioSyntax;
 
 namespace FMOD.Studio
 {

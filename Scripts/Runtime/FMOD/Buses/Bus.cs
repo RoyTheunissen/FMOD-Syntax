@@ -1,7 +1,7 @@
 using System;
 using FMODUnity;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Utility for accessing the buses more conveniently.

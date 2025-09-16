@@ -1,7 +1,7 @@
 using FMOD.Studio;
 using UnityEngine;
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Non-generic base class for the playback of Playables (Events / Snapshots).

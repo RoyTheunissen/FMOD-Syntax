@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
-using RoyTheunissen.FMODSyntax.Callbacks;
+using RoyTheunissen.AudioSyntax.Callbacks;
 
 #if UNITY_AUDIO_SYNTAX
-using RoyTheunissen.FMODSyntax.UnityAudioSyntax;
+using RoyTheunissen.AudioSyntax.UnityAudioSyntax;
 #endif // UNITY_AUDIO_SYNTAX
 
 #if FMOD_AUDIO_SYNTAX
-using RoyTheunissen.FMODSyntax;
+using RoyTheunissen.AudioSyntax;
 #endif // FMOD_AUDIO_SYNTAX
 
-namespace RoyTheunissen.FMODSyntax
+namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// Class to use to expose information, help manage playback instances, that sort of thing.
