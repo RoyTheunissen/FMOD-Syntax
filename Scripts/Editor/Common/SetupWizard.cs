@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using UnityEngine.Audio;
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -11,11 +12,42 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public class SetupWizard : EditorWindow
     {
+        [Flags]
+        private enum SupportedSystems
+        {
+            UnityNativeAudio = 1 << 0,
+            FMOD = 1 << 1,
+        }
+
+        private const float Width = 500;
+        
+        private static readonly Color WarningColor = Color.Lerp(Color.yellow, Color.red, 0.0f);
+        private static readonly Color SuccessColor = Color.green;
+        
+        private const string ResourcesFolderSuffix = "Resources/";
+        
         private string settingsFolderPath = string.Empty;
-        private string generatedScriptsFolderPath = "Generated/Scripts/FMOD";
+        private string generatedScriptsFolderPath = "Generated/Scripts/Audio";
         
         private string namespaceForGeneratedCode;
         private bool shouldGenerateAssemblyDefinition = true;
+
+        [NonSerialized] private bool didDetectFMOD;
+        [NonSerialized] private bool didDetectAudioSyntaxConfig;
+        [NonSerialized] private string detectedAudioSyntaxConfig;
+        [NonSerialized] private bool didDetectUnityAudioSyntaxConfig;
+        [NonSerialized] private string detectedUnityAudioSyntaxConfig;
+        
+        private SupportedSystems supportedSystems;
+
+        [NonSerialized] private Color preValidityCheckContentColor;
+        [NonSerialized] private Color preValidityCheckBackgroundColor;
+        
+        [NonSerialized] private Color preWarningContentColor;
+        [NonSerialized] private Color preWarningBackgroundColor;
+        
+        [NonSerialized] private Color preSuccessContentColor;
+        [NonSerialized] private Color preSuccessBackgroundColor;
         
         [NonSerialized] private GUIContent cachedFolderIcon;
         [NonSerialized] private bool didCacheFolderIcon;
@@ -35,6 +67,12 @@ namespace RoyTheunissen.AudioSyntax
                 return cachedFolderIcon;
             }
         }
+        
+        private string createUnitySyntaxSettingsAssetFolderPath = string.Empty;
+        private AudioSource audioSourcePooledPrefab;
+        private AudioMixerGroup defaultMixerGroup;
+
+        private bool CanInitialize => supportedSystems != 0 && audioSourcePooledPrefab != null;
 
         [InitializeOnLoadMethod]
         private static void Initialize()
@@ -55,14 +93,96 @@ namespace RoyTheunissen.AudioSyntax
         public static void OpenSetupWizard()
         {
             SetupWizard setupWizard = GetWindow<SetupWizard>(true, AudioSyntaxMenuPaths.ProjectName + " Setup Wizard");
-            setupWizard.minSize = setupWizard.maxSize = new Vector2(500, 270);
+            setupWizard.minSize = setupWizard.maxSize = new Vector2(Width, 550);
             setupWizard.namespaceForGeneratedCode =
-                $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.FMOD";
+                $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.Audio";
+        }
+
+        private void OnEnable()
+        {
+            didDetectFMOD = AssetDatabase.AssetPathExists("Assets/Plugins/FMOD");
+            if (didDetectFMOD)
+                supportedSystems |= SupportedSystems.FMOD;
+
+            TryFindConfig<AudioSyntaxSettings>(
+                out didDetectAudioSyntaxConfig, out detectedAudioSyntaxConfig);
+
+            TryFindConfig<UnityAudioSyntaxSettings>(
+                out didDetectUnityAudioSyntaxConfig, out detectedUnityAudioSyntaxConfig);
+
+            // If no audio source pooled prefab is specified, select the one included in the package.
+            if (audioSourcePooledPrefab == null)
+            {
+                string audioSourcePooledPrefabDefaultPath =
+                    AssetDatabase.GUIDToAssetPath("dbc94fd4dcfcddc42b214b0929284176");
+                audioSourcePooledPrefab =
+                    AssetDatabase.LoadAssetAtPath<AudioSource>(audioSourcePooledPrefabDefaultPath);
+            }
+        }
+
+        private void TryFindConfig<T>(out bool didFindConfig, out string configPath)
+            where T : ScriptableObject
+        {
+            string[] existingConfigPaths = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
+            for (int i = 0; i < existingConfigPaths.Length; i++)
+            {
+                existingConfigPaths[i] = AssetDatabase.GUIDToAssetPath(existingConfigPaths[i]);
+            }
+            didFindConfig = existingConfigPaths.Length > 0;
+            configPath = didFindConfig ? existingConfigPaths[0].GetAbsolutePath() : null;
         }
 
         private static string SanitizeNamespace(string @namespace)
         {
             return FmodSyntaxUtilities.Filter(@namespace, false);
+        }
+
+        private void BeginValidityChecks(bool isValid)
+        {
+            preValidityCheckContentColor = GUI.contentColor;
+            preValidityCheckBackgroundColor = GUI.backgroundColor;
+            
+            if (isValid)
+                return;
+            
+            GUI.contentColor = Color.Lerp(Color.white, Color.red, 0.5f);
+            GUI.backgroundColor = Color.red;
+        }
+        
+        private void EndValidityChecks()
+        {
+            GUI.contentColor = preValidityCheckContentColor;
+            GUI.backgroundColor = preValidityCheckBackgroundColor;
+        }
+        
+        private void BeginWarning()
+        {
+            preWarningContentColor = GUI.contentColor;
+            preWarningBackgroundColor = GUI.backgroundColor;
+            
+            GUI.contentColor = WarningColor;
+            GUI.backgroundColor = WarningColor;
+        }
+        
+        private void EndWarning()
+        {
+            GUI.contentColor = preWarningContentColor;
+            GUI.backgroundColor = preWarningBackgroundColor;
+        }
+        
+        private void BeginSuccess()
+        {
+            preSuccessContentColor = GUI.contentColor;
+            preSuccessBackgroundColor = GUI.backgroundColor;
+            
+            GUI.contentColor = SuccessColor;
+            GUI.backgroundColor = SuccessColor;
+        }
+        
+        private void EndSuccess()
+        {
+            GUI.contentColor = preSuccessContentColor;
+            GUI.backgroundColor = preSuccessBackgroundColor;
         }
 
         private void OnGUI()
@@ -73,43 +193,24 @@ namespace RoyTheunissen.AudioSyntax
             
             EditorGUILayout.Space();
             
-            EditorGUILayout.LabelField($"Welcome! You've installed the {AudioSyntaxMenuPaths.ProjectName} package.");
+            EditorGUILayout.LabelField($"Welcome! Let's initialize {AudioSyntaxMenuPaths.ProjectName} " +
+                                       $"with the necessary settings.");
             
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Let's initialize the system with some default settings.");
-            EditorGUILayout.Space();
-
-            EditorGUILayout.BeginVertical("Box");
-            EditorGUILayout.LabelField("Folders", EditorStyles.boldLabel);
-
-            settingsFolderPath = DrawFolderPathField(settingsFolderPath, "Settings Config", 
-                "Where to create the config file that has all the settings in it.");
-
-            generatedScriptsFolderPath = DrawFolderPathField(generatedScriptsFolderPath, "Generated Scripts", 
-                "Where to place the generated scripts for events and such.");
             
-            EditorGUILayout.Space();
+            DrawAudioSystemSelection();
 
-            EditorGUILayout.LabelField("Code Formatting", EditorStyles.boldLabel);
-            namespaceForGeneratedCode = EditorGUILayout.TextField(
-                new GUIContent("Namespace", "The namespace to use for all generated code."), namespaceForGeneratedCode);
-
-            GUIContent generateAsmdefLabel = new GUIContent(
-                "Make Assembly Definition",
-                "Whether to generate an assembly definition file for the generated FMOD code. " +
-                "If the code is to be generated within one central runtime assembly definition for your game, " +
-                "you may want to turn this off.");
-            shouldGenerateAssemblyDefinition = EditorGUILayout.Toggle(
-                generateAsmdefLabel, shouldGenerateAssemblyDefinition);
+            DrawGeneralSettings();
             
-            EditorGUILayout.Space();
-            EditorGUILayout.EndVertical();
-            
-            EditorGUILayout.Space();
+            if (supportedSystems.HasFlag(SupportedSystems.UnityNativeAudio))
+                DrawUnityAudioSpecificSettings();
 
-            bool shouldInitialize = GUILayout.Button("Initialize", GUILayout.Height(40));
-            if (shouldInitialize)
-                InitializeFmodSyntaxSystem();
+            using (new EditorGUI.DisabledScope(!CanInitialize))
+            {
+                bool shouldInitialize = GUILayout.Button("Initialize", GUILayout.Height(40));
+                if (shouldInitialize)
+                    InitializeFmodSyntaxSystem();
+            }
             
             EditorGUILayout.Space();
             
@@ -119,7 +220,134 @@ namespace RoyTheunissen.AudioSyntax
             
             EditorGUILayout.EndHorizontal();
         }
+
+        private void BeginSettingsBox(string title)
+        {
+            EditorGUILayout.BeginVertical("Box");
+            EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
+            
+            EditorGUILayout.Space();
+        }
         
+        private void EndSettingsBox()
+        {
+            EditorGUILayout.Space();
+            EditorGUILayout.EndVertical();
+            
+            EditorGUILayout.Space();
+        }
+
+        private void DrawAudioSystemSelection()
+        {
+            BeginSettingsBox("Audio System");
+            
+            EditorGUILayout.BeginHorizontal();
+            const float systemsWidth = 150;
+            EditorGUILayout.LabelField($"Which audio system(s) do you intend to use?", GUILayout.Width(Width - systemsWidth - 35));
+            BeginValidityChecks(supportedSystems != 0);
+            supportedSystems = (SupportedSystems)EditorGUILayout.EnumFlagsField(supportedSystems, GUILayout.Width(systemsWidth));
+            EndValidityChecks();
+            EditorGUILayout.EndHorizontal();
+            if (!didDetectFMOD && supportedSystems.HasFlag(SupportedSystems.FMOD))
+            {
+                BeginWarning();
+                EditorGUILayout.LabelField($"Are you sure you wish to use FMOD? We did not detect it in your project.");
+                EndWarning();
+            }
+            
+            EndSettingsBox();
+        }
+
+        private void DrawGeneralSettings()
+        {
+            BeginSettingsBox("General System Settings File");
+            
+            if (didDetectAudioSyntaxConfig)
+            {
+                BeginSuccess();
+                EditorGUILayout.LabelField($"Existing Audio Syntax Settings file detected \u2714");
+                EndSuccess();
+                EditorGUILayout.LabelField(detectedAudioSyntaxConfig, EditorStyles.miniLabel);
+            }
+            else
+            {
+
+                EditorGUILayout.LabelField("Folders", EditorStyles.boldLabel);
+
+                settingsFolderPath = DrawFolderPathField(
+                    settingsFolderPath, "Settings Config",
+                    "Where to create the config file that has all the settings in it.");
+
+                generatedScriptsFolderPath = DrawFolderPathField(
+                    generatedScriptsFolderPath, "Generated Scripts",
+                    "Where to place the generated scripts for events and such.");
+
+                EditorGUILayout.Space();
+
+                EditorGUILayout.LabelField("Code Formatting", EditorStyles.boldLabel);
+                namespaceForGeneratedCode = EditorGUILayout.TextField(
+                    new GUIContent("Namespace", "The namespace to use for all generated code."),
+                    namespaceForGeneratedCode);
+
+                GUIContent generateAsmdefLabel = new GUIContent(
+                    "Make Assembly Definition",
+                    "Whether to generate an assembly definition file for the generated FMOD code. " +
+                    "If the code is to be generated within one central runtime assembly definition for your game, " +
+                    "you may want to turn this off.");
+                shouldGenerateAssemblyDefinition = EditorGUILayout.Toggle(
+                    generateAsmdefLabel, shouldGenerateAssemblyDefinition);
+            }
+
+            EndSettingsBox();
+        }
+
+        private void DrawUnityAudioSpecificSettings()
+        {
+            BeginSettingsBox("Unity Audio Syntax Settings File");
+            
+            // TODO: REMOVE, JUST FOR TESTING
+            // didDetectUnityAudioSyntaxConfig = true;
+            // detectedUnityAudioSyntaxConfig = (Application.dataPath + "/Joe Mama.asset").ToUnityPath();
+
+            if (didDetectUnityAudioSyntaxConfig)
+            {
+                BeginSuccess();
+                EditorGUILayout.LabelField($"Existing Unity Audio Syntax Settings file detected \u2714");
+                EndSuccess();
+                EditorGUILayout.LabelField(detectedUnityAudioSyntaxConfig, EditorStyles.miniLabel);
+            }
+            else
+            {
+                // Decide where to create the asset
+                EditorGUILayout.LabelField(
+                    $"Where do you want to place the settings asset? It must be in a Resources folder.");
+
+                createUnitySyntaxSettingsAssetFolderPath = DrawFolderPathField(
+                    createUnitySyntaxSettingsAssetFolderPath, "Config Resources Folder",
+                    "Which Resources folder to create the Unity Audio Syntax Settings file inside that has all the settings in it.");
+                string absolutePath = createUnitySyntaxSettingsAssetFolderPath.GetAbsolutePath();
+                if (!absolutePath.EndsWith("/"))
+                    absolutePath += "/";
+                if (!absolutePath.EndsWith(ResourcesFolderSuffix))
+                    absolutePath += ResourcesFolderSuffix;
+                absolutePath += UnityAudioSyntaxSettings.PathSuffix;
+                EditorGUILayout.LabelField(absolutePath, EditorStyles.miniLabel);
+                
+                EditorGUILayout.Space();
+                
+                // Choose a Pooled Audio Source Prefab / Default Mixer Group
+                BeginValidityChecks(audioSourcePooledPrefab != null);
+                audioSourcePooledPrefab = (AudioSource)EditorGUILayout.ObjectField(
+                    "Audio Source Prefab", audioSourcePooledPrefab, typeof(AudioSource), false);
+                EndValidityChecks();
+                
+                defaultMixerGroup = (AudioMixerGroup)EditorGUILayout.ObjectField(
+                    "Default Mixer Group", defaultMixerGroup, typeof(AudioMixerGroup), false);
+            }
+            
+            EndSettingsBox();
+        }
+
         private void InitializeFmodSyntaxSystem()
         {
             AudioSyntaxSettings settings = CreateScriptableObject<AudioSyntaxSettings>(

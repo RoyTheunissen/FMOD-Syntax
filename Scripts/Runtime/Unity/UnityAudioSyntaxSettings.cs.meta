@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 88500b1702d3bb74382b83cb29aa60cf
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - audioSourcePooledPrefab: {fileID: 2717309069985723922, guid: dbc94fd4dcfcddc42b214b0929284176,
+      type: 3}
+  - defaultMixerGroup: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
