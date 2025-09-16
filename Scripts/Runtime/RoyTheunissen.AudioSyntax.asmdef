@@ -1,12 +1,9 @@
 {
-    "name": "RoyTheunissen.FMODSyntax",
-    "rootNamespace": "RoyTheunissen.FMODSyntax",
+    "name": "RoyTheunissen.AudioSyntax",
+    "rootNamespace": "RoyTheunissen.AudioSyntax",
     "references": [
         "FMODUnity",
-        "BrunoMikoski.ScriptableObjectCollection",
-        "RoyTheunissen.FMODSyntax.FMOD",
-        "RoyTheunissen.FMODSyntax.Unity",
-        "RoyTheunissen.FMODSyntax.Common"
+        "BrunoMikoski.ScriptableObjectCollection"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
