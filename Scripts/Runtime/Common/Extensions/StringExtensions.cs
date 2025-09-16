@@ -177,7 +177,15 @@ namespace RoyTheunissen.AudioSyntax
             return name.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
 
-        private const string AssetsFolder = "Assets";
+        public const string AssetsFolder = "Assets";
+        
+        public static string AddAssetsPrefix(this string path)
+        {
+            string prefix = AssetsFolder + Path.AltDirectorySeparatorChar;
+            if (!path.StartsWith(prefix))
+                return prefix + path;
+            return path;
+        }
 
         public static string RemoveAssetsPrefix(this string path)
         {

@@ -55,10 +55,12 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        public void InitializeFromWizard(AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup)
+        public void InitializeFromWizard(
+            AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup, string unityAudioConfigRootFolder)
         {
             this.audioSourcePooledPrefab = audioSourcePooledPrefab;
             this.defaultMixerGroup = defaultMixerGroup;
+            this.unityAudioConfigRootFolder = new FolderReference(unityAudioConfigRootFolder);
         }
     }
 }

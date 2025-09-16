@@ -1,12 +1,8 @@
-using UnityEngine;
-
 namespace RoyTheunissen.AudioSyntax
 {
     [System.Serializable]
     public class FolderReference
     {
-        [SerializeField] private string name;
-
         public string GUID;
 
 #if UNITY_EDITOR

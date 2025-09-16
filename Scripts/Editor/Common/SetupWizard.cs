@@ -28,9 +28,12 @@ namespace RoyTheunissen.AudioSyntax
 
         [NonSerialized] private bool didDetectFMOD;
         [NonSerialized] private bool didDetectAudioSyntaxConfig;
-        [NonSerialized] private string detectedAudioSyntaxConfig;
+        [NonSerialized] private AudioSyntaxSettings detectedAudioSyntaxConfig;
+        [NonSerialized] private string detectedAudioSyntaxConfigPath;
+        
         [NonSerialized] private bool didDetectUnityAudioSyntaxConfig;
-        [NonSerialized] private string detectedUnityAudioSyntaxConfig;
+        [NonSerialized] private UnityAudioSyntaxSettings detectedUnityAudioSyntaxConfig;
+        [NonSerialized] private string detectedUnityAudioSyntaxConfigPath;
         
         private SupportedSystems supportedSystems;
 
@@ -71,6 +74,7 @@ namespace RoyTheunissen.AudioSyntax
         private string createUnitySyntaxSettingsAssetResourcesFolderPath = string.Empty;
         private AudioSource audioSourcePooledPrefab;
         private AudioMixerGroup defaultMixerGroup;
+        private string unityAudioConfigRootFolder = string.Empty;
 
         private bool CanInitialize
         {
@@ -119,11 +123,11 @@ namespace RoyTheunissen.AudioSyntax
             if (didDetectFMOD)
                 supportedSystems |= SupportedSystems.FMOD;
 
-            TryFindConfig<AudioSyntaxSettings>(
-                out didDetectAudioSyntaxConfig, out detectedAudioSyntaxConfig);
+            detectedAudioSyntaxConfig = TryFindConfig<AudioSyntaxSettings>(
+                out didDetectAudioSyntaxConfig, out detectedAudioSyntaxConfigPath);
 
-            TryFindConfig<UnityAudioSyntaxSettings>(
-                out didDetectUnityAudioSyntaxConfig, out detectedUnityAudioSyntaxConfig);
+            detectedUnityAudioSyntaxConfig = TryFindConfig<UnityAudioSyntaxSettings>(
+                out didDetectUnityAudioSyntaxConfig, out detectedUnityAudioSyntaxConfigPath);
 
             // If no audio source pooled prefab is specified, select the one included in the package.
             if (audioSourcePooledPrefab == null)
@@ -135,7 +139,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        private void TryFindConfig<T>(out bool didFindConfig, out string configPath)
+        private T TryFindConfig<T>(out bool didFindConfig, out string configPath)
             where T : ScriptableObject
         {
             string[] existingConfigPaths = AssetDatabase.FindAssets($"t:{typeof(T).Name}");
@@ -145,6 +149,7 @@ namespace RoyTheunissen.AudioSyntax
             }
             didFindConfig = existingConfigPaths.Length > 0;
             configPath = didFindConfig ? existingConfigPaths[0].GetAbsolutePath() : null;
+            return didFindConfig ? AssetDatabase.LoadAssetAtPath<T>(existingConfigPaths[0]) : null;
         }
 
         private static string SanitizeNamespace(string @namespace)
@@ -282,7 +287,11 @@ namespace RoyTheunissen.AudioSyntax
                 BeginSuccess();
                 EditorGUILayout.LabelField($"Existing Audio Syntax Settings file detected \u2714");
                 EndSuccess();
-                EditorGUILayout.LabelField(detectedAudioSyntaxConfig, EditorStyles.miniLabel);
+                using (new EditorGUI.DisabledScope(false))
+                {
+                    EditorGUILayout.ObjectField(detectedAudioSyntaxConfig, typeof(AudioSyntaxSettings), false);
+                }
+                EditorGUILayout.LabelField(detectedAudioSyntaxConfigPath, EditorStyles.miniLabel);
             }
             else
             {
@@ -329,7 +338,11 @@ namespace RoyTheunissen.AudioSyntax
                 BeginSuccess();
                 EditorGUILayout.LabelField($"Existing Unity Audio Syntax Settings file detected \u2714");
                 EndSuccess();
-                EditorGUILayout.LabelField(detectedUnityAudioSyntaxConfig, EditorStyles.miniLabel);
+                using (new EditorGUI.DisabledScope(false))
+                {
+                    EditorGUILayout.ObjectField(detectedUnityAudioSyntaxConfig, typeof(UnityAudioSyntaxSettings), false);
+                }
+                EditorGUILayout.LabelField(detectedUnityAudioSyntaxConfigPath, EditorStyles.miniLabel);
             }
             else
             {
@@ -371,6 +384,17 @@ namespace RoyTheunissen.AudioSyntax
                 
                 defaultMixerGroup = (AudioMixerGroup)EditorGUILayout.ObjectField(
                     "Default Mixer Group", defaultMixerGroup, typeof(AudioMixerGroup), false);
+                
+                unityAudioConfigRootFolder = DrawFolderPathField(
+                    unityAudioConfigRootFolder, "Audio Config Root Folder",
+                    "Specifies which folder will contain the configs for all of your audio events. " +
+                    "This is used to infer a path from the config.\n\n" +
+                    "For example: 'Assets/_ProjectName/Configs/Audio/Player/Jump' will then be shortened to " +
+                    "the more appropriate 'Player/Jump'.\n\n" +
+                    "If you leave this empty, it will use its own best judgement " +
+                    "to try and leave out paths that seem irrelevant. This is not guaranteed to work, " +
+                    "so it's better if you specify it explicitly.");
+                EditorGUILayout.LabelField(unityAudioConfigRootFolder.GetAbsolutePath(), EditorStyles.miniLabel);
             }
             
             EndSettingsBox();
@@ -446,7 +470,9 @@ namespace RoyTheunissen.AudioSyntax
             fileName = Path.GetFileNameWithoutExtension(fileName);
             UnityAudioSyntaxSettings settings = CreateScriptableObject<UnityAudioSyntaxSettings>(path, fileName);
             
-            settings.InitializeFromWizard(audioSourcePooledPrefab, defaultMixerGroup);
+            string rootPath = unityAudioConfigRootFolder.AddAssetsPrefix();
+            
+            settings.InitializeFromWizard(audioSourcePooledPrefab, defaultMixerGroup, rootPath);
             
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
