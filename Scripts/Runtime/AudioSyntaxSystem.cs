@@ -27,7 +27,7 @@ namespace RoyTheunissen.AudioSyntax
             StopAllActiveEventPlaybacks();
             
 #if FMOD_AUDIO_SYNTAX
-            FmodAudioSyntaxSystem.StopAllActiveSnapshotPlaybacks();
+            FmodSyntaxSystem.StopAllActiveSnapshotPlaybacks();
 #endif // FMOD_AUDIO_SYNTAX
         }
         
@@ -42,7 +42,7 @@ namespace RoyTheunissen.AudioSyntax
             
 #if FMOD_AUDIO_SYNTAX
             if (playback is FmodAudioPlayback fmodAudioPlayback)
-                FmodAudioSyntaxSystem.OnActiveEventPlaybackRegistered(fmodAudioPlayback);
+                FmodSyntaxSystem.OnActiveEventPlaybackRegistered(fmodAudioPlayback);
 #endif // FMOD_AUDIO_SYNTAX
             
 #if UNITY_AUDIO_SYNTAX
@@ -62,7 +62,7 @@ namespace RoyTheunissen.AudioSyntax
             
 #if FMOD_AUDIO_SYNTAX
             if (playback is FmodAudioPlayback fmodAudioPlayback)
-                FmodAudioSyntaxSystem.OnActiveEventPlaybackUnregistered(fmodAudioPlayback);
+                FmodSyntaxSystem.OnActiveEventPlaybackUnregistered(fmodAudioPlayback);
 #endif // FMOD_AUDIO_SYNTAX
 #if UNITY_AUDIO_SYNTAX
             if (playback is UnityAudioPlayback unityAudioPlayback)
@@ -112,9 +112,9 @@ namespace RoyTheunissen.AudioSyntax
             
 #if FMOD_AUDIO_SYNTAX
             // Cull any snapshots that are ready to be cleaned up.
-            for (int i = FmodAudioSyntaxSystem.ActiveSnapshotPlaybacks.Count - 1; i >= 0; i--)
+            for (int i = FmodSyntaxSystem.ActiveSnapshotPlaybacks.Count - 1; i >= 0; i--)
             {
-                IFmodPlayback activeSnapshot = FmodAudioSyntaxSystem.ActiveSnapshotPlaybacks[i];
+                IFmodPlayback activeSnapshot = FmodSyntaxSystem.ActiveSnapshotPlaybacks[i];
                 if (activeSnapshot.CanBeCleanedUp)
                     activeSnapshot.Cleanup();
             }

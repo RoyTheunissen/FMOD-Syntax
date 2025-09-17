@@ -7,8 +7,13 @@ namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
     /// FMOD-specific Audio Syntax System.
+    ///
+    /// NOTE: It could be argued that the name FmodAudioSyntaxSystem would be more consistent with
+    /// UnityAudioSyntaxSystem. However, for backwards compatibility I have kept the same name.
+    /// Also, not that while Unity Syntax is vague and may not relate to audio, FMOD Syntax is clearly about audio.
+    /// So there are other cases where we use FMOD directly but Unity Audio instead of just Unity.
     /// </summary>
-    public sealed class FmodAudioSyntaxSystem
+    public sealed class FmodSyntaxSystem
     {
         private static readonly List<IAudioPlayback> activeEventPlaybacks = new();
         public static List<IAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
@@ -20,14 +25,14 @@ namespace RoyTheunissen.AudioSyntax
         
         [NonSerialized] private bool didInitialize;
         
-        [NonSerialized] private static FmodAudioSyntaxSystem cachedInstance;
-        public static FmodAudioSyntaxSystem Instance
+        [NonSerialized] private static FmodSyntaxSystem cachedInstance;
+        public static FmodSyntaxSystem Instance
         {
             get
             {
                 if (cachedInstance == null)
                 {
-                    cachedInstance = new FmodAudioSyntaxSystem();
+                    cachedInstance = new FmodSyntaxSystem();
                     cachedInstance.Initialize();
                 }
                 return cachedInstance;
