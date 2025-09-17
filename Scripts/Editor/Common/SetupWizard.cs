@@ -29,6 +29,7 @@ namespace RoyTheunissen.AudioSyntax
         [NonSerialized] private bool didDetectAudioSyntaxConfig;
         [NonSerialized] private AudioSyntaxSettings detectedAudioSyntaxConfig;
         [NonSerialized] private string detectedAudioSyntaxConfigPath;
+        [NonSerialized] private bool isMigrationProcedureRequired;
         
         [NonSerialized] private bool didDetectUnityAudioSyntaxConfig;
         [NonSerialized] private UnityAudioSyntaxSettings detectedUnityAudioSyntaxConfig;
@@ -164,6 +165,9 @@ namespace RoyTheunissen.AudioSyntax
 
             detectedAudioSyntaxConfig = TryFindConfig<AudioSyntaxSettings>(
                 out didDetectAudioSyntaxConfig, out detectedAudioSyntaxConfigPath);
+
+            isMigrationProcedureRequired = didDetectAudioSyntaxConfig &&
+                                           detectedAudioSyntaxConfig.Version < AudioSyntaxSettings.CurrentVersion;
 
             detectedUnityAudioSyntaxConfig = TryFindConfig<UnityAudioSyntaxSettings>(
                 out didDetectUnityAudioSyntaxConfig, out detectedUnityAudioSyntaxConfigPath);
@@ -538,6 +542,9 @@ namespace RoyTheunissen.AudioSyntax
             UpdateConfigWithSupportedAudioSystems();
             
             EnsureThatScriptingDefineSymbolsAreDefined(activeSystems);
+
+            if (isMigrationProcedureRequired)
+                MigrationWizard.OpenMigrationWizard();
 
             Close();
         }
