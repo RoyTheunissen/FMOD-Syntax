@@ -34,29 +34,6 @@ namespace RoyTheunissen.AudioSyntax
             this.modeProperty = modeProperty;
         }
 
-        private static string[] GetGuidsOfAllAssetsOfType(Type type)
-        {
-            return AssetDatabase.FindAssets("t:" + type.Name);
-        }
-        
-        private static string[] GetGuidsOfAllAssetsOfType<T>() where T : UnityEngine.Object
-        {
-            return GetGuidsOfAllAssetsOfType(typeof(T));
-        }
-        
-        private static T[] GetAllAssetsOfType<T>() where T : UnityEngine.Object
-        {
-            string[] guids = GetGuidsOfAllAssetsOfType<T>();
-
-            T[] result = new T[guids.Length];
-
-            for (int i = 0; i < guids.Length; ++i)
-            {
-                result[i] = AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guids[i]));
-            }
-            return result;
-        }
-
         private string GetDropdownPathForUnityAudioConfig(string assetPath, bool multipleAudioSystemsActive)
         {
             string dropdownPath = assetPath.RemoveSuffix(".asset");
@@ -110,7 +87,7 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX
             if (supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
             {
-                UnityAudioConfigBase[] unityAudioConfigs = GetAllAssetsOfType<UnityAudioConfigBase>();
+                UnityAudioConfigBase[] unityAudioConfigs = AssetLoading.GetAllAssetsOfType<UnityAudioConfigBase>();
                 string[] paths = new string[unityAudioConfigs.Length];
                 string[] guids = new string[unityAudioConfigs.Length];
 
