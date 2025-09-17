@@ -95,6 +95,11 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
+        private void ReportIssueThatNeedsToBeResolvedFirst()
+        {
+            hasDetectedIssuesThatNeedToBeResolvedFirst = true;
+        }
+
         private void Refresh()
         {
             Initialize();
@@ -110,6 +115,8 @@ namespace RoyTheunissen.AudioSyntax
                 versionProperty.intValue = versionMigratingTo;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
+            
+            Refresh();
         }
     }
 }

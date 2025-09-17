@@ -21,15 +21,7 @@ namespace RoyTheunissen.AudioSyntax
         private const string StopAllActivePlaybacksMethod = "StopAllActivePlaybacks";
         private const string StopAllActiveEventPlaybacksMethod = "StopAllActiveEventPlaybacks";
         private const string UpdateMethod = "Update";
-        
-        private static readonly string[] AudioSyntaxBasePaths =
-        {
-            "FMOD-Syntax/",
-            "FMOD-Syntax/",
-            "com.roytheunissen.fmod-syntax/",
-            "com.roytheunissen.audio-syntax/",
-        };
-        
+
         private const int VersionFmodSyntaxToAudioSyntax = 1;
         
         [NonSerialized] private bool hasDetectedOutdatedNamespaceUsage;
@@ -43,61 +35,7 @@ namespace RoyTheunissen.AudioSyntax
             { $"{FmodSyntaxSystemName}.{StopAllActiveEventPlaybacksMethod}",
                 $"{GeneralSystemName}.{StopAllActiveEventPlaybacksMethod}" },
         };
-        
-        public static bool IsProjectRelativePathInsideThisPackage(string projectRelativePath)
-        {
-            if (projectRelativePath.StartsWith("Assets/"))
-                projectRelativePath = projectRelativePath.RemoveAssetsPrefix();
-            else if (projectRelativePath.StartsWith("Packages/"))
-                projectRelativePath = projectRelativePath.RemovePrefix("Packages/");
-            
-            // WE are allowed to reference it, for example in this very script :V
-            for (int j = 0; j < AudioSyntaxBasePaths.Length; j++)
-            {
-                if (projectRelativePath.StartsWith(AudioSyntaxBasePaths[j]))
-                    return true;
-            }
 
-            return false;
-        }
-        
-        private bool IsScriptInsideThisPackage(MonoScript monoScript)
-        {
-            string assetPath = AssetDatabase.GetAssetPath(monoScript);
-            
-            return IsProjectRelativePathInsideThisPackage(assetPath);
-        }
-
-        private bool IsContainedInScripts(string text)
-        {
-            MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
-            for (int i = 0; i < monoScripts.Length; i++)
-            {
-                // WE are allowed to reference it, for example in this very script :V
-                if (IsScriptInsideThisPackage(monoScripts[i]))
-                    continue;
-                
-                string scriptText = monoScripts[i].text;
-                if (scriptText.Contains(text))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        
-        private bool AreReplacementsNecessary(Dictionary<string, string> replacements)
-        {
-            foreach (KeyValuePair<string,string> oldTextNewTextPair in replacements)
-            {
-                if (IsContainedInScripts(oldTextNewTextPair.Key))
-                    return true;
-            }
-
-            return false;
-        }
-        
         private void DetectOutdatedNamespaceUsage()
         {
             hasDetectedOutdatedNamespaceUsage = false;
@@ -108,7 +46,7 @@ namespace RoyTheunissen.AudioSyntax
             hasDetectedOutdatedNamespaceUsage = IsContainedInScripts(FmodSyntaxNamespace);
             
             if (hasDetectedOutdatedNamespaceUsage)
-                hasDetectedIssuesThatNeedToBeResolvedFirst = true;
+                ReportIssueThatNeedsToBeResolvedFirst();
         }
         
         private void DetectOutdatedSystemReferences()
@@ -121,7 +59,7 @@ namespace RoyTheunissen.AudioSyntax
             hasDetectedOutdatedSystemReferences = AreReplacementsNecessary(outdatedSystemReferenceReplacements);
             
             if (hasDetectedOutdatedSystemReferences)
-                hasDetectedIssuesThatNeedToBeResolvedFirst = true;
+                ReportIssueThatNeedsToBeResolvedFirst();
         }
         
         private void DrawMigrationFromFmodSyntaxToAudioSyntax()
@@ -131,13 +69,18 @@ namespace RoyTheunissen.AudioSyntax
             
             BeginSettingsBox("FMOD-Syntax to Audio-Syntax");
             
-            EditorGUILayout.HelpBox("The system has since been updated to support Unity-based audio as well, and has been renamed from FMOD-Syntax to Audio-Syntax. Certain Namespaces / classes have been renamed, we need to make sure those are now updated if necessary.", MessageType.Info);
+            EditorGUILayout.HelpBox("The system has since been updated to support Unity-based audio as well, and has " +
+                                    "been renamed from FMOD-Syntax to Audio-Syntax. Certain Namespaces / classes " +
+                                    "have been renamed, we need to make sure those are now updated if necessary.",
+                MessageType.Info);
             
             EditorGUILayout.Space();
 
             if (hasDetectedOutdatedNamespaceUsage)
             {
-                EditorGUILayout.HelpBox($"The system has detected that the FMOD-Syntax namespace '{FmodSyntaxNamespace}' is being used. This has since been renamed to '{AudioSyntaxNamespace}'.", MessageType.Error);
+                EditorGUILayout.HelpBox($"The system has detected that the FMOD-Syntax namespace " +
+                                        $"'{FmodSyntaxNamespace}' is being used. This has since been renamed to " +
+                                        $"'{AudioSyntaxNamespace}'.", MessageType.Error);
                 bool shouldFixNamespacesAutomatically = GUILayout.Button("Fix Automatically");
                 if (shouldFixNamespacesAutomatically)
                 {
@@ -154,7 +97,8 @@ namespace RoyTheunissen.AudioSyntax
             }
             else
             {
-                HelpBoxAffirmative($"There seem to be no more occurrences of the deprecated {FmodSyntaxNamespace} namespace.");
+                HelpBoxAffirmative($"There seem to be no more occurrences of the deprecated " +
+                                   $"{FmodSyntaxNamespace} namespace.");
             }
             
             EditorGUILayout.Space();
@@ -189,37 +133,6 @@ namespace RoyTheunissen.AudioSyntax
             }
             
             EndSettingsBox();
-        }
-        
-        private void ReplaceInScripts(string oldText, string newText, bool partOfBatch = false)
-        {
-            MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
-            for (int i = 0; i < monoScripts.Length; i++)
-            {
-                if (IsScriptInsideThisPackage(monoScripts[i]))
-                    continue;
-                
-                string scriptText = monoScripts[i].text;
-                bool hasIncorrectUsingInFile = scriptText.Contains(oldText);
-                if (!hasIncorrectUsingInFile)
-                    continue;
-
-                scriptText = scriptText.Replace(oldText, newText);
-                monoScripts[i].SetText(scriptText);
-            }
-            
-            if (!partOfBatch)
-                AssetDatabase.Refresh();
-        }
-        
-        private void ReplaceInScripts(Dictionary<string, string> replacements)
-        {
-            foreach (KeyValuePair<string,string> oldTextNewTextPair in replacements)
-            {
-                ReplaceInScripts(oldTextNewTextPair.Key, oldTextNewTextPair.Value, true);
-            }
-            
-            AssetDatabase.Refresh();
         }
 
         private void FixFmodSyntaxNamespaces()
