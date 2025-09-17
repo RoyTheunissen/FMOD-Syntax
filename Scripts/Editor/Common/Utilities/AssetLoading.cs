@@ -8,19 +8,19 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public static class AssetLoading
     {
-        private static string[] GetGuidsOfAllAssetsOfType(Type type)
+        private static string[] GetGuidsOfAllAssetsOfType(Type type, string[] searchInFolders = null)
         {
-            return AssetDatabase.FindAssets("t:" + type.Name);
+            return AssetDatabase.FindAssets("t:" + type.Name, searchInFolders);
         }
         
-        private static string[] GetGuidsOfAllAssetsOfType<T>() where T : UnityEngine.Object
+        private static string[] GetGuidsOfAllAssetsOfType<T>(string[] searchInFolders = null) where T : UnityEngine.Object
         {
-            return GetGuidsOfAllAssetsOfType(typeof(T));
+            return GetGuidsOfAllAssetsOfType(typeof(T), searchInFolders);
         }
 
-        public static T[] GetAllAssetsOfType<T>() where T : UnityEngine.Object
+        public static T[] GetAllAssetsOfType<T>(string[] searchInFolders = null) where T : UnityEngine.Object
         {
-            string[] guids = GetGuidsOfAllAssetsOfType<T>();
+            string[] guids = GetGuidsOfAllAssetsOfType<T>(searchInFolders);
 
             T[] result = new T[guids.Length];
 
