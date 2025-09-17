@@ -128,6 +128,8 @@ namespace RoyTheunissen.AudioSyntax
 
             detectedUnityAudioSyntaxConfig = TryFindConfig<UnityAudioSyntaxSettings>(
                 out didDetectUnityAudioSyntaxConfig, out detectedUnityAudioSyntaxConfigPath);
+            if (didDetectUnityAudioSyntaxConfig)
+                supportedSystems |= SupportedSystems.UnityNativeAudio;
 
             // If no audio source pooled prefab is specified, select the one included in the package.
             if (audioSourcePooledPrefab == null)
