@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -13,11 +14,13 @@ namespace RoyTheunissen.AudioSyntax
         private const string FmodSyntaxNamespace = "RoyTheunissen.FMODSyntax";
         private const string AudioSyntaxNamespace = "RoyTheunissen.AudioSyntax";
         
-        private const string OldSystemName = "FmodSyntaxSystem";
-        private const string NewGeneralSystemName = "AudioSyntaxSystem";
-        private const string NewFmodSystemName = "FmodAudioSyntaxSystem";
-        private const string RegisterEventPlaybackCallbackReceiverMethod = "RegisterEventPlaybackCallbackReceiver";
-        private const string UnregisterEventPlaybackCallbackReceiverMethod = "UnregisterEventPlaybackCallbackReceiver";
+        private const string FmodSyntaxSystemName = "FmodSyntaxSystem";
+        private const string GeneralSystemName = "AudioSyntaxSystem";
+        private const string UnityAudioSystemName = "UnityAudioSyntaxSystem";
+        private const string CullPlaybacksMethod = "CullPlaybacks";
+        private const string StopAllActivePlaybacksMethod = "StopAllActivePlaybacks";
+        private const string StopAllActiveEventPlaybacksMethod = "StopAllActiveEventPlaybacks";
+        private const string UpdateMethod = "Update";
         
         private static readonly string[] AudioSyntaxBasePaths =
         {
@@ -31,6 +34,15 @@ namespace RoyTheunissen.AudioSyntax
         
         [NonSerialized] private bool hasDetectedOutdatedNamespaceUsage;
         [NonSerialized] private bool hasDetectedOutdatedSystemReferences;
+
+        private readonly Dictionary<string, string> outdatedSystemReferenceReplacements = new()
+        {
+            { $"{FmodSyntaxSystemName}.{CullPlaybacksMethod}", $"{GeneralSystemName}.{UpdateMethod}" },
+            { $"{FmodSyntaxSystemName}.{StopAllActivePlaybacksMethod}",
+                $"{GeneralSystemName}.{StopAllActivePlaybacksMethod}" },
+            { $"{FmodSyntaxSystemName}.{StopAllActiveEventPlaybacksMethod}",
+                $"{GeneralSystemName}.{StopAllActiveEventPlaybacksMethod}" },
+        };
         
         public static bool IsProjectRelativePathInsideThisPackage(string projectRelativePath)
         {
@@ -75,6 +87,17 @@ namespace RoyTheunissen.AudioSyntax
             return false;
         }
         
+        private bool AreReplacementsNecessary(Dictionary<string, string> replacements)
+        {
+            foreach (KeyValuePair<string,string> oldTextNewTextPair in replacements)
+            {
+                if (IsContainedInScripts(oldTextNewTextPair.Key))
+                    return true;
+            }
+
+            return false;
+        }
+        
         private void DetectOutdatedNamespaceUsage()
         {
             hasDetectedOutdatedNamespaceUsage = false;
@@ -95,7 +118,7 @@ namespace RoyTheunissen.AudioSyntax
             if (versionMigratingFrom >= VersionFmodSyntaxToAudioSyntax)
                 return;
             
-            hasDetectedOutdatedSystemReferences = IsContainedInScripts(OldSystemName);
+            hasDetectedOutdatedSystemReferences = AreReplacementsNecessary(outdatedSystemReferenceReplacements);
             
             if (hasDetectedOutdatedSystemReferences)
                 hasDetectedIssuesThatNeedToBeResolvedFirst = true;
@@ -138,31 +161,37 @@ namespace RoyTheunissen.AudioSyntax
             
             if (hasDetectedOutdatedSystemReferences)
             {
-                EditorGUILayout.HelpBox($"The system has detected that the deprecated system '{OldSystemName}' is being referenced. This has since been renamed to '{NewGeneralSystemName}'.", MessageType.Error);
-                bool shouldFixNamespacesAutomatically = GUILayout.Button("Fix Automatically");
-                if (shouldFixNamespacesAutomatically)
+                EditorGUILayout.HelpBox($"There used to be one system called '{FmodSyntaxSystemName}'. This has " +
+                                        $"been replaced by a general system '{GeneralSystemName}' which in turn " +
+                                        $"updates both '{FmodSyntaxSystemName}' and '{UnityAudioSystemName}'. " +
+                                        $"The '{CullPlaybacksMethod}' method has also been renamed " +
+                                        $"to '{UpdateMethod}' because it now does more than just culling playbacks.",
+                    MessageType.Error);
+                
+                bool shouldFixSystemReferencesAutomatically = GUILayout.Button("Fix Automatically");
+                if (shouldFixSystemReferencesAutomatically)
                 {
                     bool confirmed = EditorUtility.DisplayDialog(
-                        "Automatically fix deprecated system references",
-                        $"Are you sure you want to automatically replace references to the old system " +
-                        $"'{OldSystemName}' with references to the new system '{NewGeneralSystemName}'?\n\n" +
-                        $"We recommend that you commit your changes to version control first so that you don't lose " +
-                        $"any work.",
+                        "Automatically fix system references",
+                        $"Are you sure you want to automatically update references to the old system " +
+                        $"'{FmodSyntaxSystemName}' with references to the new system '{GeneralSystemName}' " +
+                        $"where possible?\n\nWe recommend that you commit your changes to version control first so " +
+                        $"that you don't lose any work.",
                         "Yes, I have saved my work.", "No");
                     
                     if (confirmed)
-                        FixFmodSyntaxSystemReferences();
+                        FixOutdatedSystemReferences();
                 }
             }
             else
             {
-                HelpBoxAffirmative($"There seem to be no more references to the deprecated '{OldSystemName}' system.");
+                HelpBoxAffirmative($"There seem to be no more outdated references to '{FmodSyntaxSystemName}'.");
             }
             
             EndSettingsBox();
         }
         
-        private void ReplaceInScripts(string oldText, string newText)
+        private void ReplaceInScripts(string oldText, string newText, bool partOfBatch = false)
         {
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
@@ -179,6 +208,17 @@ namespace RoyTheunissen.AudioSyntax
                 monoScripts[i].SetText(scriptText);
             }
             
+            if (!partOfBatch)
+                AssetDatabase.Refresh();
+        }
+        
+        private void ReplaceInScripts(Dictionary<string, string> replacements)
+        {
+            foreach (KeyValuePair<string,string> oldTextNewTextPair in replacements)
+            {
+                ReplaceInScripts(oldTextNewTextPair.Key, oldTextNewTextPair.Value, true);
+            }
+            
             AssetDatabase.Refresh();
         }
 
@@ -187,16 +227,9 @@ namespace RoyTheunissen.AudioSyntax
             ReplaceInScripts(FmodSyntaxNamespace, AudioSyntaxNamespace);
         }
         
-        private void FixFmodSyntaxSystemReferences()
+        private void FixOutdatedSystemReferences()
         {
-            // Point existing calls to event playback (un)registration to the new FMOD-specific system which has a
-            // slightly different name.
-            // TODO: Or should we perhaps keep the old name so that this is not necessary to begin with?
-            // 'FmodAudioSystaxSystem' is more consistent because there is now also 'UnityAudioSyntaxSystem'...
-            ReplaceInScripts($"{OldSystemName}.{RegisterEventPlaybackCallbackReceiverMethod}", $"{NewFmodSystemName}.{RegisterEventPlaybackCallbackReceiverMethod}");
-            ReplaceInScripts($"{OldSystemName}.{UnregisterEventPlaybackCallbackReceiverMethod}", $"{NewFmodSystemName}.{UnregisterEventPlaybackCallbackReceiverMethod}");
-            
-            ReplaceInScripts(OldSystemName, NewGeneralSystemName);
+            ReplaceInScripts(outdatedSystemReferenceReplacements);
         }
     }
 }
