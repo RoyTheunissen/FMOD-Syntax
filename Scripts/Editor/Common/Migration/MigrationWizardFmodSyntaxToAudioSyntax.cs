@@ -24,23 +24,28 @@ namespace RoyTheunissen.AudioSyntax
         
         [NonSerialized] private bool hasDetectedIncorrectUsing;
         
-        private bool IsScriptAllowedToReferenceOldNamespace(MonoScript monoScript)
+        public static bool IsProjectRelativePathInsideThisPackage(string projectRelativePath)
         {
-            string assetPath = AssetDatabase.GetAssetPath(monoScript);
-
-            if (assetPath.StartsWith("Assets/"))
-                assetPath = assetPath.RemoveAssetsPrefix();
-            else if (assetPath.StartsWith("Packages/"))
-                assetPath = assetPath.RemovePrefix("Packages/");
+            if (projectRelativePath.StartsWith("Assets/"))
+                projectRelativePath = projectRelativePath.RemoveAssetsPrefix();
+            else if (projectRelativePath.StartsWith("Packages/"))
+                projectRelativePath = projectRelativePath.RemovePrefix("Packages/");
             
             // WE are allowed to reference it, for example in this very script :V
             for (int j = 0; j < AudioSyntaxBasePaths.Length; j++)
             {
-                if (assetPath.StartsWith(AudioSyntaxBasePaths[j]))
+                if (projectRelativePath.StartsWith(AudioSyntaxBasePaths[j]))
                     return true;
             }
 
             return false;
+        }
+        
+        private bool IsScriptAllowedToReferenceOldNamespace(MonoScript monoScript)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(monoScript);
+            
+            return IsProjectRelativePathInsideThisPackage(assetPath);
         }
         
         private void DetectOutdatedNamespaceUsage()
@@ -79,12 +84,44 @@ namespace RoyTheunissen.AudioSyntax
             {
                 EditorGUILayout.HelpBox($"The system has detected that the FMOD-Syntax namespace '{FmodSyntaxNamespace}' is being used. This has since been renamed to '{AudioSyntaxNamespace}'.", MessageType.Error);
                 bool shouldFixNamespacesAutomatically = GUILayout.Button("Fix Automatically");
+                if (shouldFixNamespacesAutomatically)
+                {
+                    bool confirmed = EditorUtility.DisplayDialog(
+                        "Automatically fix namespaces",
+                        $"Are you sure you want to automatically replace the {FmodSyntaxNamespace} namespace with " +
+                        $"the {AudioSyntaxNamespace} namespace?\n\nWe recommend that you commit your changes to " +
+                        $"version control first so that you don't lose any work.",
+                        "Yes, I have saved my work.", "No");
+                    
+                    if (confirmed)
+                        FixFmodSyntaxNamespaces();
+                }
             }
             else
             {
                 HelpBoxAffirmative($"There seem to be no more occurrences of the deprecated {FmodSyntaxNamespace} namespace.");
             }
             EndSettingsBox();
+        }
+
+        private void FixFmodSyntaxNamespaces()
+        {
+            MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
+            for (int i = 0; i < monoScripts.Length; i++)
+            {
+                if (IsScriptAllowedToReferenceOldNamespace(monoScripts[i]))
+                    continue;
+                
+                string scriptText = monoScripts[i].text;
+                bool hasIncorrectUsingInFile = scriptText.Contains(FmodSyntaxNamespace);
+                if (!hasIncorrectUsingInFile)
+                    continue;
+
+                scriptText = scriptText.Replace(FmodSyntaxNamespace, AudioSyntaxNamespace);
+                monoScripts[i].SetText(scriptText);
+            }
+            
+            AssetDatabase.Refresh();
         }
     }
 }
