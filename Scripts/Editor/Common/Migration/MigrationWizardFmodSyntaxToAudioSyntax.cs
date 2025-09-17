@@ -12,6 +12,13 @@ namespace RoyTheunissen.AudioSyntax
     {
         private const string FmodSyntaxNamespace = "RoyTheunissen.FMODSyntax";
         private const string AudioSyntaxNamespace = "RoyTheunissen.AudioSyntax";
+        
+        private const string OldSystemName = "FmodSyntaxSystem";
+        private const string NewGeneralSystemName = "AudioSyntaxSystem";
+        private const string NewFmodSystemName = "FmodAudioSyntaxSystem";
+        private const string RegisterEventPlaybackCallbackReceiverMethod = "RegisterEventPlaybackCallbackReceiver";
+        private const string UnregisterEventPlaybackCallbackReceiverMethod = "UnregisterEventPlaybackCallbackReceiver";
+        
         private static readonly string[] AudioSyntaxBasePaths =
         {
             "FMOD-Syntax/",
@@ -22,7 +29,8 @@ namespace RoyTheunissen.AudioSyntax
         
         private const int VersionFmodSyntaxToAudioSyntax = 1;
         
-        [NonSerialized] private bool hasDetectedIncorrectUsing;
+        [NonSerialized] private bool hasDetectedOutdatedNamespaceUsage;
+        [NonSerialized] private bool hasDetectedOutdatedSystemReferences;
         
         public static bool IsProjectRelativePathInsideThisPackage(string projectRelativePath)
         {
@@ -41,35 +49,56 @@ namespace RoyTheunissen.AudioSyntax
             return false;
         }
         
-        private bool IsScriptAllowedToReferenceOldNamespace(MonoScript monoScript)
+        private bool IsScriptInsideThisPackage(MonoScript monoScript)
         {
             string assetPath = AssetDatabase.GetAssetPath(monoScript);
             
             return IsProjectRelativePathInsideThisPackage(assetPath);
         }
-        
-        private void DetectOutdatedNamespaceUsage()
+
+        private bool IsContainedInScripts(string text)
         {
-            hasDetectedIncorrectUsing = false;
-            
-            if (versionMigratingFrom >= VersionFmodSyntaxToAudioSyntax)
-                return;
-            
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
             {
                 // WE are allowed to reference it, for example in this very script :V
-                if (IsScriptAllowedToReferenceOldNamespace(monoScripts[i]))
+                if (IsScriptInsideThisPackage(monoScripts[i]))
                     continue;
                 
                 string scriptText = monoScripts[i].text;
-                bool hasIncorrectUsingInFile = scriptText.Contains(FmodSyntaxNamespace);
-                if (hasIncorrectUsingInFile)
+                if (scriptText.Contains(text))
                 {
-                    hasDetectedIncorrectUsing = true;
-                    return;
+                    return true;
                 }
             }
+
+            return false;
+        }
+        
+        private void DetectOutdatedNamespaceUsage()
+        {
+            hasDetectedOutdatedNamespaceUsage = false;
+            
+            if (versionMigratingFrom >= VersionFmodSyntaxToAudioSyntax)
+                return;
+
+            hasDetectedOutdatedNamespaceUsage = IsContainedInScripts(FmodSyntaxNamespace);
+            
+            if (hasDetectedOutdatedNamespaceUsage)
+                hasDetectedIssuesThatNeedToBeResolvedFirst = true;
+        }
+        
+        private void DetectOutdatedSystemReferences()
+        {
+            hasDetectedOutdatedSystemReferences = false;
+            
+            if (versionMigratingFrom >= VersionFmodSyntaxToAudioSyntax)
+                return;
+            
+            hasDetectedOutdatedSystemReferences = IsContainedInScripts(OldSystemName);
+            
+            if (hasDetectedOutdatedSystemReferences)
+                hasDetectedIssuesThatNeedToBeResolvedFirst = true;
         }
         
         private void DrawMigrationFromFmodSyntaxToAudioSyntax()
@@ -78,9 +107,12 @@ namespace RoyTheunissen.AudioSyntax
                 return;
             
             BeginSettingsBox("FMOD-Syntax to Audio-Syntax");
+            
             EditorGUILayout.HelpBox("The system has since been updated to support Unity-based audio as well, and has been renamed from FMOD-Syntax to Audio-Syntax. Certain Namespaces / classes have been renamed, we need to make sure those are now updated if necessary.", MessageType.Info);
+            
+            EditorGUILayout.Space();
 
-            if (hasDetectedIncorrectUsing)
+            if (hasDetectedOutdatedNamespaceUsage)
             {
                 EditorGUILayout.HelpBox($"The system has detected that the FMOD-Syntax namespace '{FmodSyntaxNamespace}' is being used. This has since been renamed to '{AudioSyntaxNamespace}'.", MessageType.Error);
                 bool shouldFixNamespacesAutomatically = GUILayout.Button("Fix Automatically");
@@ -101,27 +133,70 @@ namespace RoyTheunissen.AudioSyntax
             {
                 HelpBoxAffirmative($"There seem to be no more occurrences of the deprecated {FmodSyntaxNamespace} namespace.");
             }
+            
+            EditorGUILayout.Space();
+            
+            if (hasDetectedOutdatedSystemReferences)
+            {
+                EditorGUILayout.HelpBox($"The system has detected that the deprecated system '{OldSystemName}' is being referenced. This has since been renamed to '{NewGeneralSystemName}'.", MessageType.Error);
+                bool shouldFixNamespacesAutomatically = GUILayout.Button("Fix Automatically");
+                if (shouldFixNamespacesAutomatically)
+                {
+                    bool confirmed = EditorUtility.DisplayDialog(
+                        "Automatically fix deprecated system references",
+                        $"Are you sure you want to automatically replace references to the old system " +
+                        $"'{OldSystemName}' with references to the new system '{NewGeneralSystemName}'?\n\n" +
+                        $"We recommend that you commit your changes to version control first so that you don't lose " +
+                        $"any work.",
+                        "Yes, I have saved my work.", "No");
+                    
+                    if (confirmed)
+                        FixFmodSyntaxSystemReferences();
+                }
+            }
+            else
+            {
+                HelpBoxAffirmative($"There seem to be no more references to the deprecated '{OldSystemName}' system.");
+            }
+            
             EndSettingsBox();
         }
-
-        private void FixFmodSyntaxNamespaces()
+        
+        private void ReplaceInScripts(string oldText, string newText)
         {
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
             {
-                if (IsScriptAllowedToReferenceOldNamespace(monoScripts[i]))
+                if (IsScriptInsideThisPackage(monoScripts[i]))
                     continue;
                 
                 string scriptText = monoScripts[i].text;
-                bool hasIncorrectUsingInFile = scriptText.Contains(FmodSyntaxNamespace);
+                bool hasIncorrectUsingInFile = scriptText.Contains(oldText);
                 if (!hasIncorrectUsingInFile)
                     continue;
 
-                scriptText = scriptText.Replace(FmodSyntaxNamespace, AudioSyntaxNamespace);
+                scriptText = scriptText.Replace(oldText, newText);
                 monoScripts[i].SetText(scriptText);
             }
             
             AssetDatabase.Refresh();
+        }
+
+        private void FixFmodSyntaxNamespaces()
+        {
+            ReplaceInScripts(FmodSyntaxNamespace, AudioSyntaxNamespace);
+        }
+        
+        private void FixFmodSyntaxSystemReferences()
+        {
+            // Point existing calls to event playback (un)registration to the new FMOD-specific system which has a
+            // slightly different name.
+            // TODO: Or should we perhaps keep the old name so that this is not necessary to begin with?
+            // 'FmodAudioSystaxSystem' is more consistent because there is now also 'UnityAudioSyntaxSystem'...
+            ReplaceInScripts($"{OldSystemName}.{RegisterEventPlaybackCallbackReceiverMethod}", $"{NewFmodSystemName}.{RegisterEventPlaybackCallbackReceiverMethod}");
+            ReplaceInScripts($"{OldSystemName}.{UnregisterEventPlaybackCallbackReceiverMethod}", $"{NewFmodSystemName}.{UnregisterEventPlaybackCallbackReceiverMethod}");
+            
+            ReplaceInScripts(OldSystemName, NewGeneralSystemName);
         }
     }
 }

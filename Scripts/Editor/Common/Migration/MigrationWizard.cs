@@ -18,6 +18,8 @@ namespace RoyTheunissen.AudioSyntax
         private int versionMigratingFrom;
         private int versionMigratingTo;
 
+        private bool hasDetectedIssuesThatNeedToBeResolvedFirst;
+
         [MenuItem(OpenMenuPath, false)]
         public static void OpenMigrationWizard()
         {
@@ -37,8 +39,10 @@ namespace RoyTheunissen.AudioSyntax
         {
             versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
             versionMigratingTo = AudioSyntaxSettings.CurrentVersion;
-            
+
+            hasDetectedIssuesThatNeedToBeResolvedFirst = false;
             DetectOutdatedNamespaceUsage();
+            DetectOutdatedSystemReferences();
         }
 
         private void OnEnable()
@@ -48,31 +52,52 @@ namespace RoyTheunissen.AudioSyntax
 
         private void OnGUI()
         {
+            bool requiresMigration = true;
             if (versionMigratingFrom > versionMigratingTo)
             {
                 EditorGUILayout.HelpBox($"Hello time traveler. It was detected that you used a future version of " +
                                         $"{AudioSyntaxMenuPaths.ProjectName}. We can't help you with that yet.", MessageType.Info);
-                return;
+                requiresMigration = false;
             }
-            if (versionMigratingFrom == versionMigratingTo)
+            else if (versionMigratingFrom == versionMigratingTo)
             {
+                requiresMigration = false;
                 EditorGUILayout.HelpBox($"It looks like your version of {AudioSyntaxMenuPaths.ProjectName} is up to date!", MessageType.Info);
-                return;
+            }
+            else
+            {
+                EditorGUILayout.HelpBox($"It was detected that you used an earlier version of " +
+                                        $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes need to be made " +
+                                        $"before your project is in working order again.", MessageType.Info);
             }
             
-            EditorGUILayout.HelpBox($"It was detected that you used an earlier version of " +
-                                       $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes need to be made " +
-                                       $"before your project is in working order again.", MessageType.Info);
+            bool shouldRefresh = GUILayout.Button("Refresh");
+            if (shouldRefresh)
+                Refresh();
+            
+            if (!requiresMigration)
+                return;
+            
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUIStyle.none, GUI.skin.verticalScrollbar);
 
             DrawMigrationFromFmodSyntaxToAudioSyntax();
             
             EditorGUILayout.EndScrollView();
+            
+            using (new EditorGUI.DisabledScope(hasDetectedIssuesThatNeedToBeResolvedFirst))
+            {
+                bool shouldFinalize = GUILayout.Button("Finalize", GUILayout.Height(48));
+                if (shouldFinalize)
+                    FinalizeMigration();
+            }
+        }
 
-            bool shouldFinalize = GUILayout.Button("Finalize", GUILayout.Height(48));
-            if (shouldFinalize)
-                FinalizeMigration();
+        private void Refresh()
+        {
+            Initialize();
         }
 
         private void FinalizeMigration()
