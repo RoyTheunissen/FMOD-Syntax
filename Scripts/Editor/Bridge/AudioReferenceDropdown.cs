@@ -17,14 +17,6 @@ namespace RoyTheunissen.AudioSyntax
         private const string FMODSectionName = "FMOD";
         private const string UnitySectionName = "Unity";
         private const string NoneSelectedGuid = "None";
-        
-        [Flags]
-        public enum SupportedSystems
-        {
-            Unity = 1 << 0,
-            FMOD = 1 << 1,
-            Everything = ~0,
-        }
 
         private readonly SerializedObject serializedObject;
         private readonly SerializedProperty unityAudioConfigProperty;
@@ -100,23 +92,23 @@ namespace RoyTheunissen.AudioSyntax
         protected override AdvancedDropdownItem BuildRoot()
         {
             AudioConfigDropdownItem root = new AudioConfigDropdownItem(
-                this, string.Empty, "Audio Configs", string.Empty, SupportedSystems.Everything);
+                this, string.Empty, "Audio Configs", string.Empty, AudioSyntaxSystems.Everything);
             
-            SupportedSystems supportedSystems = 0;
+            AudioSyntaxSystems supportedSystems = 0;
 #if UNITY_AUDIO_SYNTAX
-            supportedSystems |= SupportedSystems.Unity;
+            supportedSystems |= AudioSyntaxSystems.UnityNativeAudio;
 #endif
 #if FMOD_AUDIO_SYNTAX
-            supportedSystems |= SupportedSystems.FMOD;
+            supportedSystems |= AudioSyntaxSystems.FMOD;
 #endif
             
-            root.AddChildByPath(NoneSelectedGuid, "None", SupportedSystems.Everything);
+            root.AddChildByPath(NoneSelectedGuid, "None", AudioSyntaxSystems.Everything);
             
-            bool multipleAudioSystemsActive = supportedSystems.HasFlag(SupportedSystems.Unity) &&
-                                              supportedSystems.HasFlag(SupportedSystems.FMOD);
+            bool multipleAudioSystemsActive = supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio) &&
+                                              supportedSystems.HasFlag(AudioSyntaxSystems.FMOD);
             
 #if UNITY_AUDIO_SYNTAX
-            if (supportedSystems.HasFlag(SupportedSystems.Unity))
+            if (supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
             {
                 UnityAudioConfigBase[] unityAudioConfigs = GetAllAssetsOfType<UnityAudioConfigBase>();
                 string[] paths = new string[unityAudioConfigs.Length];
@@ -133,13 +125,13 @@ namespace RoyTheunissen.AudioSyntax
 
                 for (int i = 0; i < paths.Length; i++)
                 {
-                    root.AddChildByPath(guids[i], paths[i], SupportedSystems.Unity);
+                    root.AddChildByPath(guids[i], paths[i], AudioSyntaxSystems.UnityNativeAudio);
                 }
             }
 #endif
             
 #if FMOD_AUDIO_SYNTAX
-            if (supportedSystems.HasFlag(SupportedSystems.FMOD))
+            if (supportedSystems.HasFlag(AudioSyntaxSystems.FMOD))
             {
                 EditorEventRef[] parameterlessEvents = EventManager.Events
                     .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix) && e.LocalParameters.Count == 0)
@@ -165,7 +157,7 @@ namespace RoyTheunissen.AudioSyntax
 
                 for (int i = 0; i < paths.Length; i++)
                 {
-                    root.AddChildByPath(guids[i], paths[i], SupportedSystems.FMOD);
+                    root.AddChildByPath(guids[i], paths[i], AudioSyntaxSystems.FMOD);
                 }
             }
 #endif
@@ -184,15 +176,15 @@ namespace RoyTheunissen.AudioSyntax
             // If a property of a specific system was selected, update the mode to that system.
             switch (dropdownItem.System)
             {
-                case SupportedSystems.Unity:
+                case AudioSyntaxSystems.UnityNativeAudio:
                     modeProperty.intValue = (int)AudioReference.Modes.Unity;
                     break;
                 
-                case SupportedSystems.FMOD:
+                case AudioSyntaxSystems.FMOD:
                     modeProperty.intValue = (int)AudioReference.Modes.FMOD;
                     break;
                 
-                case SupportedSystems.Everything:
+                case AudioSyntaxSystems.Everything:
                     // The updated applied to all systems. This happens if you select None. Mode needs no change.
                     break;
                 
@@ -202,7 +194,7 @@ namespace RoyTheunissen.AudioSyntax
             
             // If the item selected is supposed to update the unity property, do so.
             // The GUID then represents the GUID of the UnityAudioConfigBase asset to load.
-            if (dropdownItem.System.HasFlag(SupportedSystems.Unity) && !string.Equals(
+            if (dropdownItem.System.HasFlag(AudioSyntaxSystems.UnityNativeAudio) && !string.Equals(
                     dropdownItem.Guid, NoneSelectedGuid, StringComparison.OrdinalIgnoreCase))
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(dropdownItem.Guid);
@@ -216,7 +208,7 @@ namespace RoyTheunissen.AudioSyntax
             
             // If the item selected is supposed to update the FMOD property, do so.
             // The GUID then represents the FMOD event GUID.
-            if (dropdownItem.System.HasFlag(SupportedSystems.FMOD) && !string.Equals(
+            if (dropdownItem.System.HasFlag(AudioSyntaxSystems.FMOD) && !string.Equals(
                     dropdownItem.Guid, NoneSelectedGuid, StringComparison.OrdinalIgnoreCase))
             {
                 fmodAudioConfigProperty.stringValue = dropdownItem.Guid;
@@ -241,12 +233,12 @@ namespace RoyTheunissen.AudioSyntax
         private string guid;
         public string Guid => guid;
 
-        private readonly AudioReferenceDropdown.SupportedSystems system;
-        public AudioReferenceDropdown.SupportedSystems System => system;
+        private readonly AudioSyntaxSystems system;
+        public AudioSyntaxSystems System => system;
 
         public AudioConfigDropdownItem(
             AudioReferenceDropdown dropdown, string guid, string name, string path,
-            AudioReferenceDropdown.SupportedSystems system) : base(name)
+            AudioSyntaxSystems system) : base(name)
         {
             this.dropdown = dropdown;
             this.guid = guid;
@@ -255,7 +247,7 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         private AudioConfigDropdownItem AddChild(
-            string guid, string name, AudioReferenceDropdown.SupportedSystems system)
+            string guid, string name, AudioSyntaxSystems system)
         {
             string newPath = string.IsNullOrEmpty(path) ? name : path + Separator + name;
 
@@ -267,7 +259,7 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         private AudioConfigDropdownItem GetOrCreateChild(
-            string guid, string name, AudioReferenceDropdown.SupportedSystems system)
+            string guid, string name, AudioSyntaxSystems system)
         {
             // Find a child with the specified name.
             AudioConfigDropdownItem existingChild = GetChild(name);
@@ -291,7 +283,7 @@ namespace RoyTheunissen.AudioSyntax
             return default;
         }
 
-        public void AddChildByPath(string guid, string relativePath, AudioReferenceDropdown.SupportedSystems system)
+        public void AddChildByPath(string guid, string relativePath, AudioSyntaxSystems system)
         {
             // Leaf node, add the event there.
             if (!relativePath.Contains(Separator))
