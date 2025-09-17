@@ -39,7 +39,7 @@ namespace RoyTheunissen.AudioSyntax
             {
                 if (!didCacheInstance)
                 {
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
                     string[] guids = AssetDatabase.FindAssets($"t:{nameof(UnityAudioSyntaxSettings)}");
                     if (guids.Length > 0)
                     {
