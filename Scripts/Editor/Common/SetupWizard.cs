@@ -13,13 +13,10 @@ namespace RoyTheunissen.AudioSyntax
     /// Window to show to users when they haven't set up the FMOD Syntax system yet to let them conveniently
     /// initialize it with appropriate settings.
     /// </summary>
-    public class SetupWizard : EditorWindow
+    public class SetupWizard : WizardBase
     {
         private const float Width = 500;
-        
-        private static readonly Color WarningColor = Color.Lerp(Color.yellow, Color.red, 0.0f);
-        private static readonly Color SuccessColor = Color.green;
-        
+
         private const string ResourcesFolderSuffix = "Resources";
         
         private const string FmodScriptingDefineSymbol = "FMOD_AUDIO_SYNTAX";
@@ -36,15 +33,6 @@ namespace RoyTheunissen.AudioSyntax
         [NonSerialized] private string detectedUnityAudioSyntaxConfigPath;
         
         private AudioSyntaxSystems activeSystems;
-
-        [NonSerialized] private Color preValidityCheckContentColor;
-        [NonSerialized] private Color preValidityCheckBackgroundColor;
-        
-        [NonSerialized] private Color preWarningContentColor;
-        [NonSerialized] private Color preWarningBackgroundColor;
-        
-        [NonSerialized] private Color preSuccessContentColor;
-        [NonSerialized] private Color preSuccessBackgroundColor;
         
         [NonSerialized] private GUIContent cachedFolderIcon;
         [NonSerialized] private bool didCacheFolderIcon;
@@ -249,54 +237,6 @@ namespace RoyTheunissen.AudioSyntax
             return FmodSyntaxUtilities.Filter(@namespace, false);
         }
 
-        private void BeginValidityChecks(bool isValid)
-        {
-            preValidityCheckContentColor = GUI.contentColor;
-            preValidityCheckBackgroundColor = GUI.backgroundColor;
-            
-            if (isValid)
-                return;
-            
-            GUI.contentColor = Color.Lerp(Color.white, Color.red, 0.5f);
-            GUI.backgroundColor = Color.red;
-        }
-        
-        private void EndValidityChecks()
-        {
-            GUI.contentColor = preValidityCheckContentColor;
-            GUI.backgroundColor = preValidityCheckBackgroundColor;
-        }
-        
-        private void BeginWarning()
-        {
-            preWarningContentColor = GUI.contentColor;
-            preWarningBackgroundColor = GUI.backgroundColor;
-            
-            GUI.contentColor = WarningColor;
-            GUI.backgroundColor = WarningColor;
-        }
-        
-        private void EndWarning()
-        {
-            GUI.contentColor = preWarningContentColor;
-            GUI.backgroundColor = preWarningBackgroundColor;
-        }
-        
-        private void BeginSuccess()
-        {
-            preSuccessContentColor = GUI.contentColor;
-            preSuccessBackgroundColor = GUI.backgroundColor;
-            
-            GUI.contentColor = SuccessColor;
-            GUI.backgroundColor = SuccessColor;
-        }
-        
-        private void EndSuccess()
-        {
-            GUI.contentColor = preSuccessContentColor;
-            GUI.backgroundColor = preSuccessBackgroundColor;
-        }
-
         private void OnGUI()
         {
             EditorGUILayout.BeginHorizontal();
@@ -331,22 +271,6 @@ namespace RoyTheunissen.AudioSyntax
             EditorGUILayout.Space();
             
             EditorGUILayout.EndHorizontal();
-        }
-
-        private void BeginSettingsBox(string title)
-        {
-            EditorGUILayout.BeginVertical("Box");
-            EditorGUILayout.LabelField(title, EditorStyles.boldLabel);
-            
-            EditorGUILayout.Space();
-        }
-        
-        private void EndSettingsBox()
-        {
-            EditorGUILayout.Space();
-            EditorGUILayout.EndVertical();
-            
-            EditorGUILayout.Space();
         }
 
         private void DrawAudioSystemSelection()
