@@ -29,7 +29,7 @@ namespace RoyTheunissen.AudioSyntax
         [NonSerialized] private UnityAudioSyntaxSettings detectedUnityAudioSyntaxConfig;
         [NonSerialized] private string detectedUnityAudioSyntaxConfigPath;
         
-        private AudioSyntaxSystems supportedSystems;
+        private AudioSyntaxSystems activeSystems;
 
         [NonSerialized] private Color preValidityCheckContentColor;
         [NonSerialized] private Color preValidityCheckBackgroundColor;
@@ -74,10 +74,10 @@ namespace RoyTheunissen.AudioSyntax
         {
             get
             {
-                if (supportedSystems == 0)
+                if (activeSystems == 0)
                     return false;
 
-                if (supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio)
+                if (activeSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio)
                     && (audioSourcePooledPrefab == null || IsUnitySettingsFolderASubfolderOfResources()))
                 {
                     return false;
@@ -115,7 +115,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             didDetectFMOD = AssetDatabase.AssetPathExists("Assets/Plugins/FMOD");
             if (didDetectFMOD)
-                supportedSystems |= AudioSyntaxSystems.FMOD;
+                activeSystems |= AudioSyntaxSystems.FMOD;
 
             detectedAudioSyntaxConfig = TryFindConfig<AudioSyntaxSettings>(
                 out didDetectAudioSyntaxConfig, out detectedAudioSyntaxConfigPath);
@@ -123,7 +123,7 @@ namespace RoyTheunissen.AudioSyntax
             detectedUnityAudioSyntaxConfig = TryFindConfig<UnityAudioSyntaxSettings>(
                 out didDetectUnityAudioSyntaxConfig, out detectedUnityAudioSyntaxConfigPath);
             if (didDetectUnityAudioSyntaxConfig)
-                supportedSystems |= AudioSyntaxSystems.UnityNativeAudio;
+                activeSystems |= AudioSyntaxSystems.UnityNativeAudio;
 
             // If no audio source pooled prefab is specified, select the one included in the package.
             if (audioSourcePooledPrefab == null)
@@ -265,7 +265,7 @@ namespace RoyTheunissen.AudioSyntax
 
             DrawGeneralSettings();
             
-            if (supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
+            if (activeSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
                 DrawUnityAudioSpecificSettings();
 
             using (new EditorGUI.DisabledScope(!CanInitialize))
@@ -307,11 +307,11 @@ namespace RoyTheunissen.AudioSyntax
             EditorGUILayout.BeginHorizontal();
             const float systemsWidth = 150;
             EditorGUILayout.LabelField($"Which audio system(s) do you intend to use?", GUILayout.Width(Width - systemsWidth - 35));
-            BeginValidityChecks(supportedSystems != 0);
-            supportedSystems = (AudioSyntaxSystems)EditorGUILayout.EnumFlagsField(supportedSystems, GUILayout.Width(systemsWidth));
+            BeginValidityChecks(activeSystems != 0);
+            activeSystems = (AudioSyntaxSystems)EditorGUILayout.EnumFlagsField(activeSystems, GUILayout.Width(systemsWidth));
             EndValidityChecks();
             EditorGUILayout.EndHorizontal();
-            if (!didDetectFMOD && supportedSystems.HasFlag(AudioSyntaxSystems.FMOD))
+            if (!didDetectFMOD && activeSystems.HasFlag(AudioSyntaxSystems.FMOD))
             {
                 BeginWarning();
                 EditorGUILayout.LabelField($"Are you sure you wish to use FMOD? We did not detect it in your project.");
@@ -487,10 +487,28 @@ namespace RoyTheunissen.AudioSyntax
             if (!didDetectAudioSyntaxConfig)
                 CreateAudioSyntaxSettingsFile();
             
-            if (!didDetectUnityAudioSyntaxConfig && supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
+            if (!didDetectUnityAudioSyntaxConfig && activeSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
                 CreateUnityAudioSyntaxSettingsFile();
 
+            UpdateConfigWithSupportedAudioSystems();
+
             Close();
+        }
+
+        private void UpdateConfigWithSupportedAudioSystems()
+        {
+            AudioSyntaxSettings config = AudioSyntaxSettings.Instance;
+            
+            if (config.ActiveSystems == activeSystems)
+                return;
+
+            using (SerializedObject so = new(config))
+            {
+                so.Update();
+                SerializedProperty activeSystemsProperty = so.FindProperty("activeSystems");
+                activeSystemsProperty.intValue = (int)activeSystems;
+                so.ApplyModifiedPropertiesWithoutUndo();
+            }
         }
 
         private void CreateAudioSyntaxSettingsFile()
@@ -499,7 +517,7 @@ namespace RoyTheunissen.AudioSyntax
                 settingsFolderPath, nameof(AudioSyntaxSettings));
             
             settings.InitializeFromWizard(
-                generatedScriptsFolderPath, namespaceForGeneratedCode, shouldGenerateAssemblyDefinition);
+                activeSystems, generatedScriptsFolderPath, namespaceForGeneratedCode, shouldGenerateAssemblyDefinition);
             
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();

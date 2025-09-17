@@ -22,7 +22,10 @@ namespace RoyTheunissen.AudioSyntax
             FlatWithPathIncludedInName = 1,
             SubclassesPerFolder = 2,
         }
-        
+
+        [SerializeField] private AudioSyntaxSystems activeSystems;
+        public AudioSyntaxSystems ActiveSystems => activeSystems;
+
         [SerializeField] private string generatedScriptsFolderPath;
         public string GeneratedScriptsFolderPath => generatedScriptsFolderPath;
 
@@ -76,9 +79,11 @@ namespace RoyTheunissen.AudioSyntax
         public delegate void RequestCodeRegenerationHandler();
         public static event RequestCodeRegenerationHandler RequestCodeRegenerationEvent;
 
-        public void InitializeFromWizard(
+        public void InitializeFromWizard(AudioSyntaxSystems activeSystems,
             string generatedScriptsFolderPath, string namespaceForGeneratedCode, bool shouldGenerateAssemblyDefinition)
         {
+            this.activeSystems = activeSystems;
+            
             // Sanitize the generated scripts folder path.
             this.generatedScriptsFolderPath = generatedScriptsFolderPath.Replace(
                 Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
