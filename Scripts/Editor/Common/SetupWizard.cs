@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Linq;
+using UnityEditor.Build;
 using UnityEngine.Audio;
 
 namespace RoyTheunissen.AudioSyntax
@@ -19,6 +21,9 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly Color SuccessColor = Color.green;
         
         private const string ResourcesFolderSuffix = "Resources";
+        
+        private const string FmodScriptingDefineSymbol = "FMOD_AUDIO_SYNTAX";
+        private const string UnityScriptingDefineSymbol = "UNITY_AUDIO_SYNTAX";
 
         [NonSerialized] private bool didDetectFMOD;
         [NonSerialized] private bool didDetectAudioSyntaxConfig;
@@ -84,6 +89,46 @@ namespace RoyTheunissen.AudioSyntax
                 }
 
                 return true;
+            }
+        }
+        
+        [NonSerialized] private static NamedBuildTarget[] cachedAllNamedBuildTargets;
+        [NonSerialized] private static bool didCacheAllNamedBuildTargets;
+        private static NamedBuildTarget[] AllNamedBuildTargets
+        {
+            get
+            {
+                if (!didCacheAllNamedBuildTargets)
+                {
+                    didCacheAllNamedBuildTargets = true;
+                    
+                    List<NamedBuildTarget> namedBuildTargets = new();
+
+                    foreach (BuildTargetGroup group in Enum.GetValues(typeof(BuildTargetGroup)))
+                    {
+                        if (group == BuildTargetGroup.Unknown)
+                            continue;
+
+                        NamedBuildTarget namedBuildTarget;
+                        try
+                        {
+                            namedBuildTarget = NamedBuildTarget.FromBuildTargetGroup(group);
+                        }
+                        catch (ArgumentException)
+                        {
+                            continue;
+                        }
+                        
+                        if (namedBuildTarget == NamedBuildTarget.Unknown)
+                            continue;
+
+                        if (!namedBuildTargets.Contains(namedBuildTarget))
+                            namedBuildTargets.Add(namedBuildTarget);
+                    }
+
+                    cachedAllNamedBuildTargets = namedBuildTargets.ToArray();
+                }
+                return cachedAllNamedBuildTargets;
             }
         }
 
@@ -491,6 +536,8 @@ namespace RoyTheunissen.AudioSyntax
                 CreateUnityAudioSyntaxSettingsFile();
 
             UpdateConfigWithSupportedAudioSystems();
+            
+            EnsureThatScriptingDefineSymbolsAreDefined(activeSystems);
 
             Close();
         }
@@ -594,6 +641,79 @@ namespace RoyTheunissen.AudioSyntax
             EditorGUILayout.EndHorizontal();
             
             return currentPath;
+        }
+        
+        private static bool IsScriptingDefineSymbolDefined(string symbol)
+        {
+            NamedBuildTarget[] buildTargets = AllNamedBuildTargets;
+            for (int i = 0; i < buildTargets.Length; i++)
+            {
+                PlayerSettings.GetScriptingDefineSymbols(buildTargets[i], out string[] symbols);
+                if (!symbols.Contains(symbol))
+                    return false;
+            }
+
+            return true;
+        }
+        
+        private static bool IsScriptingDefineSymbolCorrect(string symbol, bool shouldExist)
+        {
+            return IsScriptingDefineSymbolDefined(symbol) == shouldExist;
+        }
+
+        public static bool AreScriptingDefineSymbolsCorrect(AudioSyntaxSystems systems)
+        {
+            bool isFmodCorrect = IsScriptingDefineSymbolCorrect(
+                FmodScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.FMOD));
+            bool isUnityCorrect = IsScriptingDefineSymbolCorrect(
+                UnityScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.UnityNativeAudio));
+            return isFmodCorrect || isUnityCorrect;
+        }
+
+        private static bool AddScriptingDefineSymbol(string symbol)
+        {
+            NamedBuildTarget[] buildTargets = AllNamedBuildTargets;
+            for (int i = 0; i < buildTargets.Length; i++)
+            {
+                PlayerSettings.GetScriptingDefineSymbols(buildTargets[i], out string[] symbols);
+                if (!symbols.Contains(symbol))
+                {
+                    symbols = symbols.Append(symbol).ToArray();
+                    PlayerSettings.SetScriptingDefineSymbols(buildTargets[i], symbols);
+                }
+            }
+
+            return true;
+        }
+
+        private static bool RemoveScriptingDefineSymbol(string symbol)
+        {
+            NamedBuildTarget[] buildTargets = AllNamedBuildTargets;
+            for (int i = 0; i < buildTargets.Length; i++)
+            {
+                PlayerSettings.GetScriptingDefineSymbols(buildTargets[i], out string[] symbols);
+                if (symbols.Contains(symbol))
+                {
+                    symbols = symbols.RemoveValue(symbol);
+                    PlayerSettings.SetScriptingDefineSymbols(buildTargets[i], symbols);
+                }
+            }
+
+            return true;
+        }
+
+        private static void SetScriptingDefineSymbol(string symbol, bool shouldBeSet)
+        {
+            if (shouldBeSet)
+                AddScriptingDefineSymbol(symbol);
+            else
+                RemoveScriptingDefineSymbol(symbol);
+        }
+        
+        public static void EnsureThatScriptingDefineSymbolsAreDefined(AudioSyntaxSystems systems)
+        {
+            SetScriptingDefineSymbol(FmodScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.FMOD));
+            SetScriptingDefineSymbol(UnityScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.UnityNativeAudio));
         }
     }
 }

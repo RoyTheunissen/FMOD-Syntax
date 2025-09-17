@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Audio;
 using UnityEngine.Serialization;
-using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -75,7 +73,6 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        // TODO: FMOD Code Generator needs to subscribe to this and regenerate code when requested.
         public delegate void RequestCodeRegenerationHandler();
         public static event RequestCodeRegenerationHandler RequestCodeRegenerationEvent;
 
