@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Linq;
 using UnityEngine.Audio;
 
 namespace RoyTheunissen.AudioSyntax
@@ -139,6 +140,53 @@ namespace RoyTheunissen.AudioSyntax
                 audioSourcePooledPrefab =
                     AssetDatabase.LoadAssetAtPath<AudioSource>(audioSourcePooledPrefabDefaultPath);
             }
+
+            unityAudioConfigRootFolder = GetInferredUnityAudioConfigBasePathFromProjectStructure();
+        }
+        
+        private static string GetInferredUnityAudioConfigBasePathFromProjectStructure()
+        {
+            // No base folder was defined. Let's TRY and have some intelligent filtering.
+
+            string currentPath = Application.dataPath.ToUnityPath();
+
+            // Check if there's a subdirectory that starts with a _ or a [. This is something Unity projects often have
+            // in order to ensure that the main project files are sorted to be at the top. If we see that, it's
+            // reasonable to assume that it's the main project folder.
+            string[] rootSubDirectories = Directory.GetDirectories(currentPath);
+            string directoryWithSymbol = rootSubDirectories.FirstOrDefault(sd =>
+            {
+                string folderName = Path.GetFileName(sd.TrimEnd(Path.AltDirectorySeparatorChar));
+                return folderName.StartsWith("_") || folderName.StartsWith("[");
+            });
+            if (!string.IsNullOrEmpty(directoryWithSymbol))
+                currentPath = directoryWithSymbol;
+
+            void EnterSubdirectoryIfExists(params string[] names)
+            {
+                string[] subDirectories = Directory.GetDirectories(currentPath);
+                for (int i = 0; i < subDirectories.Length; i++)
+                {
+                    string folderName = Path.GetFileName(subDirectories[i].TrimEnd(Path.AltDirectorySeparatorChar));
+                    if (string.Equals(folderName, names[i], StringComparison.OrdinalIgnoreCase))
+                    {
+                        currentPath = subDirectories[i];
+                        return;
+                    }
+                }
+            }
+
+            // If we're in the main project folder, then check if we're in some kind of Configs folder.
+            // At least, I know that that's a common structure to use.
+            EnterSubdirectoryIfExists("Configs", "Configuration", "Configurations", "Data", "Database");
+            
+            // Also check for an Audio subfolder, because you're likely to have other kinds of configs too.
+            EnterSubdirectoryIfExists("Audio", "AudioSyntax", "Audio Syntax", "UnityAudioSyntax", "Unity Audio Syntax");
+
+            string absolutePath = currentPath;
+            string assetsFolderPath = Application.dataPath.RemoveSuffix("/");
+            string relativePath = Path.GetRelativePath(assetsFolderPath, absolutePath).ToUnityPath();
+            return relativePath;
         }
 
         private T TryFindConfig<T>(out bool didFindConfig, out string configPath)
