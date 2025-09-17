@@ -78,7 +78,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             string dropdownPath = assetPath.RemoveSuffix(".asset");
 
-            string basePath = AudioSyntaxSettings.Instance.UnityAudioConfigRootFolder.Path.ToUnityPath();
+            string basePath = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolder.Path.ToUnityPath();
             if (!string.IsNullOrEmpty(basePath))
             {
                 if (!basePath.EndsWith("/"))

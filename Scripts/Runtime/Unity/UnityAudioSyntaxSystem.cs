@@ -71,8 +71,8 @@ namespace RoyTheunissen.AudioSyntax
             
             onEventPlaybackCallbackReceivers.Clear();
 
-            this.audioSourcePooledPrefab = AudioSyntaxSettings.Instance.AudioSourcePooledPrefab;
-            this.defaultMixerGroup = AudioSyntaxSettings.Instance.DefaultMixerGroup;
+            this.audioSourcePooledPrefab = UnityAudioSyntaxSettings.Instance.AudioSourcePooledPrefab;
+            this.defaultMixerGroup = UnityAudioSyntaxSettings.Instance.DefaultMixerGroup;
             
             audioSourcesPool = new Pool<AudioSource>(() =>
             {
