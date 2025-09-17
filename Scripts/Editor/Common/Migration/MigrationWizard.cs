@@ -37,18 +37,36 @@ namespace RoyTheunissen.AudioSyntax
         {
             versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
             versionMigratingTo = AudioSyntaxSettings.CurrentVersion;
+            
+            DetectOutdatedNamespaceUsage();
+        }
+
+        private void OnEnable()
+        {
+            Initialize();
         }
 
         private void OnGUI()
         {
+            if (versionMigratingFrom > versionMigratingTo)
+            {
+                EditorGUILayout.HelpBox($"Hello time traveler. It was detected that you used a future version of " +
+                                        $"{AudioSyntaxMenuPaths.ProjectName}. We can't help you with that yet.", MessageType.Info);
+                return;
+            }
+            if (versionMigratingFrom == versionMigratingTo)
+            {
+                EditorGUILayout.HelpBox($"It looks like your version of {AudioSyntaxMenuPaths.ProjectName} is up to date!", MessageType.Info);
+                return;
+            }
+            
             EditorGUILayout.HelpBox($"It was detected that you used an earlier version of " +
                                        $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes need to be made " +
                                        $"before your project is in working order again.", MessageType.Info);
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUIStyle.none, GUI.skin.verticalScrollbar);
 
-            if (versionMigratingFrom < 1)
-                DrawMigrationFromFmodSyntaxToAudioSyntax();
+            DrawMigrationFromFmodSyntaxToAudioSyntax();
             
             EditorGUILayout.EndScrollView();
 
