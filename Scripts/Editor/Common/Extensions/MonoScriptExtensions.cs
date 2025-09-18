@@ -17,7 +17,6 @@ namespace RoyTheunissen.AudioSyntax
                 return;
             }
             
-            Debug.Log($"Intending to set text on script '{absolutePath}'");
             File.WriteAllText(absolutePath, text);
         }
     }
