@@ -266,10 +266,10 @@ namespace RoyTheunissen.AudioSyntax
 
             using (new EditorGUI.DisabledScope(!CanInitialize))
             {
-                string buttonText = isMigrationProcedureRequired ? "Continue" : "Initialize";
-                bool shouldInitialize = GUILayout.Button(buttonText, GUILayout.Height(40));
-                if (shouldInitialize)
-                    InitializeAudioSyntaxSystem();
+                string buttonText = isMigrationProcedureRequired ? "Continue" : "Finalize";
+                bool shouldFinalize = GUILayout.Button(buttonText, GUILayout.Height(40));
+                if (shouldFinalize)
+                    FinalizeSetup();
             }
             
             EditorGUILayout.Space();
@@ -460,7 +460,7 @@ namespace RoyTheunissen.AudioSyntax
             return path;
         }
 
-        private void InitializeAudioSyntaxSystem()
+        private void FinalizeSetup()
         {
             if (!didDetectAudioSyntaxConfig)
                 CreateAudioSyntaxSettingsFile();
