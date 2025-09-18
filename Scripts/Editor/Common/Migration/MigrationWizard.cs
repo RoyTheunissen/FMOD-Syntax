@@ -1,3 +1,5 @@
+// #define ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
+
 using UnityEditor;
 using UnityEngine;
 
@@ -32,7 +34,9 @@ namespace RoyTheunissen.AudioSyntax
         
         private int refreshProgressId;
 
+#if ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
         [MenuItem(OpenMenuPath, false, Priority)]
+#endif // ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
         public static void OpenMigrationWizard()
         {
             MigrationWizard migrationWizard = GetWindow<MigrationWizard>(
@@ -41,11 +45,13 @@ namespace RoyTheunissen.AudioSyntax
             migrationWizard.Refresh();
         }
         
+#if ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
         [MenuItem(OpenMenuPath, true, Priority)]
         private static bool OpenMigrationWizardValidation()
         {
             return AudioSyntaxSettings.Instance != null;
         }
+#endif // ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
 
         private void OnEnable()
         {
