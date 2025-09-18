@@ -414,10 +414,7 @@ namespace RoyTheunissen.AudioSyntax
                     "Specifies which folder will contain the configs for all of your audio events. " +
                     "This is used to infer a path from the config.\n\n" +
                     "For example: 'Assets/_ProjectName/Configs/Audio/Player/Jump' will then be shortened to " +
-                    "the more appropriate 'Player/Jump'.\n\n" +
-                    "If you leave this empty, it will use its own best judgement " +
-                    "to try and leave out paths that seem irrelevant. This is not guaranteed to work, " +
-                    "so it's better if you specify it explicitly.");
+                    "the more appropriate 'Player/Jump'.");
                 EditorGUILayout.LabelField(unityAudioConfigRootFolder.GetAbsolutePath(), EditorStyles.miniLabel);
             }
             
