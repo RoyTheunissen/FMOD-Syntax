@@ -11,6 +11,9 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public partial class MigrationWizard
     {
+        private const string FmodSyntaxToAudioSyntaxMigrationDocumentationURL =
+            "https://github.com/RoyTheunissen/FMOD-Syntax?tab=readme-ov-file#migration-to-audio-syntax";
+        
         private const string FmodSyntaxNamespace = "RoyTheunissen.FMODSyntax";
         private const string AudioSyntaxNamespace = "RoyTheunissen.AudioSyntax";
         
@@ -86,9 +89,13 @@ namespace RoyTheunissen.AudioSyntax
             BeginSettingsBox("FMOD-Syntax to Audio-Syntax");
             
             EditorGUILayout.HelpBox("The system has since been updated to support Unity-based audio as well, and has " +
-                                    "been renamed from FMOD-Syntax to Audio-Syntax. Certain Namespaces / classes " +
+                                    "been renamed from FMOD-Syntax to Audio-Syntax. Certain namespaces / classes " +
                                     "have been renamed, we need to make sure those are now updated if necessary.",
                 MessageType.Info);
+            
+            bool didClickDocumentation = EditorGUILayout.LinkButton("Documentation");
+            if (didClickDocumentation)
+                Application.OpenURL(FmodSyntaxToAudioSyntaxMigrationDocumentationURL);
             
             EditorGUILayout.Space();
 
