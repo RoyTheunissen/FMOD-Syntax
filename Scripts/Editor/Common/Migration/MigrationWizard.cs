@@ -9,6 +9,8 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public partial class MigrationWizard : WizardBase
     {
+        private const int Priority = 1;
+        
         private const string OpenMenuPath = AudioSyntaxMenuPaths.Root + "Open Migration Wizard";
         
         private const float Width = 500;
@@ -20,7 +22,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private bool hasDetectedIssuesThatNeedToBeResolvedFirst;
 
-        [MenuItem(OpenMenuPath, false)]
+        [MenuItem(OpenMenuPath, false, Priority)]
         public static void OpenMigrationWizard()
         {
             MigrationWizard migrationWizard = GetWindow<MigrationWizard>(
@@ -29,7 +31,7 @@ namespace RoyTheunissen.AudioSyntax
             migrationWizard.Initialize();
         }
         
-        [MenuItem(OpenMenuPath, true)]
+        [MenuItem(OpenMenuPath, true, Priority)]
         private static bool OpenMigrationWizardValidation()
         {
             return AudioSyntaxSettings.Instance != null;

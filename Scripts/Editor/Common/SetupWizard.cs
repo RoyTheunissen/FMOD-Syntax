@@ -15,6 +15,8 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public class SetupWizard : WizardBase
     {
+        private const int Priority = 0;
+        
         private const float Width = 500;
 
         private const string ResourcesFolderSuffix = "Resources";
@@ -136,7 +138,7 @@ namespace RoyTheunissen.AudioSyntax
             };
         }
 
-        [MenuItem(AudioSyntaxMenuPaths.Root + "Open Setup Wizard")]
+        [MenuItem(AudioSyntaxMenuPaths.Root + "Open Setup Wizard", false, Priority)]
         public static void OpenSetupWizard()
         {
             SetupWizard setupWizard = GetWindow<SetupWizard>(true, AudioSyntaxMenuPaths.ProjectName + " Setup Wizard");
