@@ -162,11 +162,13 @@ namespace RoyTheunissen.AudioSyntax
         private void FixFmodSyntaxNamespaces()
         {
             ReplaceInScripts(FmodSyntaxNamespace, AudioSyntaxNamespace);
+            Refresh();
         }
         
         private void FixOutdatedSystemReferences()
         {
             ReplaceInScripts(outdatedSystemReferenceReplacements);
+            Refresh();
         }
     }
 }
