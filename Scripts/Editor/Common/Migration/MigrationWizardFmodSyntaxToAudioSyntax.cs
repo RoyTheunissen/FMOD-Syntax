@@ -35,6 +35,22 @@ namespace RoyTheunissen.AudioSyntax
             { $"{FmodSyntaxSystemName}.{StopAllActiveEventPlaybacksMethod}",
                 $"{GeneralSystemName}.{StopAllActiveEventPlaybacksMethod}" },
         };
+        
+        [NonSerialized] private string cachedOutdatedSystemReferencesDisplayText;
+        [NonSerialized] private bool didCacheOutdatedSystemReferencesDisplayText;
+        private string OutdatedSystemReferencesDisplayText
+        {
+            get
+            {
+                if (!didCacheOutdatedSystemReferencesDisplayText)
+                {
+                    didCacheOutdatedSystemReferencesDisplayText = true;
+                    cachedOutdatedSystemReferencesDisplayText =
+                        GetDisplayTextForReplacements(outdatedSystemReferenceReplacements);
+                }
+                return cachedOutdatedSystemReferencesDisplayText;
+            }
+        }
 
         private void DetectOutdatedNamespaceUsage()
         {
@@ -109,7 +125,8 @@ namespace RoyTheunissen.AudioSyntax
                                         $"been replaced by a general system '{GeneralSystemName}' which in turn " +
                                         $"updates both '{FmodSyntaxSystemName}' and '{UnityAudioSystemName}'. " +
                                         $"The '{CullPlaybacksMethod}' method has also been renamed " +
-                                        $"to '{UpdateMethod}' because it now does more than just culling playbacks.",
+                                        $"to '{UpdateMethod}' because it now does more than just culling " +
+                                        $"playbacks.\n\n" + OutdatedSystemReferencesDisplayText,
                     MessageType.Error);
                 
                 bool shouldFixSystemReferencesAutomatically = GUILayout.Button("Fix Automatically");

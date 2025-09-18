@@ -97,5 +97,23 @@ namespace RoyTheunissen.AudioSyntax
 
             AssetDatabase.Refresh();
         }
+        
+        private string GetDisplayTextForReplacements(Dictionary<string, string> replacements)
+        {
+            string text = string.Empty;
+            int count = replacements.Count;
+            int index = 0;
+            foreach (KeyValuePair<string,string> oldTextNewTextPair in replacements)
+            {
+                text += oldTextNewTextPair.Key + " \u2192 " + oldTextNewTextPair.Value;
+
+                if (index < count - 1)
+                    text += "\n";
+                
+                index++;
+            }
+
+            return text;
+        }
     }
 }
