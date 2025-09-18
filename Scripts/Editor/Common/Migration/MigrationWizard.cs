@@ -148,7 +148,7 @@ namespace RoyTheunissen.AudioSyntax
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
             
-            Refresh();
+            Close();
         }
     }
 }
