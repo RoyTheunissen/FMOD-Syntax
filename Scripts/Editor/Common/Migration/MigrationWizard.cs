@@ -28,6 +28,7 @@ namespace RoyTheunissen.AudioSyntax
         private int versionMigratingTo;
 
         private bool hasDetectedIssuesThatNeedToBeResolvedFirst;
+        private bool hasDetectedIssuesThatShouldBeResolvedFirst;
         
         private int refreshProgressId;
 
@@ -60,6 +61,7 @@ namespace RoyTheunissen.AudioSyntax
             versionMigratingTo = AudioSyntaxSettings.CurrentVersion;
 
             hasDetectedIssuesThatNeedToBeResolvedFirst = false;
+            hasDetectedIssuesThatShouldBeResolvedFirst = false;
 
             Progress.Report(refreshProgressId, 1, refreshSteps);
             
@@ -112,6 +114,11 @@ namespace RoyTheunissen.AudioSyntax
             
             EditorGUILayout.EndScrollView();
             
+            if (hasDetectedIssuesThatNeedToBeResolvedFirst)
+                EditorGUILayout.HelpBox("Issues were detected that need to be resolved first.", MessageType.Error);
+            else if (hasDetectedIssuesThatShouldBeResolvedFirst)
+                EditorGUILayout.HelpBox("Issues were detected that you should consider resolving first.", MessageType.Warning);
+            
             using (new EditorGUI.DisabledScope(hasDetectedIssuesThatNeedToBeResolvedFirst))
             {
                 bool shouldFinalize = GUILayout.Button("Finalize", GUILayout.Height(48));
@@ -123,6 +130,11 @@ namespace RoyTheunissen.AudioSyntax
         private void ReportIssueThatNeedsToBeResolvedFirst()
         {
             hasDetectedIssuesThatNeedToBeResolvedFirst = true;
+        }
+        
+        private void ReportIssueThatShouldBeResolvedFirst()
+        {
+            hasDetectedIssuesThatShouldBeResolvedFirst = true;
         }
 
         private void FinalizeMigration()

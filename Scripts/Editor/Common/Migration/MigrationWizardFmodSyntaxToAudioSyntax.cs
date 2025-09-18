@@ -78,7 +78,7 @@ namespace RoyTheunissen.AudioSyntax
             hasDetectedOutdatedSystemReferences = AreReplacementsNecessary(outdatedSystemReferenceReplacements);
             
             if (hasDetectedOutdatedSystemReferences)
-                ReportIssueThatNeedsToBeResolvedFirst();
+                ReportIssueThatShouldBeResolvedFirst();
         }
         
         private void DrawMigrationFromFmodSyntaxToAudioSyntax()
@@ -134,7 +134,7 @@ namespace RoyTheunissen.AudioSyntax
                                         $"The '{CullPlaybacksMethod}' method has also been renamed " +
                                         $"to '{UpdateMethod}' because it now does more than just culling " +
                                         $"playbacks.\n\n" + OutdatedSystemReferencesDisplayText,
-                    MessageType.Error);
+                    MessageType.Warning);
                 
                 bool shouldFixSystemReferencesAutomatically = GUILayout.Button("Fix Automatically");
                 if (shouldFixSystemReferencesAutomatically)
