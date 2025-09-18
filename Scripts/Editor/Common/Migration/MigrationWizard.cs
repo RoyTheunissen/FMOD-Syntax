@@ -9,6 +9,10 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public partial class MigrationWizard : WizardBase
     {
+        public static readonly string MigrationNecessaryText = $"It was detected that you used an earlier version of " +
+                                                     $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes " +
+                                                     $"need to be made before your project is in working order again.";
+        
         private const int Priority = 1;
         
         private const string OpenMenuPath = AudioSyntaxMenuPaths.Root + "Open Migration Wizard";
@@ -68,9 +72,7 @@ namespace RoyTheunissen.AudioSyntax
             }
             else
             {
-                EditorGUILayout.HelpBox($"It was detected that you used an earlier version of " +
-                                        $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes need to be made " +
-                                        $"before your project is in working order again.", MessageType.Info);
+                EditorGUILayout.HelpBox(MigrationNecessaryText, MessageType.Info);
             }
             
             bool shouldRefresh = GUILayout.Button("Refresh");

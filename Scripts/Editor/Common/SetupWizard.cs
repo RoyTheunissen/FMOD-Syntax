@@ -259,9 +259,15 @@ namespace RoyTheunissen.AudioSyntax
             if (activeSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
                 DrawUnityAudioSpecificSettings();
 
+            if (isMigrationProcedureRequired)
+            {
+                EditorGUILayout.HelpBox(MigrationWizard.MigrationNecessaryText, MessageType.Info);
+            }
+
             using (new EditorGUI.DisabledScope(!CanInitialize))
             {
-                bool shouldInitialize = GUILayout.Button("Initialize", GUILayout.Height(40));
+                string buttonText = isMigrationProcedureRequired ? "Continue" : "Initialize";
+                bool shouldInitialize = GUILayout.Button(buttonText, GUILayout.Height(40));
                 if (shouldInitialize)
                     InitializeAudioSyntaxSystem();
             }
