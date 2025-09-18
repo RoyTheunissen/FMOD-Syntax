@@ -32,7 +32,7 @@ namespace RoyTheunissen.AudioSyntax
             MigrationWizard migrationWizard = GetWindow<MigrationWizard>(
                 false, AudioSyntaxMenuPaths.ProjectName + " Migration Wizard");
             migrationWizard.minSize = new Vector2(Width, 150);
-            migrationWizard.Initialize();
+            migrationWizard.Refresh();
         }
         
         [MenuItem(OpenMenuPath, true, Priority)]
@@ -41,7 +41,12 @@ namespace RoyTheunissen.AudioSyntax
             return AudioSyntaxSettings.Instance != null;
         }
 
-        private void Initialize()
+        private void OnEnable()
+        {
+            Refresh();
+        }
+        
+        private void Refresh()
         {
             versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
             versionMigratingTo = AudioSyntaxSettings.CurrentVersion;
@@ -49,11 +54,6 @@ namespace RoyTheunissen.AudioSyntax
             hasDetectedIssuesThatNeedToBeResolvedFirst = false;
             DetectOutdatedNamespaceUsage();
             DetectOutdatedSystemReferences();
-        }
-
-        private void OnEnable()
-        {
-            Initialize();
         }
 
         private void OnGUI()
@@ -102,11 +102,6 @@ namespace RoyTheunissen.AudioSyntax
         private void ReportIssueThatNeedsToBeResolvedFirst()
         {
             hasDetectedIssuesThatNeedToBeResolvedFirst = true;
-        }
-
-        private void Refresh()
-        {
-            Initialize();
         }
 
         private void FinalizeMigration()
