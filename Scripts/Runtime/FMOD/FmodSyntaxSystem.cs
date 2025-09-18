@@ -112,6 +112,24 @@ namespace RoyTheunissen.AudioSyntax
         {
             onEventPlaybackCallbackReceivers.Remove(callbackReceiver);
         }
+
+        [Obsolete("This has been moved to AudioSyntaxSystem. Also, it has been renamed to Update because it will do more than just cull playbacks from now on.")]
+        public static void CullPlaybacks()
+        {
+            AudioSyntaxSystem.Update();
+        }
+        
+        [Obsolete("This has been moved to AudioSyntaxSystem.")]
+        public static void StopAllActivePlaybacks()
+        {
+            AudioSyntaxSystem.StopAllActivePlaybacks();
+        }
+        
+        [Obsolete("This has been moved to AudioSyntaxSystem.")]
+        public static void StopAllActiveEventPlaybacks()
+        {
+            AudioSyntaxSystem.StopAllActiveEventPlaybacks();
+        }
     }
 }
 #endif // FMOD_AUDIO_SYNTAX
