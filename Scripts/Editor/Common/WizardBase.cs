@@ -9,6 +9,9 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly Color WarningColor = Color.Lerp(Color.yellow, Color.red, 0.0f);
         private static readonly Color SuccessColor = Color.green;
         
+        [NonSerialized] private Color preValidityChecksContentColor;
+        [NonSerialized] private Color preValidityChecksBackgroundColor;
+        
         [NonSerialized] private Color preErrorContentColor;
         [NonSerialized] private Color preErrorBackgroundColor;
         
@@ -34,6 +37,9 @@ namespace RoyTheunissen.AudioSyntax
 
         protected void BeginValidityChecks(bool isValid)
         {
+            preValidityChecksContentColor = GUI.contentColor;
+            preValidityChecksBackgroundColor = GUI.backgroundColor;
+            
             if (isValid)
                 return;
             
@@ -42,7 +48,8 @@ namespace RoyTheunissen.AudioSyntax
 
         protected void EndValidityChecks()
         {
-            EndError();
+            GUI.contentColor = preValidityChecksContentColor;
+            GUI.backgroundColor = preValidityChecksBackgroundColor;
         }
         
         protected void BeginError()
