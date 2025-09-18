@@ -12,6 +12,9 @@ namespace RoyTheunissen.AudioSyntax
         public static readonly string MigrationNecessaryText = $"It was detected that you used an earlier version of " +
                                                      $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes " +
                                                      $"need to be made before your project is in working order again.";
+
+        private static readonly string ProgressTitle = $"Detecting {AudioSyntaxMenuPaths.ProjectName} migration status";
+        private const string ProgressInfo = "In the process of checking what version you're on, and if you're behind, what changes are necessary for you to be up-to-date.";
         
         private const int Priority = 1;
         
@@ -25,6 +28,8 @@ namespace RoyTheunissen.AudioSyntax
         private int versionMigratingTo;
 
         private bool hasDetectedIssuesThatNeedToBeResolvedFirst;
+        
+        private int refreshProgressId;
 
         [MenuItem(OpenMenuPath, false, Priority)]
         public static void OpenMigrationWizard()
@@ -48,12 +53,28 @@ namespace RoyTheunissen.AudioSyntax
         
         private void Refresh()
         {
+            const int refreshSteps = 3;
+            refreshProgressId = Progress.Start(ProgressTitle, ProgressInfo);
+            
             versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
             versionMigratingTo = AudioSyntaxSettings.CurrentVersion;
 
             hasDetectedIssuesThatNeedToBeResolvedFirst = false;
-            DetectOutdatedNamespaceUsage();
-            DetectOutdatedSystemReferences();
+
+            Progress.Report(refreshProgressId, 1, refreshSteps);
+            
+            if (versionMigratingFrom < versionMigratingTo)
+            {
+                DetectOutdatedNamespaceUsage();
+                
+                Progress.Report(refreshProgressId, 2, refreshSteps);
+                
+                DetectOutdatedSystemReferences();
+            }
+            
+            Progress.Report(refreshProgressId, 3, refreshSteps);
+            
+            Progress.Finish(refreshProgressId);
         }
 
         private void OnGUI()
