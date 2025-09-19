@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using RoyTheunissen.AudioSyntax.Callbacks;
 
 namespace RoyTheunissen.AudioSyntax
 {
