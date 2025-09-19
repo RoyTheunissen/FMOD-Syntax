@@ -1,3 +1,5 @@
+// #define AUDIO_SYNTAX_AUTOMATICALLY_OPEN_SETUP_WIZARD_WHEN_NECESSARY
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -123,6 +125,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
+#if AUDIO_SYNTAX_AUTOMATICALLY_OPEN_SETUP_WIZARD_WHEN_NECESSARY
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
@@ -137,6 +140,7 @@ namespace RoyTheunissen.AudioSyntax
                 EditorApplication.delayCall += OpenSetupWizard;
             };
         }
+#endif // AUDIO_SYNTAX_AUTOMATICALLY_OPEN_SETUP_WIZARD_WHEN_NECESSARY
 
         [MenuItem(AudioSyntaxMenuPaths.Root + "Open Setup Wizard", false, Priority)]
         public static void OpenSetupWizard()
