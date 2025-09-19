@@ -1,5 +1,3 @@
-// #define ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
-
 using UnityEditor;
 using UnityEngine;
 
@@ -18,7 +16,7 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly string ProgressTitle = $"Detecting {AudioSyntaxMenuPaths.ProjectName} migration status";
         private const string ProgressInfo = "In the process of checking what version you're on, and if you're behind, what changes are necessary for you to be up-to-date.";
         
-        private const int Priority = 1;
+        private const int Priority = 0;
         
         private const string OpenMenuPath = AudioSyntaxMenuPaths.Root + "Open Migration Wizard";
         
@@ -33,10 +31,8 @@ namespace RoyTheunissen.AudioSyntax
         private bool hasDetectedIssuesThatShouldBeResolvedFirst;
         
         private int refreshProgressId;
-
-#if ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
+        
         [MenuItem(OpenMenuPath, false, Priority)]
-#endif // ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
         public static void OpenMigrationWizard()
         {
             MigrationWizard migrationWizard = GetWindow<MigrationWizard>(
@@ -45,13 +41,12 @@ namespace RoyTheunissen.AudioSyntax
             migrationWizard.Refresh();
         }
         
-#if ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
         [MenuItem(OpenMenuPath, true, Priority)]
         private static bool OpenMigrationWizardValidation()
         {
-            return AudioSyntaxSettings.Instance != null;
+            // If we could not determine the current system version then we don't know how/what to migrate.
+            return MigrationVersion.HasDeterminedCurrentSystemVersion;
         }
-#endif // ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
 
         private void OnEnable()
         {

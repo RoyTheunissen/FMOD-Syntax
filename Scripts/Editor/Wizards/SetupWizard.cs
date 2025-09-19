@@ -15,7 +15,7 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public class SetupWizard : WizardBase
     {
-        private const int Priority = 0;
+        private const int Priority = 1;
         
         private const float Width = 500;
 
