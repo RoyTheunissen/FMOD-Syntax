@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AudioSyntaxPrecompiledSource</name>
+    </assembly>
+    <members>
+        <member name="T:RoyTheunissen.AudioSyntax.AudioSyntaxMenuPaths">
+            <summary>
+            Defines useful constants for menu paths so that we don't redefine those over and over.
+            NOTE: These needed to be duplicated for the precompiled DLL, no avoiding it.
+            </summary>
+        </member>
+        <member name="M:RoyTheunissen.AudioSyntax.StringExtensions.ToHumanReadable(System.String,System.Char)">
+            <summary>
+            Gets the human readable version of programmer text, like a variable name.
+            </summary>
+            <param name="programmerText">The programmer text.</param>
+            <returns>The human readable equivalent of the programmer text.</returns>
+        </member>
+        <member name="M:RoyTheunissen.AudioSyntax.StringExtensions.ToUnityPath(System.String)">
+            <summary>
+            Converts the slashes to be consistent.
+            </summary>
+        </member>
+        <member name="T:RoyTheunissen.AudioSyntax.AssetLoading">
+            <summary>
+            Utilities for loading assets.
+            </summary>
+        </member>
+        <member name="T:RoyTheunissen.AudioSyntax.EditorAssetReference`1">
+            <summary>
+            Helps you access an asset at editor time. Useful for finding code templates, for example.
+            </summary>
+        </member>
+        <member name="T:RoyTheunissen.AudioSyntax.MigrationVersion">
+            <summary>
+            Responsible for managing the version of the system, which is stored in a AudioSyntaxSettings scriptable object
+            config but we do not want that type to be pre-compiled because then it would be a lot harder to modify / it
+            would increase the complexity of the package a bunch. So we have to jump through some hoops to get/set the
+            version from that config because we cannot reference its type.
+            </summary>
+        </member>
+        <member name="T:RoyTheunissen.AudioSyntax.MigrationWizard">
+            <summary>
+            Window to show to users when they haven't set up the FMOD Syntax system yet to let them conveniently
+            initialize it with appropriate settings.
+            </summary>
+            <summary>
+            Window to show to users when they haven't set up the FMOD Syntax system yet to let them conveniently
+            initialize it with appropriate settings.
+            </summary>
+        </member>
+        <member name="T:RoyTheunissen.AudioSyntax.WizardBase">
+            <summary>
+            Base class for Wizards like the SetupWizard and MigrationWizard. Helps draw boxes with conditions that either
+            fail or succeed depending on the current system status.
+            
+            Needs to be pre-compiled just because the MigrationWizard needs to be.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -50,6 +50,16 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="src\Duplications\AudioSyntaxMenuPaths.cs" />
+        <Compile Include="src\Extensions\MonoScriptExtensions.cs" />
+        <Compile Include="src\Extensions\StringExtensions.cs" />
+        <Compile Include="src\Utilities\AssetLoading.cs" />
+        <Compile Include="src\Utilities\EditorAssetReference.cs" />
+        <Compile Include="src\Wizards\Migration\MigrationVersion.cs" />
+        <Compile Include="src\Wizards\Migration\MigrationWizard.cs" />
+        <Compile Include="src\Wizards\Migration\MigrationWizard.MigrationWizardRefactorUtilities.cs" />
+        <Compile Include="src\Wizards\Migration\MigrationWizardFmodSyntaxToAudioSyntax.cs" />
+        <Compile Include="src\Wizards\WizardBase.cs" />
         <Compile Include="TestPrecompiledClass.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
     </ItemGroup>
