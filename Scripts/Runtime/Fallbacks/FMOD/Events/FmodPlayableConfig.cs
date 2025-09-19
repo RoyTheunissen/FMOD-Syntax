@@ -7,6 +7,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Base class for configs of Playables (Events and Snapshots).
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class FmodPlayableConfig
     {
         public string Id => string.Empty;

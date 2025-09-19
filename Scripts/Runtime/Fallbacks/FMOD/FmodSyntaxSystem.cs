@@ -9,6 +9,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Class to use to expose information, help manage playback instances, that sort of thing.
     /// </summary>
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public static class FmodSyntaxSystem
     {
         public static List<FmodAudioPlayback> ActiveEventPlaybacks => null;

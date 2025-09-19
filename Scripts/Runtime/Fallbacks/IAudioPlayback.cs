@@ -2,6 +2,7 @@
 
 namespace RoyTheunissen.FMODSyntax
 {
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public interface IFmodPlayback
     {
         bool CanBeCleanedUp { get; }
@@ -9,10 +10,12 @@ namespace RoyTheunissen.FMODSyntax
         void Cleanup();
     }
     
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public interface IFmodAudioPlayback : IFmodPlayback, IAudioPlayback
     {
     }
     
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public interface IAudioPlayback
     {
         string Name { get; }

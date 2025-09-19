@@ -7,6 +7,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Playback of a simple FMOD event without any parameters.
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public sealed class FmodParameterlessAudioPlayback : FmodAudioPlayback
     {
     }
@@ -14,6 +15,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Config of a simple FMOD event without any parameters.
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public sealed class FmodParameterlessAudioConfig : FmodAudioConfig<FmodParameterlessAudioPlayback>, IAudioConfig
     {
         public FmodParameterlessAudioConfig(string guid) : base(guid)

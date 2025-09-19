@@ -5,6 +5,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Non-generic base class for FmodSnapshotConfig to apply as a type constraint.
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class FmodSnapshotConfigBase : FmodPlayableConfig
     {
         protected FmodSnapshotConfigBase(string guid) : base(guid)
@@ -20,6 +21,7 @@ namespace RoyTheunissen.FMODSyntax
     /// unlike events, snapshots do not have any parameters. As such, we do not need to generate new types of snapshots,
     /// we just need to generate snapshots with the appropriate GUIDs. 
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class FmodSnapshotConfig<PlaybackType> : FmodSnapshotConfigBase
         where PlaybackType : FmodSnapshotPlayback
     {

@@ -11,6 +11,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Utility for setting FMOD parameters from code.
     /// </summary>
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class Parameter
     {
         protected PARAMETER_ID id;
@@ -30,6 +31,7 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
     
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class ParameterGeneric<ValueType> : Parameter
     {
         private float floatValue;
@@ -62,6 +64,7 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
     
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public sealed class ParameterFloat : ParameterGeneric<float>
     {
         public ParameterFloat(PARAMETER_ID id, bool isGlobal) : base(id, isGlobal)
@@ -79,6 +82,7 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
     
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public sealed class ParameterInt : ParameterGeneric<int>
     {
         public ParameterInt(PARAMETER_ID id, bool isGlobal) : base(id, isGlobal)
@@ -96,6 +100,7 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
     
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public sealed class ParameterEnum<EnumType> : ParameterGeneric<EnumType>
         where EnumType : Enum
     {
@@ -115,6 +120,7 @@ namespace RoyTheunissen.FMODSyntax
     }
     
 #if SCRIPTABLE_OBJECT_COLLECTION
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public sealed class ParameterScriptableObjectCollectionItem<ItemType> : ParameterGeneric<ItemType>
         where ItemType : ScriptableObjectCollectionItem
     {
@@ -134,6 +140,7 @@ namespace RoyTheunissen.FMODSyntax
     }
 #endif // SCRIPTABLE_OBJECT_COLLECTION
     
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public sealed class ParameterBool : ParameterGeneric<bool>
     {
         public ParameterBool(PARAMETER_ID id, bool isGlobal) : base(id, isGlobal)

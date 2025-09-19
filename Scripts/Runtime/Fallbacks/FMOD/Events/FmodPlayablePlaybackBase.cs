@@ -7,6 +7,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Non-generic base class for the playback of Playables (Events / Snapshots).
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class FmodPlayablePlaybackBase
     {
         protected EventInstance Instance

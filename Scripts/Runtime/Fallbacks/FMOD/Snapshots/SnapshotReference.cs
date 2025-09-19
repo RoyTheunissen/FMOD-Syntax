@@ -9,6 +9,7 @@ namespace RoyTheunissen.FMODSyntax
     /// Inspector reference to FMOD snapshot config. Can be used to specify via the inspector which snapshot to play.
     /// </summary>
     [Serializable]
+    [Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public class SnapshotReference
     {
         [SerializeField] private string fmodSnapshotGuid;

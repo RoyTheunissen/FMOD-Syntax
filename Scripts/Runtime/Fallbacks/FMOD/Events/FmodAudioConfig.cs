@@ -18,6 +18,7 @@ namespace RoyTheunissen.FMODSyntax
     /// Config for a playable FMOD audio event. Returns an instance of the specified AudioFmodPlayback type so you can
     /// modify its parameters. Configs are specified in FmodEvents.AudioEvents
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class FmodAudioConfig<PlaybackType> : FmodAudioConfigBase, IAudioConfig
         where PlaybackType : FmodAudioPlayback
     {

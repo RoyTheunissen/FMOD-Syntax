@@ -7,6 +7,7 @@ namespace RoyTheunissen.FMODSyntax
     /// <summary>
     /// Non-generic base class for FmodSnapshotPlayback to apply as a type constraint.
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class FmodSnapshotPlaybackBase : FmodPlayablePlaybackBase
     {
         /// <summary>

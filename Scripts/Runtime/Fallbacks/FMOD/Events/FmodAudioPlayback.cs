@@ -8,6 +8,7 @@ namespace RoyTheunissen.FMODSyntax
     /// Playback for a playable FMOD audio event. Allows you to update its parameters.
     /// Produced by calling Play() on an AudioFmodConfig, which are specified in FmodEvents.AudioEvents
     /// </summary>
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public abstract class FmodAudioPlayback : FmodPlayablePlaybackBase, IFmodAudioPlayback
     {
         private bool isOneshot = false;

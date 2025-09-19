@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace RoyTheunissen.FMODSyntax
 {
+    [System.Obsolete("RoyTheunissen.FMODSyntax version of a class is used. Please open 'Audio Syntax/Migration Wizard' to migrate to RoyTheunissen.AudioSyntax instead.")]
     public interface IAudioConfig 
     {
         string Name { get; }
