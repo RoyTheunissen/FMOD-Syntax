@@ -1,7 +1,6 @@
-using System;
-using FMOD;
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 using FMOD.Studio;
-using FMODUnity;
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -10,46 +9,30 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public abstract class FmodPlayableConfig
     {
-        [NonSerialized] private GUID id;
-        public string Id => id.ToString();
+        public string Id => string.Empty;
         
         /// <summary>
         /// NOTE: Seems like we can't cache this for some reason that's related to domain reloading. Not sure yet why.
         /// </summary>
-        protected EventDescription EventDescription => RuntimeManager.GetEventDescription(id);
+        protected EventDescription EventDescription => default;
 
-        public string Path
-        {
-            get
-            {
-                EventDescription.getPath(out string path);
-                return path;
-            }
-        }
+        public string Path => string.Empty;
 
-        public string Name => System.IO.Path.GetFileNameWithoutExtension(Path);
+        public string Name => string.Empty;
 
-        public bool IsAssigned => !id.IsNull;
+        public bool IsAssigned => false;
 
         public FmodPlayableConfig(string guid)
         {
-            id = GUID.Parse(guid);
         }
 
         public void Preload()
         {
-            EventDescription.loadSampleData();
         }
         
         public void Unload()
         {
-            EventDescription.unloadSampleData();
-        }
-
-        public override string ToString()
-        {
-            return Name;
         }
     }
 }
-
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

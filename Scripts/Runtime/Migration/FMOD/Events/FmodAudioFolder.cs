@@ -1,3 +1,4 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
 namespace RoyTheunissen.FMODSyntax
 {
     /// <summary>
@@ -7,3 +8,4 @@ namespace RoyTheunissen.FMODSyntax
     {
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

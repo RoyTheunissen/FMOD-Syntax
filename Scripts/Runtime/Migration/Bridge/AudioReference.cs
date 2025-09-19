@@ -1,3 +1,5 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 using System;
 using UnityEngine;
 
@@ -30,3 +32,4 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

@@ -1,3 +1,5 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 namespace RoyTheunissen.FMODSyntax
 {
     public interface IFmodPlayback
@@ -32,3 +34,4 @@ namespace RoyTheunissen.FMODSyntax
         void Stop();
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

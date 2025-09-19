@@ -1,5 +1,4 @@
-using FMOD.Studio;
-using FMODUnity;
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -8,22 +7,17 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public class VCA
     {
-        private readonly string path;
-        
-        /// <summary>
-        /// NOTE: Seems like we can't cache this for some reason that's related to domain reloading. Not sure yet why.
-        /// </summary>
-        private FMOD.Studio.VCA FmodVca => RuntimeManager.GetVCA(path);
-
         public float VolumeLinear
         {
-            get => FmodVca.getVolume();
-            set => FmodVca.setVolume(value);
+            get => 1.0f;
+            set
+            {
+            }
         }
 
         public VCA(string path)
         {
-            this.path = path;
         }
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

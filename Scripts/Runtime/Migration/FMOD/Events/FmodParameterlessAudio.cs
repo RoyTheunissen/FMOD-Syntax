@@ -1,3 +1,5 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 using UnityEngine;
 
 namespace RoyTheunissen.FMODSyntax
@@ -20,16 +22,13 @@ namespace RoyTheunissen.FMODSyntax
 
         public override FmodParameterlessAudioPlayback Play(Transform source = null)
         {
-            FmodParameterlessAudioPlayback instance = new FmodParameterlessAudioPlayback();
-            instance.Play(EventDescription, source);
-            return instance;
+            return null;
         }
 
         IAudioPlayback IAudioConfig.Play(Transform source)
         {
-            FmodParameterlessAudioPlayback instance = new FmodParameterlessAudioPlayback();
-            instance.Play(EventDescription, source);
-            return instance;
+            return null;
         }
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

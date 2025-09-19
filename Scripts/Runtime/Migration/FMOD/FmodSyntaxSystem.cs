@@ -1,3 +1,5 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 using System;
 using System.Collections.Generic;
 using RoyTheunissen.FMODSyntax.Callbacks;
@@ -70,3 +72,4 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

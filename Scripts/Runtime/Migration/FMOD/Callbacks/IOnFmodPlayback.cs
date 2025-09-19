@@ -1,5 +1,4 @@
-using System;
-
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
 namespace RoyTheunissen.FMODSyntax.Callbacks
 {
     public interface IOnFmodPlayback
@@ -8,4 +7,4 @@ namespace RoyTheunissen.FMODSyntax.Callbacks
         void OnFmodPlaybackUnregistered(FmodAudioPlayback playback);
     }
 }
-
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

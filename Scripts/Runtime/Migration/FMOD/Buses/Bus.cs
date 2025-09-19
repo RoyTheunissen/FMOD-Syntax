@@ -1,5 +1,4 @@
-using System;
-using FMODUnity;
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
 
 namespace RoyTheunissen.FMODSyntax
 {
@@ -8,33 +7,19 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public class Bus
     {
-        private readonly string path;
-        
-        [NonSerialized] private FMOD.Studio.Bus cachedFmodBus;
-        [NonSerialized] private bool didCacheFmodBus;
-
-        public FMOD.Studio.Bus FmodBus
-        {
-            get
-            {
-                if (!didCacheFmodBus)
-                {
-                    didCacheFmodBus = true;
-                    cachedFmodBus = RuntimeManager.GetBus(path);
-                }
-                return cachedFmodBus;
-            }
-        }
+        public FMOD.Studio.Bus FmodBus => default;
 
         public float VolumeLinear
         {
-            get => FMOD.Studio.BusExtensions.getVolume(FmodBus);
-            set => FmodBus.setVolume(value);
+            get => 1.0f;
+            set
+            {
+            }
         }
 
         public Bus(string path)
         {
-            this.path = path;
         }
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

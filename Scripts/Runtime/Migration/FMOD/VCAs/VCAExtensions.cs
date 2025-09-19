@@ -1,3 +1,5 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 namespace FMOD.Studio
 {
     /// <summary>
@@ -7,14 +9,13 @@ namespace FMOD.Studio
     {
         public static string getPath(this FMOD.Studio.VCA vca)
         {
-            vca.getPath(out string path);
-            return path;
+            return string.Empty;
         }
         
         public static float getVolume(this FMOD.Studio.VCA vca)
         {
-            vca.getVolume(out float volume);
-            return volume;
+            return 1.0f;
         }
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

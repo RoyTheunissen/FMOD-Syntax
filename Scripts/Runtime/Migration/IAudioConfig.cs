@@ -1,3 +1,5 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 using UnityEngine;
 
 namespace RoyTheunissen.FMODSyntax
@@ -10,3 +12,4 @@ namespace RoyTheunissen.FMODSyntax
         IAudioPlayback Play(Transform source = null);
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX

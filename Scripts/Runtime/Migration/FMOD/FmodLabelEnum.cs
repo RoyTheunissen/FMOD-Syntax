@@ -1,3 +1,5 @@
+#if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
+
 using System;
 
 namespace RoyTheunissen.FMODSyntax
@@ -10,12 +12,10 @@ namespace RoyTheunissen.FMODSyntax
     /// </summary>
     public class FmodLabelTypeAttribute : Attribute
     {
-        private string[] labelledParameterNames;
-        public string[] LabelledParameterNames => labelledParameterNames;
+        public string[] LabelledParameterNames => Array.Empty<string>();
 
         public FmodLabelTypeAttribute(params string[] labelledParameterNames)
         {
-            this.labelledParameterNames = labelledParameterNames;
         }
     }
     
@@ -32,3 +32,4 @@ namespace RoyTheunissen.FMODSyntax
         }
     }
 }
+#endif // #if !UNITY_AUDIO_SYNTAX && !FMOD_AUDIO_SYNTAX
