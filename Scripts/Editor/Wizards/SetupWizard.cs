@@ -204,10 +204,13 @@ namespace RoyTheunissen.AudioSyntax
                 for (int i = 0; i < subDirectories.Length; i++)
                 {
                     string folderName = Path.GetFileName(subDirectories[i].TrimEnd(Path.AltDirectorySeparatorChar));
-                    if (string.Equals(folderName, names[i], StringComparison.OrdinalIgnoreCase))
+                    for (int j = 0; j < names.Length; j++)
                     {
-                        currentPath = subDirectories[i];
-                        return;
+                        if (string.Equals(folderName, names[j], StringComparison.OrdinalIgnoreCase))
+                        {
+                            currentPath = subDirectories[i];
+                            return;
+                        }
                     }
                 }
             }
