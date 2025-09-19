@@ -13,20 +13,35 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public static class MigrationVersion
     {
+        private const string SettingsTypeName = "AudioSyntaxSettings";
+        
         public const int TargetVersion = 1;
         
         private const string VersionField = "version";
+
+        private static bool HasFoundSettingsAsset => SettingsAsset != null;
+        public static bool HasDeterminedCurrentSystemVersion => HasFoundSettingsAsset;
 
         public static int CurrentVersion
         {
             get
             {
+                if (!HasFoundSettingsAsset)
+                    return -1;
+                
                 using SerializedObject so = new(SettingsAsset);
                 so.Update();
                 return so.FindProperty(VersionField).intValue;
             }
             set
             {
+                if (!HasFoundSettingsAsset)
+                {
+                    Debug.LogError($"Tried to update Audio Syntax to version '{value}' but no instance of " +
+                                   $"'{SettingsTypeName} could be found.'");
+                    return;
+                }
+                
                 using SerializedObject so = new(SettingsAsset);
                 so.Update();
                 so.FindProperty(VersionField).intValue = value;
@@ -51,7 +66,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private static ScriptableObject TryToFindAudioSyntaxSystemSettingsAsset()
         {
-            string[] guids = AssetDatabase.FindAssets($"t:AudioSyntaxSettings");
+            string[] guids = AssetDatabase.FindAssets($"t:" + SettingsTypeName);
             string guid = guids.FirstOrDefault();
             if (string.IsNullOrEmpty(guid))
                 return null;
