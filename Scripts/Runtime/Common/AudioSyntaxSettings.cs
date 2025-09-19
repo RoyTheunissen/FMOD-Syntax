@@ -14,17 +14,12 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public sealed class AudioSyntaxSettings : ScriptableObject
     {
-        public const int CurrentVersion = 1;
-        
         public enum SyntaxFormats
         {
             Flat = 0,
             FlatWithPathIncludedInName = 1,
             SubclassesPerFolder = 2,
         }
-
-        [SerializeField, HideInInspector] private int version;
-        public int Version => version;
 
         [SerializeField] private AudioSyntaxSystems activeSystems;
         public AudioSyntaxSystems ActiveSystems => activeSystems;

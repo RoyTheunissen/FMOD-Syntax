@@ -63,8 +63,8 @@ namespace RoyTheunissen.AudioSyntax
             const int refreshSteps = 3;
             refreshProgressId = Progress.Start(ProgressTitle, ProgressInfo);
             
-            versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
-            versionMigratingTo = AudioSyntaxSettings.CurrentVersion;
+            versionMigratingFrom = MigrationVersion.CurrentVersion;
+            versionMigratingTo = MigrationVersion.TargetVersion;
 
             hasDetectedIssuesThatNeedToBeResolvedFirst = false;
             hasDetectedIssuesThatShouldBeResolvedFirst = false;
@@ -145,14 +145,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private void FinalizeMigration()
         {
-            // Update the version that's saved in the settings config.
-            using (SerializedObject so = new(AudioSyntaxSettings.Instance))
-            {
-                so.Update();
-                SerializedProperty versionProperty = so.FindProperty("version");
-                versionProperty.intValue = versionMigratingTo;
-                so.ApplyModifiedPropertiesWithoutUndo();
-            }
+            MigrationVersion.CurrentVersion = versionMigratingTo;
             
             Close();
         }
