@@ -41,9 +41,11 @@
         <Reference Include="System.Xml"/>
         <Reference Include="UnityEditor">
           <HintPath>..\..\..\..\..\..\Program Files\Unity\Hub\Editor\6000.0.23f1\Editor\Data\Managed\UnityEditor.dll</HintPath>
+          <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine">
           <HintPath>..\..\..\..\..\..\Program Files\Unity\Hub\Editor\6000.0.23f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
+          <Private>False</Private>
         </Reference>
     </ItemGroup>
     <ItemGroup>
