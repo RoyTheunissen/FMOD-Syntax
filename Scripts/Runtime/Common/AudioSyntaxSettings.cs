@@ -20,6 +20,9 @@ namespace RoyTheunissen.AudioSyntax
             FlatWithPathIncludedInName = 1,
             SubclassesPerFolder = 2,
         }
+        
+        [SerializeField, HideInInspector] private int version;
+        public int Version => version;
 
         [SerializeField] private AudioSyntaxSystems activeSystems;
         public AudioSyntaxSystems ActiveSystems => activeSystems;
