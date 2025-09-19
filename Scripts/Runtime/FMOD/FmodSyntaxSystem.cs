@@ -22,7 +22,7 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new();
         public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
         
-        private static readonly List<IOnFmodPlaybackRegistered> onEventPlaybackCallbackReceivers = new();
+        private static readonly List<IOnFmodPlayback> onEventPlaybackCallbackReceivers = new();
         
         [NonSerialized] private bool didInitialize;
         
@@ -104,12 +104,12 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public static void RegisterEventPlaybackCallbackReceiver(IOnFmodPlaybackRegistered callbackReceiver)
+        public static void RegisterEventPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
         {
             onEventPlaybackCallbackReceivers.Add(callbackReceiver);
         }
         
-        public static void UnregisterEventPlaybackCallbackReceiver(IOnFmodPlaybackRegistered callbackReceiver)
+        public static void UnregisterEventPlaybackCallbackReceiver(IOnFmodPlayback callbackReceiver)
         {
             onEventPlaybackCallbackReceivers.Remove(callbackReceiver);
         }
