@@ -1,7 +1,0 @@
-# Rider
-/.idea/
-*.sln.DotSettings.user
-
-# Build artifacts
-/bin/
-/obj/

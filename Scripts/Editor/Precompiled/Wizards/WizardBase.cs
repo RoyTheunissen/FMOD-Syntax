@@ -4,12 +4,6 @@ using UnityEngine;
 
 namespace RoyTheunissen.AudioSyntax
 {
-    /// <summary>
-    /// Base class for Wizards like the SetupWizard and MigrationWizard. Helps draw boxes with conditions that either
-    /// fail or succeed depending on the current system status.
-    /// 
-    /// Needs to be pre-compiled just because the MigrationWizard needs to be.
-    /// </summary>
     public abstract class WizardBase : EditorWindow
     {
         private static readonly Color WarningColor = Color.Lerp(Color.yellow, Color.red, 0.0f);
