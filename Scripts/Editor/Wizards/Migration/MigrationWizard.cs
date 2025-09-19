@@ -45,7 +45,7 @@ namespace RoyTheunissen.AudioSyntax
         private static bool OpenMigrationWizardValidation()
         {
             // If we could not determine the current system version then we don't know how/what to migrate.
-            return MigrationVersion.HasDeterminedCurrentSystemVersion;
+            return AudioSyntaxSettings.Instance != null;
         }
 
         private void OnEnable()
@@ -58,8 +58,8 @@ namespace RoyTheunissen.AudioSyntax
             const int refreshSteps = 3;
             refreshProgressId = Progress.Start(ProgressTitle, ProgressInfo);
             
-            versionMigratingFrom = MigrationVersion.CurrentVersion;
-            versionMigratingTo = MigrationVersion.TargetVersion;
+            versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
+            versionMigratingTo = AudioSyntaxSettings.TargetVersion;
 
             hasDetectedIssuesThatNeedToBeResolvedFirst = false;
             hasDetectedIssuesThatShouldBeResolvedFirst = false;
@@ -140,7 +140,10 @@ namespace RoyTheunissen.AudioSyntax
 
         private void FinalizeMigration()
         {
-            MigrationVersion.CurrentVersion = versionMigratingTo;
+            using SerializedObject so = new(AudioSyntaxSettings.Instance);
+            so.Update();
+            so.FindProperty("version").intValue = AudioSyntaxSettings.TargetVersion;
+            so.ApplyModifiedPropertiesWithoutUndo();
             
             Close();
         }

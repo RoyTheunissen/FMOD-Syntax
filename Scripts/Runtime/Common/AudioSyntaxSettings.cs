@@ -21,6 +21,8 @@ namespace RoyTheunissen.AudioSyntax
             SubclassesPerFolder = 2,
         }
         
+        public const int TargetVersion = 1;
+        
         [SerializeField, HideInInspector] private int version;
         public int Version => version;
 

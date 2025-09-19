@@ -161,7 +161,7 @@ namespace RoyTheunissen.AudioSyntax
                 out didDetectAudioSyntaxConfig, out detectedAudioSyntaxConfigPath);
 
             isMigrationProcedureRequired = didDetectAudioSyntaxConfig &&
-                                           MigrationVersion.CurrentVersion < MigrationVersion.TargetVersion;
+                                           AudioSyntaxSettings.Instance.Version < AudioSyntaxSettings.TargetVersion;
 
             detectedUnityAudioSyntaxConfig = TryFindConfig<UnityAudioSyntaxSettings>(
                 out didDetectUnityAudioSyntaxConfig, out detectedUnityAudioSyntaxConfigPath);
