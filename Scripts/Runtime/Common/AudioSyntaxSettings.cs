@@ -77,9 +77,6 @@ namespace RoyTheunissen.AudioSyntax
                 return cachedInstance;
             }
         }
-        
-        public delegate void RequestCodeRegenerationHandler();
-        public static event RequestCodeRegenerationHandler RequestCodeRegenerationEvent;
 
         public void InitializeFromWizard(AudioSyntaxSystems activeSystems,
             string generatedScriptsFolderPath, string namespaceForGeneratedCode, bool shouldGenerateAssemblyDefinition)
@@ -95,11 +92,6 @@ namespace RoyTheunissen.AudioSyntax
             this.namespaceForGeneratedCode = namespaceForGeneratedCode;
 
             this.shouldGenerateAssemblyDefinition = shouldGenerateAssemblyDefinition;
-        }
-
-        public static void RequestCodeRegeneration()
-        {
-            RequestCodeRegenerationEvent?.Invoke();
         }
     }
 }

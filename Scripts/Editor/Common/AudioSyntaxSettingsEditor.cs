@@ -20,7 +20,7 @@ namespace RoyTheunissen.AudioSyntax
             if (shouldGenerateCode)
             {
 #if FMOD_AUDIO_SYNTAX
-                AudioSyntaxSettings.RequestCodeRegeneration();
+                FmodCodeGenerator.GenerateCode();
 #endif // FMOD_AUDIO_SYNTAX
             }
         }
