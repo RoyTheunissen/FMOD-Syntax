@@ -266,9 +266,6 @@ namespace RoyTheunissen.AudioSyntax
         {
             labelParameterNameToUserSpecifiedType.Clear();
             didCacheUserSpecifiedEnums = false;
-            
-            AudioSyntaxSettings.RequestCodeRegenerationEvent -= HandleAudioSyntaxSettingsRequestCodeRegenerationEvent;
-            AudioSyntaxSettings.RequestCodeRegenerationEvent += HandleAudioSyntaxSettingsRequestCodeRegenerationEvent;
 
             // NOTE: For this to work, SourceFilesChangedEvent and BankRefreshEvent events need to be added to FMOD.
 #if FMOD_AUTO_REGENERATE_CODE
@@ -281,13 +278,6 @@ namespace RoyTheunissen.AudioSyntax
             BankRefresher.BankRefreshEvent -= HandleBankRefreshEvent;
             BankRefresher.BankRefreshEvent += HandleBankRefreshEvent;
 #endif // FMOD_AUTO_REGENERATE_CODE
-        }
-
-        private static void HandleAudioSyntaxSettingsRequestCodeRegenerationEvent()
-        {
-            AudioSyntaxSettings.RequestCodeRegenerationEvent -= HandleAudioSyntaxSettingsRequestCodeRegenerationEvent;
-            
-            GenerateCode();
         }
 
 #if FMOD_AUTO_REGENERATE_CODE
