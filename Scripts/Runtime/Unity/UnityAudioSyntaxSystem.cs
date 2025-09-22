@@ -93,15 +93,15 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public AudioSource GetAudioSourceForPlayback(UnityAudioConfigBase audioConfig)
+        public AudioSource GetAudioSourceForPlayback(UnityAudioEventConfigBase audioEventConfig)
         {
             AudioSource audioSource = audioSourcesPool.Get();
             
             // Assign the mixer group.
-            if (audioConfig.MixerGroup == null)
+            if (audioEventConfig.MixerGroup == null)
                 audioSource.outputAudioMixerGroup = defaultMixerGroup;
             else
-                audioSource.outputAudioMixerGroup = audioConfig.MixerGroup;
+                audioSource.outputAudioMixerGroup = audioEventConfig.MixerGroup;
             
             // Reset these to the default Unity values, just in case...
             audioSource.clip = null;

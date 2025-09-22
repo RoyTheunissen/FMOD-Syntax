@@ -18,9 +18,9 @@ namespace RoyTheunissen.AudioSyntax
             SmoothDamp,
         }
         
-        protected UnityAudioConfigBase baseConfig;
+        protected UnityAudioEventConfigBase BaseEventConfig;
         
-        private IList<UnityAudioTag> Tags => baseConfig.Tags;
+        private IList<UnityAudioTag> Tags => BaseEventConfig.Tags;
 
         private float volumeFactorOverride;
         public float VolumeFactorOverride => volumeFactorOverride;
@@ -54,7 +54,7 @@ namespace RoyTheunissen.AudioSyntax
         private bool canBeCleanedUp;
         public bool CanBeCleanedUp => canBeCleanedUp;
 
-        public string Name => baseConfig.name;
+        public string Name => BaseEventConfig.name;
 
         public abstract bool IsFadingOut
         {
@@ -103,9 +103,9 @@ namespace RoyTheunissen.AudioSyntax
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
 
         public void Initialize(
-            UnityAudioConfigBase audioConfig, Transform origin, float volumeFactorOverride, AudioSource audioSource)
+            UnityAudioEventConfigBase audioEventConfig, Transform origin, float volumeFactorOverride, AudioSource audioSource)
         {
-            baseConfig = audioConfig;
+            BaseEventConfig = audioEventConfig;
             this.volumeFactorOverride = volumeFactorOverride;
             source = audioSource;
             
@@ -231,10 +231,10 @@ namespace RoyTheunissen.AudioSyntax
     }
     
     public abstract class UnityAudioPlaybackGeneric<AudioConfigType, ThisType> : UnityAudioPlayback
-        where AudioConfigType : UnityAudioConfigBase
+        where AudioConfigType : UnityAudioEventConfigBase
         where ThisType : UnityAudioPlayback, IAudioPlayback
     {
-        protected AudioConfigType Config => (AudioConfigType)baseConfig;
+        protected AudioConfigType Config => (AudioConfigType)BaseEventConfig;
         
         private float volumeFactor = 1.0f;
         

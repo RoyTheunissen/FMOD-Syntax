@@ -33,9 +33,9 @@ namespace RoyTheunissen.AudioSyntax
 #endif // FMOD_AUDIO_SYNTAX
         
 #if UNITY_AUDIO_SYNTAX
-        private string GetUnityDisplayText(bool supportsBothSystems, UnityAudioConfigBase unityAudioConfig)
+        private string GetUnityDisplayText(bool supportsBothSystems, UnityAudioEventConfigBase unityAudioEventConfig)
         {
-            string displayText = unityAudioConfig == null ? "" : unityAudioConfig.name;
+            string displayText = unityAudioEventConfig == null ? "" : unityAudioEventConfig.name;
             if (supportsBothSystems)
                 displayText += " (Unity)";
             return displayText;
@@ -43,13 +43,13 @@ namespace RoyTheunissen.AudioSyntax
 #endif // UNITY_AUDIO_SYNTAX
         
         private string GetDisplayText(
-            bool supportsBothSystems, AudioReference.Modes mode, UnityAudioConfigBase unityAudioConfig,
+            bool supportsBothSystems, AudioReference.Modes mode, UnityAudioEventConfigBase unityAudioEventConfig,
             string fmodEventGuid)
         {
 #if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
             switch (mode)
             {
-                case AudioReference.Modes.Unity: return GetUnityDisplayText(supportsBothSystems, unityAudioConfig);
+                case AudioReference.Modes.Unity: return GetUnityDisplayText(supportsBothSystems, unityAudioEventConfig);
 
                 case AudioReference.Modes.FMOD: return GetFmodDisplayText(supportsBothSystems, fmodEventGuid);
 
@@ -57,7 +57,7 @@ namespace RoyTheunissen.AudioSyntax
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
 #elif UNITY_AUDIO_SYNTAX
-            return GetUnityDisplayText(supportsBothSystems, unityAudioConfig);
+            return GetUnityDisplayText(supportsBothSystems, unityAudioEventConfig);
 #elif FMOD_AUDIO_SYNTAX
             return GetFmodDisplayText(supportsBothSystems, fmodEventGuid);
 #else
@@ -74,21 +74,21 @@ namespace RoyTheunissen.AudioSyntax
             if (property.IsInArray())
                 label = GUIContent.none;
             
-            SerializedProperty unityAudioConfigProperty = property.FindPropertyRelative("unityAudioConfig");
-            SerializedProperty fmodAudioConfigProperty = property.FindPropertyRelative("fmodEventGuid");
+            SerializedProperty unityAudioEventConfigProperty = property.FindPropertyRelative("unityAudioEventConfig");
+            SerializedProperty fmodAudioEventConfigProperty = property.FindPropertyRelative("fmodEventGuid");
 
             SerializedProperty audioConfigProperty;
             bool supportsBothSystems = false;
 #if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
-            if (unityAudioConfigProperty.objectReferenceValue != null)
-                audioConfigProperty = unityAudioConfigProperty;
+            if (unityAudioEventConfigProperty.objectReferenceValue != null)
+                audioConfigProperty = unityAudioEventConfigProperty;
             else
-                audioConfigProperty = fmodAudioConfigProperty;
+                audioConfigProperty = fmodAudioEventConfigProperty;
             supportsBothSystems = true;
 #elif UNITY_AUDIO_SYNTAX
-            audioConfigProperty = unityAudioConfigProperty;
+            audioConfigProperty = unityAudioEventConfigProperty;
 #elif FMOD_AUDIO_SYNTAX
-            audioConfigProperty = fmodAudioConfigProperty;
+            audioConfigProperty = fmodAudioEventConfigProperty;
 #else
             audioConfigProperty = null;
             EditorGUI.LabelField(position, "Select at least one audio system.");
@@ -100,8 +100,8 @@ namespace RoyTheunissen.AudioSyntax
             // Figure out the display text and the content property.
             string displayedText = GetDisplayText(supportsBothSystems,
                 (AudioReference.Modes)modeProperty.intValue,
-                (UnityAudioConfigBase)unityAudioConfigProperty.objectReferenceValue,
-                fmodAudioConfigProperty.stringValue);
+                (UnityAudioEventConfigBase)unityAudioEventConfigProperty.objectReferenceValue,
+                fmodAudioEventConfigProperty.stringValue);
 
             Rect configRect = position;
 
@@ -116,8 +116,8 @@ namespace RoyTheunissen.AudioSyntax
                 dropDownRect.xMax += 200;
 
                 AudioReferenceDropdown menu = new(
-                    new AdvancedDropdownState(), property.serializedObject, unityAudioConfigProperty,
-                    fmodAudioConfigProperty, modeProperty);
+                    new AdvancedDropdownState(), property.serializedObject, unityAudioEventConfigProperty,
+                    fmodAudioEventConfigProperty, modeProperty);
                 menu.Show(dropDownRect, 200);
             }
             EditorGUI.EndProperty();

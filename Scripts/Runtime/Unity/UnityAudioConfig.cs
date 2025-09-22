@@ -15,9 +15,9 @@ using BrunoMikoski.ScriptableObjectCollections;
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
-    /// Base class for one-off and continuous Unity audio configs.
+    /// Base class for one-off and continuous Unity audio event configs.
     /// </summary>
-    public abstract class UnityAudioConfigBase : ScriptableObject, IAudioConfig
+    public abstract class UnityAudioEventConfigBase : ScriptableObject, IAudioConfig
     {
         [SerializeField] private AudioMixerGroup mixerGroup;
         public AudioMixerGroup MixerGroup => mixerGroup;
@@ -55,11 +55,11 @@ namespace RoyTheunissen.AudioSyntax
     }
     
     /// <summary>
-    /// Generic base class for Unity one-off and continuous audio configs. When told to play, a Playback instance is
-    /// created and returned. You can then use this to manipulate the sound.
+    /// Generic base class for Unity one-off and continuous audio event configs. When told to play, a Playback instance
+    /// is created and returned. You can then use this to manipulate the audio.
     /// </summary>
-    /// <typeparam name="PlaybackType">The type of Playback instance that sound be created when played.</typeparam>
-    public abstract class UnityAudioConfigGeneric<PlaybackType> : UnityAudioConfigBase
+    /// <typeparam name="PlaybackType">The type of Playback instance that should be created when played.</typeparam>
+    public abstract class UnityAudioEventConfigGeneric<PlaybackType> : UnityAudioEventConfigBase
         where PlaybackType : UnityAudioPlayback, new()
     {
         public PlaybackType Play(float volumeFactor = 1.0f)
@@ -91,7 +91,7 @@ namespace RoyTheunissen.AudioSyntax
 }
 
 #else
-public abstract class UnityAudioConfigBase : UnityEngine.ScriptableObject
+public abstract class UnityAudioEventConfigBase : UnityEngine.ScriptableObject
 {
 }
 #endif // !UNITY_AUDIO_SYNTAX

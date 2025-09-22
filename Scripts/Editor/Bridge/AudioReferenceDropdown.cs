@@ -19,22 +19,22 @@ namespace RoyTheunissen.AudioSyntax
         private const string NoneSelectedGuid = "None";
 
         private readonly SerializedObject serializedObject;
-        private readonly SerializedProperty unityAudioConfigProperty;
+        private readonly SerializedProperty unityAudioEventConfigProperty;
         private readonly SerializedProperty fmodAudioConfigProperty;
         private readonly SerializedProperty modeProperty;
 
         public AudioReferenceDropdown(
-            AdvancedDropdownState state, SerializedObject serializedObject, SerializedProperty unityAudioConfigProperty,
+            AdvancedDropdownState state, SerializedObject serializedObject, SerializedProperty unityAudioEventConfigProperty,
             SerializedProperty fmodAudioConfigProperty, SerializedProperty modeProperty)
             : base(state)
         {
             this.serializedObject = serializedObject;
-            this.unityAudioConfigProperty = unityAudioConfigProperty;
+            this.unityAudioEventConfigProperty = unityAudioEventConfigProperty;
             this.fmodAudioConfigProperty = fmodAudioConfigProperty;
             this.modeProperty = modeProperty;
         }
 
-        private string GetDropdownPathForUnityAudioConfig(string assetPath, bool multipleAudioSystemsActive)
+        private string GetDropdownPathForUnityAudioEventConfig(string assetPath, bool multipleAudioSystemsActive)
         {
             string dropdownPath = assetPath.RemoveSuffix(".asset");
 
@@ -90,15 +90,16 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX
             if (supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
             {
-                UnityAudioConfigBase[] unityAudioConfigs = AssetLoading.GetAllAssetsOfType<UnityAudioConfigBase>();
-                string[] paths = new string[unityAudioConfigs.Length];
-                string[] guids = new string[unityAudioConfigs.Length];
+                UnityAudioEventConfigBase[] unityAudioEventConfigs =
+                    AssetLoading.GetAllAssetsOfType<UnityAudioEventConfigBase>();
+                string[] paths = new string[unityAudioEventConfigs.Length];
+                string[] guids = new string[unityAudioEventConfigs.Length];
 
-                for (int i = 0; i < unityAudioConfigs.Length; i++)
+                for (int i = 0; i < unityAudioEventConfigs.Length; i++)
                 {
-                    string assetPath = AssetDatabase.GetAssetPath(unityAudioConfigs[i]);
+                    string assetPath = AssetDatabase.GetAssetPath(unityAudioEventConfigs[i]);
                     
-                    paths[i] = GetDropdownPathForUnityAudioConfig(assetPath, multipleAudioSystemsActive);
+                    paths[i] = GetDropdownPathForUnityAudioEventConfig(assetPath, multipleAudioSystemsActive);
 
                     guids[i] = AssetDatabase.AssetPathToGUID(assetPath);
                 }
@@ -173,17 +174,17 @@ namespace RoyTheunissen.AudioSyntax
             }
             
             // If the item selected is supposed to update the unity property, do so.
-            // The GUID then represents the GUID of the UnityAudioConfigBase asset to load.
+            // The GUID then represents the GUID of the UnityAudioEventConfigBase asset to load.
             if (dropdownItem.System.HasFlag(AudioSyntaxSystems.UnityNativeAudio) && !string.Equals(
                     dropdownItem.Guid, NoneSelectedGuid, StringComparison.OrdinalIgnoreCase))
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(dropdownItem.Guid);
-                UnityAudioConfigBase config = AssetDatabase.LoadAssetAtPath<UnityAudioConfigBase>(assetPath);
-                unityAudioConfigProperty.objectReferenceValue = config;
+                UnityAudioEventConfigBase eventConfig = AssetDatabase.LoadAssetAtPath<UnityAudioEventConfigBase>(assetPath);
+                unityAudioEventConfigProperty.objectReferenceValue = eventConfig;
             }
             else
             {
-                unityAudioConfigProperty.objectReferenceValue = null;
+                unityAudioEventConfigProperty.objectReferenceValue = null;
             }
             
             // If the item selected is supposed to update the FMOD property, do so.

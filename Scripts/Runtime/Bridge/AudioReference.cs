@@ -28,8 +28,8 @@ namespace RoyTheunissen.AudioSyntax
         
         private Modes Mode => mode;
 
-        [SerializeField] private UnityAudioConfigBase unityAudioConfig;
-        public UnityAudioConfigBase UnityAudioConfig => unityAudioConfig;
+        [SerializeField] private UnityAudioEventConfigBase unityAudioEventConfig;
+        public UnityAudioEventConfigBase UnityAudioEventConfig => unityAudioEventConfig;
 
         [SerializeField] private string fmodEventGuid;
         
@@ -68,7 +68,7 @@ namespace RoyTheunissen.AudioSyntax
                 {
                     case Modes.Unity: 
 #if UNITY_AUDIO_SYNTAX
-                        return UnityAudioConfig;
+                        return UnityAudioEventConfig;
 #else
                         return null;
 #endif // !UNITY_AUDIO_SYNTAX
@@ -99,7 +99,7 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX
         public UnityAudioPlayback PlayUnity(Transform source = null, float volumeFactor = 1.0f)
         {
-            return UnityAudioConfig.PlayGeneric(source, volumeFactor);
+            return UnityAudioEventConfig.PlayGeneric(source, volumeFactor);
         }
 #endif // UNITY_AUDIO_SYNTAX
         
