@@ -10,10 +10,11 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public abstract class Migration
     {
+        // NOTE: These must be in chronological order from low urgency to high urgency.
         public enum IssueUrgencies
         {
-            Required,
             Optional,
+            Required,
         }
         
         public abstract string DisplayName { get; }
