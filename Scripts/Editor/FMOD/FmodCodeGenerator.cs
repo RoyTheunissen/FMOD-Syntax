@@ -43,7 +43,7 @@ namespace RoyTheunissen.AudioSyntax
                 if (existingFolder != null)
                     return existingFolder;
                 
-                EventFolder newFolder = new EventFolder(name);
+                EventFolder newFolder = new(name);
                 childFolders.Add(newFolder);
                 childFolders.Sort((x, y) => String.Compare(x.name, y.name, StringComparison.Ordinal));
                 return newFolder;
@@ -80,8 +80,7 @@ namespace RoyTheunissen.AudioSyntax
 
             [SerializeField] private string[] eventGuidToPreviousSyntaxPaths = Array.Empty<string>();
             
-            [NonSerialized] private Dictionary<string,string> cachedEventGuidToPreviousSyntaxPathDictionary
-                = new Dictionary<string, string>();
+            [NonSerialized] private Dictionary<string,string> cachedEventGuidToPreviousSyntaxPathDictionary = new();
             [NonSerialized] private bool didCacheEventGuidToPreviousSyntaxPathDictionary;
             public Dictionary<string,string> EventGuidToPreviousSyntaxPath
             {
@@ -101,7 +100,7 @@ namespace RoyTheunissen.AudioSyntax
                 }
                 set
                 {
-                    List<string> previousEventSyntaxPathValues = new List<string>(); 
+                    List<string> previousEventSyntaxPathValues = new(); 
                     foreach (KeyValuePair<string, string> stringPair in value)
                     {
                         previousEventSyntaxPathValues.Add(stringPair.Key);
@@ -173,61 +172,62 @@ namespace RoyTheunissen.AudioSyntax
         private const string VCAsTemplatePath = TemplatePathBase + "VCAs/";
 
         private static readonly CodeGenerator assemblyDefinitionGenerator =
-            new CodeGenerator(TemplatePathBase + "Audio-Syntax.asmdef");
+            new(TemplatePathBase + "Audio-Syntax.asmdef");
 
         private const string EventNameKeyword = "EventName";
 
-        private static readonly CodeGenerator eventsScriptGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEvents.g.cs");
+        private static readonly CodeGenerator eventsScriptGenerator = 
+            new(EventsTemplatePath + "AudioEvents.g.cs");
         private static readonly CodeGenerator eventTypesScriptGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventTypes.g.cs"); // Currently FMOD-specific
-        private static readonly CodeGenerator eventTypeGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventType.g.cs"); // Currently FMOD-specific
-        private static readonly CodeGenerator eventFieldGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventField.g.cs");
+            new(EventsTemplatePath + "FmodEventTypes.g.cs"); // Currently FMOD-specific
+        private static readonly CodeGenerator eventTypeGenerator = 
+            new(EventsTemplatePath + "FmodEventType.g.cs"); // Currently FMOD-specific
+        private static readonly CodeGenerator eventFieldGenerator = 
+            new(EventsTemplatePath + "AudioEventField.g.cs");
         private static readonly CodeGenerator eventParameterGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventParameter.g.cs");
+            new(EventsTemplatePath + "AudioEventParameter.g.cs");
         private static readonly CodeGenerator eventParametersInitializationGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventParametersInitialization.g.cs");
+            new(EventsTemplatePath + "AudioEventParametersInitialization.g.cs");
         private static readonly CodeGenerator eventConfigPlayMethodWithParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventConfigPlayMethodWithParameters.g.cs");
+            new(EventsTemplatePath + "AudioEventConfigPlayMethodWithParameters.g.cs");
         private static readonly CodeGenerator eventPlaybackPlayMethodWithParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventPlaybackPlayMethodWithParameters.g.cs");
+            new(EventsTemplatePath + "AudioEventPlaybackPlayMethodWithParameters.g.cs");
         
-        private static readonly CodeGenerator eventFolderGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventFolder.g.cs");
+        private static readonly CodeGenerator eventFolderGenerator = 
+            new(EventsTemplatePath + "AudioEventFolder.g.cs");
 
-        private static readonly CodeGenerator enumGenerator = new(EventsTemplatePath + "AudioEnum.g.cs");
+        private static readonly CodeGenerator enumGenerator = 
+            new(EventsTemplatePath + "AudioEnum.g.cs");
         
         private static string GlobalParametersScriptPath => ScriptPathBase + "AudioGlobalParameters.g.cs";
         private static readonly CodeGenerator globalParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioGlobalParameters.g.cs");
+            new(EventsTemplatePath + "AudioGlobalParameters.g.cs");
         private static readonly CodeGenerator globalParameterGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameter.g.cs"); // Currently FMOD-specific
+            new(EventsTemplatePath + "FmodGlobalParameter.g.cs"); // Currently FMOD-specific
         
-        private static readonly CodeGenerator banksScriptGenerator =
-            new CodeGenerator(BanksTemplatePath + "AudioBanks.g.cs");
-        private static readonly CodeGenerator bankFieldGenerator =
-            new CodeGenerator(BanksTemplatePath + "AudioBankField.g.cs");
+        private static readonly CodeGenerator banksScriptGenerator = 
+            new(BanksTemplatePath + "AudioBanks.g.cs");
+        private static readonly CodeGenerator bankFieldGenerator = 
+            new(BanksTemplatePath + "AudioBankField.g.cs");
         
-        private static readonly CodeGenerator busesScriptGenerator =
-            new CodeGenerator(BusesTemplatePath + "AudioBuses.g.cs");
-        private static readonly CodeGenerator busFieldGenerator =
-            new CodeGenerator(BusesTemplatePath + "AudioBusField.g.cs");
+        private static readonly CodeGenerator busesScriptGenerator = 
+            new(BusesTemplatePath + "AudioBuses.g.cs");
+        private static readonly CodeGenerator busFieldGenerator = 
+            new(BusesTemplatePath + "AudioBusField.g.cs");
         
         private static readonly CodeGenerator snapshotsScriptGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshots.g.cs");
+            new(SnapshotsTemplatePath + "AudioSnapshots.g.cs");
         private static readonly CodeGenerator snapshotTypesScriptGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshotTypes.g.cs");
+            new(SnapshotsTemplatePath + "AudioSnapshotTypes.g.cs");
         private static readonly CodeGenerator snapshotTypeGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotType.g.cs"); // Currently FMOD-specific
+            new(SnapshotsTemplatePath + "FmodSnapshotType.g.cs"); // Currently FMOD-specific
         private static readonly CodeGenerator snapshotFieldsGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.g.cs"); // Currently FMOD-specific
+            new(SnapshotsTemplatePath + "FmodSnapshotFields.g.cs"); // Currently FMOD-specific
         
-        private static readonly CodeGenerator vcasScriptGenerator =
-            new CodeGenerator(VCAsTemplatePath + "AudioVCAs.g.cs");
-        private static readonly CodeGenerator vcaFieldGenerator =
-            new CodeGenerator(VCAsTemplatePath + "AudioVCAField.g.cs");
+        private static readonly CodeGenerator vcasScriptGenerator = 
+            new(VCAsTemplatePath + "AudioVCAs.g.cs");
+        private static readonly CodeGenerator vcaFieldGenerator = 
+            new(VCAsTemplatePath + "AudioVCAField.g.cs");
         
         private const string RefactorOldEventReferencesMenuPath = "FMOD/Refactor Old Event References";
 
@@ -269,8 +269,7 @@ namespace RoyTheunissen.AudioSyntax
         
         private static Dictionary<string, string> detectedEventChanges = new();
         
-        [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedType 
-            = new Dictionary<string, Type>();
+        [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedType = new();
         [NonSerialized] private static bool didCacheUserSpecifiedEnums;
 
         [InitializeOnLoadMethod]
@@ -501,7 +500,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private static Dictionary<string, string> GetExistingEventSyntaxPathsByGuid()
         {
-            Dictionary<string, string> existingEventPathsByGuid = new Dictionary<string, string>();
+            Dictionary<string, string> existingEventPathsByGuid = new();
             
             // Every line is an individual event formatted as path=guid
             string[] lines = rawMetaDataFromPreviousCodeGeneration.Split("\r\n");
@@ -749,7 +748,7 @@ namespace RoyTheunissen.AudioSyntax
             
             // Now let's clean up the dictionary section.
             string[] dictionarySectionLines = dictionarySection.Split("\n");
-            List<string> combinedDictionarySectionLines = new List<string>();
+            List<string> combinedDictionarySectionLines = new();
             
             // NOTE: The last line is empty so skip that one.
             for (int i = 0; i < dictionarySectionLines.Length; i += 2)
@@ -984,8 +983,7 @@ namespace RoyTheunissen.AudioSyntax
                 // because we may still need that one for generating other files.
                 string versionNumber = GetCurrentVersionNumber();
                 AudioSyntaxSettings.SyntaxFormats syntaxFormat = Settings.SyntaxFormat;
-                MetaData newMetaData = new MetaData(
-                    versionNumber, syntaxFormat, activeEventGuidToCurrentSyntaxPath);
+                MetaData newMetaData = new(versionNumber, syntaxFormat, activeEventGuidToCurrentSyntaxPath);
                 codeGenerator.ReplaceKeyword("MetaData", newMetaData.GetJson(), true);
             }
 
@@ -1188,8 +1186,8 @@ namespace RoyTheunissen.AudioSyntax
             EditorUtils.System.getBankList(out Bank[] banks);
             
             banks = banks.OrderBy(b => b.getPath()).ToArray();
-            List<FMOD.Studio.Bus> buses = new List<FMOD.Studio.Bus>();
-            List<FMOD.Studio.VCA> VCAs = new List<FMOD.Studio.VCA>();
+            List<FMOD.Studio.Bus> buses = new();
+            List<FMOD.Studio.VCA> VCAs = new();
             foreach (Bank bank in banks)
             {
                 bankFieldGenerator.Reset();
@@ -1439,7 +1437,7 @@ namespace RoyTheunissen.AudioSyntax
             AudioSyntaxSettings.SyntaxFormats oldSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
             AudioSyntaxSettings.SyntaxFormats newSyntaxFormat = Settings.SyntaxFormat;
             
-            Dictionary<string, string> renamesToPerform = new Dictionary<string, string>();
+            Dictionary<string, string> renamesToPerform = new();
             foreach (KeyValuePair<string,string> previousEventPathToNewPath in detectedEventChanges)
             {
                 string oldSyntaxPath = previousEventPathToNewPath.Key;
