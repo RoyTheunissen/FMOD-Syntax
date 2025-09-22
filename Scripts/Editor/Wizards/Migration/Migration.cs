@@ -78,6 +78,18 @@ namespace RoyTheunissen.AudioSyntax
                     EditorGUILayout.Space();
             }
         }
+        
+        public void PerformAllRefactors()
+        {
+            if (!isNecessary)
+                return;
+            
+            for (int i = 0; i < refactors.Count; i++)
+            {
+                if (refactors[i].IsNecessary)
+                    refactors[i].PerformAsPartOfBatch();
+            }
+        }
 
         public static T Create<T>() where T : Migration, new()
         {

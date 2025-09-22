@@ -162,6 +162,8 @@ namespace RoyTheunissen.AudioSyntax
                     EditorGUILayout.HelpBox("Issues were detected that need to be resolved first.", MessageType.Error);
                 else
                     EditorGUILayout.HelpBox("Issues were detected that you should consider resolving first.", MessageType.Warning);
+                if (GUILayout.Button("Fix All Automatically"))
+                    AutoFixAll();
             }
             
             using (new EditorGUI.DisabledScope(hasDetectedIssues))
@@ -169,6 +171,16 @@ namespace RoyTheunissen.AudioSyntax
                 bool shouldFinalize = GUILayout.Button("Finalize", GUILayout.Height(48));
                 if (shouldFinalize)
                     FinalizeMigration();
+            }
+        }
+
+        private void AutoFixAll()
+        {
+            for (int i = 0; i < Migrations.Length; i++)
+            {
+                Migration migration = Migrations[i];
+
+                migration.PerformAllRefactors();
             }
         }
 

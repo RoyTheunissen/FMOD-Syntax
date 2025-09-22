@@ -38,12 +38,26 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         protected abstract bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency);
+        
+        private void PerformInternal(bool dispatchEvent)
+        {
+            OnPerform();
+
+            if (dispatchEvent)
+                RefactorPerformedEvent?.Invoke(this);
+        }
 
         private void Perform()
         {
-            OnPerform();
-            
-            RefactorPerformedEvent?.Invoke(this);
+            PerformInternal(true);
+        }
+
+        public void PerformAsPartOfBatch()
+        {
+            // The intention was to not dispatch an event for every individual refactor when doing Auto Fix All,
+            // but for robustness, perhaps it *is* best to re-evaluate all the refactors and see if they are still
+            // necessary. Perhaps certain refactors will cause other refactors to not be necessary.
+            PerformInternal(true);
         }
 
         protected abstract void OnPerform();
