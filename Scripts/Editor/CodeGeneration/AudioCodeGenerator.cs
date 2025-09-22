@@ -12,9 +12,9 @@ using UnityEngine;
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
-    /// Generates code for FMOD events & parameters.
+    /// Generates code for audio events & parameters.
     /// </summary>
-    public static class FmodCodeGenerator
+    public static class AudioCodeGenerator
     {
         private sealed class EventFolder
         {
@@ -776,8 +776,8 @@ namespace RoyTheunissen.AudioSyntax
             return preDictionarySection + dictionarySection + postDictionarySection;
         }
 
-        [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
-        [MenuItem(AudioSyntaxMenuPaths.Root + "Generate FMOD Code", false, 999999999)]
+        [MenuItem("FMOD/Generate Audio Code %&g", false, 999999999)]
+        [MenuItem(AudioSyntaxMenuPaths.Root + "Generate Audio Code", false, 999999999)]
         public static void GenerateCode()
         {
             ParseMetaData();

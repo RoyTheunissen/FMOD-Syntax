@@ -28,7 +28,7 @@ namespace FMODUnity
             this EditorParamRef parameter, bool fullyQualified, EditorEventRef @event)
         {
             string name = parameter.GetFilteredName();
-            bool hasUserEnum = FmodCodeGenerator.GetUserSpecifiedLabelParameterType(name, out Type userEnum);
+            bool hasUserEnum = AudioCodeGenerator.GetUserSpecifiedLabelParameterType(name, out Type userEnum);
             if (hasUserEnum)
                 return userEnum.FullName;
 
@@ -52,7 +52,7 @@ namespace FMODUnity
                 {
 #if SCRIPTABLE_OBJECT_COLLECTION
                     string name = parameter.GetFilteredName();
-                    bool hasUserType = FmodCodeGenerator.GetUserSpecifiedLabelParameterType(name, out Type userType);
+                    bool hasUserType = AudioCodeGenerator.GetUserSpecifiedLabelParameterType(name, out Type userType);
                     if (hasUserType && !typeof(Enum).IsAssignableFrom(userType))
                         return $"ParameterScriptableObjectCollectionItem<{parameter.GetLabelParameterTypeName(false, null)}>";
 #endif // SCRIPTABLE_OBJECT_COLLECTION
