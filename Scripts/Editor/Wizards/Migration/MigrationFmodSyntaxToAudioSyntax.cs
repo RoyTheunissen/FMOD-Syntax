@@ -110,7 +110,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             bool isNecessary = AreReplacementsNecessary(replacements, ~FileScopes.GeneratedCode);
 
-            urgency = Migration.IssueUrgencies.Optional;
+            urgency = Migration.IssueUrgencies.Required;
             
             return isNecessary;
         }
