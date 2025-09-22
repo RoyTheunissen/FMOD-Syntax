@@ -10,7 +10,7 @@ namespace RoyTheunissen.AudioSyntax
     /// Window to show to users when they haven't set up the FMOD Syntax system yet to let them conveniently
     /// initialize it with appropriate settings.
     /// </summary>
-    public partial class MigrationWizard : WizardBase
+    public sealed class MigrationWizard : WizardBase
     {
         public static readonly string MigrationNecessaryText = $"It was detected that you used an earlier version of " +
                                                      $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes " +
