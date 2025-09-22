@@ -30,8 +30,8 @@ namespace RoyTheunissen.AudioSyntax
         private int versionMigratingFrom;
         private int versionMigratingTo;
 
-        private bool hasDetectedIssuesThatNeedToBeResolvedFirst;
-        private bool hasDetectedIssuesThatShouldBeResolvedFirst;
+        private bool hasDetectedIssues;
+        private Migration.IssueUrgencies detectedIssueUrgency;
         
         private int refreshProgressId;
 
@@ -59,12 +59,6 @@ namespace RoyTheunissen.AudioSyntax
         private void OnEnable()
         {
             Refresh();
-
-            for (int i = 0; i < Migrations.Length; i++)
-            {
-                Migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
-                Migrations[i].IssueDetectedEvent += HandleIssueDetectedEvent;
-            }
             
             Refactor.RefactorPerformedEvent -= HandleRefactorPerformedEvent;
             Refactor.RefactorPerformedEvent += HandleRefactorPerformedEvent;
@@ -72,29 +66,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private void OnDisable()
         {
-            for (int i = 0; i < Migrations.Length; i++)
-            {
-                Migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
-            }
-            
             Refactor.RefactorPerformedEvent -= HandleRefactorPerformedEvent;
-        }
-
-        private void HandleIssueDetectedEvent(Migration migration, Migration.IssueUrgencies urgency)
-        {
-            switch (urgency)
-            {
-                case Migration.IssueUrgencies.Required:
-                    hasDetectedIssuesThatNeedToBeResolvedFirst = true;
-                    break;
-                
-                case Migration.IssueUrgencies.Optional:
-                    hasDetectedIssuesThatShouldBeResolvedFirst = true;
-                    break;
-                
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(urgency), urgency, null);
-            }
         }
         
         private void HandleRefactorPerformedEvent(Refactor refactor)
@@ -109,8 +81,8 @@ namespace RoyTheunissen.AudioSyntax
             versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
             versionMigratingTo = AudioSyntaxSettings.TargetVersion;
 
-            hasDetectedIssuesThatNeedToBeResolvedFirst = false;
-            hasDetectedIssuesThatShouldBeResolvedFirst = false;
+            hasDetectedIssues = false;
+            detectedIssueUrgency = Migration.IssueUrgencies.Optional;
 
             int refreshStepCount = 2 + Migrations.Length;
             int refreshStep = 0;
@@ -121,6 +93,13 @@ namespace RoyTheunissen.AudioSyntax
                 for (int i = 0; i < Migrations.Length; i++)
                 {
                     Migrations[i].UpdateConditions(versionMigratingFrom);
+
+                    if (Migrations[i].IsNecessary)
+                    {
+                        hasDetectedIssues = true;
+                        if (Migrations[i].Urgency > detectedIssueUrgency)
+                            detectedIssueUrgency = Migrations[i].Urgency;
+                    }
                     
                     Progress.Report(refreshProgressId, refreshStep++, refreshStepCount);
                 }
@@ -176,13 +155,16 @@ namespace RoyTheunissen.AudioSyntax
             }
             
             EditorGUILayout.EndScrollView();
+
+            if (hasDetectedIssues)
+            {
+                if (detectedIssueUrgency == Migration.IssueUrgencies.Required)
+                    EditorGUILayout.HelpBox("Issues were detected that need to be resolved first.", MessageType.Error);
+                else
+                    EditorGUILayout.HelpBox("Issues were detected that you should consider resolving first.", MessageType.Warning);
+            }
             
-            if (hasDetectedIssuesThatNeedToBeResolvedFirst)
-                EditorGUILayout.HelpBox("Issues were detected that need to be resolved first.", MessageType.Error);
-            else if (hasDetectedIssuesThatShouldBeResolvedFirst)
-                EditorGUILayout.HelpBox("Issues were detected that you should consider resolving first.", MessageType.Warning);
-            
-            using (new EditorGUI.DisabledScope(hasDetectedIssuesThatNeedToBeResolvedFirst))
+            using (new EditorGUI.DisabledScope(hasDetectedIssues))
             {
                 bool shouldFinalize = GUILayout.Button("Finalize", GUILayout.Height(48));
                 if (shouldFinalize)

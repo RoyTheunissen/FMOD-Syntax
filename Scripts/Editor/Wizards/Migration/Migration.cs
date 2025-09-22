@@ -27,10 +27,13 @@ namespace RoyTheunissen.AudioSyntax
         
         public abstract string DocumentationURL { get; }
 
+        private bool isNecessary;
+        public bool IsNecessary => isNecessary;
+
+        private IssueUrgencies urgency;
+        public IssueUrgencies Urgency => urgency;
+
         private readonly List<Refactor> refactors = new();
-        
-        public delegate void IssueDetectedHandler(Migration migration, IssueUrgencies urgency);
-        public event IssueDetectedHandler IssueDetectedEvent;
 
         private void Initialize()
         {
@@ -43,9 +46,19 @@ namespace RoyTheunissen.AudioSyntax
         {
             this.versionMigratingFrom = versionMigratingFrom;
 
+            isNecessary = false;
+            urgency = IssueUrgencies.Optional;
+
             for (int i = 0; i < refactors.Count; i++)
             {
                 refactors[i].CheckIfNecessary();
+
+                if (refactors[i].IsNecessary)
+                {
+                    isNecessary = true;
+                    if (refactors[i].Urgency > urgency)
+                        urgency = refactors[i].Urgency;
+                }
             }
         }
 
@@ -66,11 +79,6 @@ namespace RoyTheunissen.AudioSyntax
                 if (i < refactors.Count - 1)
                     EditorGUILayout.Space();
             }
-        }
-
-        protected void ReportIssue(IssueUrgencies urgency)
-        {
-            IssueDetectedEvent?.Invoke(this, urgency);
         }
 
         public static T Create<T>() where T : Migration, new()
