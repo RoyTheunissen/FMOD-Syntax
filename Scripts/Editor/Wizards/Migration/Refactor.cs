@@ -123,7 +123,12 @@ namespace RoyTheunissen.AudioSyntax
         
         private bool IsScriptGeneratedCode(MonoScript monoScript)
         {
-            // TODO: Make sure generated code uses the .g.cs extension?
+            // The new convention dictates that generated files should be called .g and then whatever file extension
+            // they have, for example: .g.cs
+            if (monoScript.name.EndsWith(".g"))
+                return true;
+            
+            // We didn't use to use that convention, but we did consistently feature this text in our generated files.
             return monoScript.text.Contains("/// GENERATED: ");
         }
         
