@@ -254,8 +254,7 @@ namespace RoyTheunissen.AudioSyntax
             
             EditorGUILayout.Space();
             
-            EditorGUILayout.LabelField($"Welcome! Let's initialize {AudioSyntaxMenuPaths.ProjectName} " +
-                                       $"with the necessary settings.");
+            EditorGUILayout.LabelField($"Let's set up {AudioSyntaxMenuPaths.ProjectName} with the necessary settings.");
             
             EditorGUILayout.Space();
             
