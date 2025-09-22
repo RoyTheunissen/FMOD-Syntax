@@ -268,7 +268,11 @@ namespace RoyTheunissen.AudioSyntax
 
             if (isMigrationProcedureRequired)
             {
-                EditorGUILayout.HelpBox(MigrationWizard.MigrationNecessaryText, MessageType.Info);
+                EditorGUILayout.HelpBox($"It was detected that you used an earlier version of " +
+                                        $"{AudioSyntaxMenuPaths.ProjectName} and that certain changes " +
+                                        $"need to be made before your project is in working order again.\n\n" +
+                                        $"The Migration Wizard will be launched to guide you through this process.",
+                    MessageType.Info);
             }
 
             using (new EditorGUI.DisabledScope(!CanInitialize))
