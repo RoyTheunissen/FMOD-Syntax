@@ -1451,7 +1451,7 @@ namespace RoyTheunissen.AudioSyntax
                 
                 // Just a sanity check, but don't refactor FMOD-Syntax itself...
                 // The only thing that I could see it rename is examples in some of the comments.
-                if (MigrationWizard.IsProjectRelativePathInsideThisPackage(fileRelative))
+                if (Refactor.IsProjectRelativePathInsideThisPackage(fileRelative))
                     continue;
                 
                 // Don't update the generated code itself. That one is already up to date.

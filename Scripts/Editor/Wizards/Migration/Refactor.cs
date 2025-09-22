@@ -87,7 +87,9 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        private static bool IsProjectRelativePathInsideThisPackage(string projectRelativePath)
+        // NOTE: This is also used in FmodCodeGenerator to ensure that event renames are not performed inside the
+        // package itself. Generally speaking it is useful to exclude files to automatically refactor.
+        public static bool IsProjectRelativePathInsideThisPackage(string projectRelativePath)
         {
             if (projectRelativePath.StartsWith("Assets/"))
                 projectRelativePath = projectRelativePath.RemoveAssetsPrefix();
