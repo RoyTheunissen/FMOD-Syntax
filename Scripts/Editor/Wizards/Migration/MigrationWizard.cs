@@ -25,6 +25,8 @@ namespace RoyTheunissen.AudioSyntax
         
         private const float Width = 500;
         
+        private const float ThickButtonHeight = 48;
+        
         private Vector2 scrollPosition;
 
         private int versionMigratingFrom;
@@ -124,10 +126,6 @@ namespace RoyTheunissen.AudioSyntax
                 requiresMigration = false;
                 EditorGUILayout.HelpBox($"It looks like your version of {AudioSyntaxMenuPaths.ProjectName} is up to date!", MessageType.Info);
             }
-            else
-            {
-                EditorGUILayout.HelpBox(MigrationNecessaryText, MessageType.Info);
-            }
             
             bool shouldRefresh = GUILayout.Button("Refresh");
             if (shouldRefresh)
@@ -162,7 +160,7 @@ namespace RoyTheunissen.AudioSyntax
                     EditorGUILayout.HelpBox("Issues were detected that need to be resolved first.", MessageType.Error);
                 else
                     EditorGUILayout.HelpBox("Issues were detected that you should consider resolving first.", MessageType.Warning);
-                if (GUILayout.Button("Fix All Automatically"))
+                if (GUILayout.Button("Fix All Automatically", GUILayout.Height(ThickButtonHeight)))
                 {
                     bool confirmed = EditorUtility.DisplayDialog("Automatic Refactor All Confirmation",
                         $"You are about to let {AudioSyntaxMenuPaths.ProjectName} try to automatically refactor " +
@@ -181,7 +179,7 @@ namespace RoyTheunissen.AudioSyntax
             
             using (new EditorGUI.DisabledScope(hasDetectedIssues))
             {
-                bool shouldFinalize = GUILayout.Button("Finalize", GUILayout.Height(48));
+                bool shouldFinalize = GUILayout.Button("Finalize", GUILayout.Height(ThickButtonHeight));
                 if (shouldFinalize)
                     FinalizeMigration();
             }
