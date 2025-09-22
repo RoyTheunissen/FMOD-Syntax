@@ -1,25 +1,10 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor;
-using UnityEngine;
 
 namespace RoyTheunissen.AudioSyntax
 {
     public sealed class MigrationFmodSyntaxToAudioSyntax : Migration
     {
-        private const string FmodSyntaxNamespace = "RoyTheunissen.FMODSyntax";
-        private const string AudioSyntaxNamespace = "RoyTheunissen.AudioSyntax";
-        
-        private const string FmodSyntaxSystemName = "FmodSyntaxSystem";
-        private const string GeneralSystemName = "AudioSyntaxSystem";
-        private const string UnityAudioSystemName = "UnityAudioSyntaxSystem";
-        private const string CullPlaybacksMethod = "CullPlaybacks";
-        private const string StopAllActivePlaybacksMethod = "StopAllActivePlaybacks";
-        private const string StopAllActiveEventPlaybacksMethod = "StopAllActiveEventPlaybacks";
-        private const string UpdateMethod = "Update";
-
-        private const int VersionFmodSyntaxToAudioSyntax = 1;
-        
         public override int VersionMigratingTo => 1;
 
         public override string DisplayName => "FMOD-Syntax to Audio-Syntax";
@@ -31,10 +16,58 @@ namespace RoyTheunissen.AudioSyntax
 
         public override string DocumentationURL =>
             "https://github.com/RoyTheunissen/FMOD-Syntax?tab=readme-ov-file#migration-to-audio-syntax";
-        
-        [NonSerialized] private bool hasDetectedOutdatedNamespaceUsage;
-        [NonSerialized] private bool hasDetectedOutdatedSystemReferences;
 
+        protected override void RegisterRefactors(List<Refactor> refactors)
+        {
+            refactors.Add(new FmodSyntaxNamespaceToAudioSyntaxNamespaceRefactor());
+            refactors.Add(new FmodSyntaxOutdatedSystemReferencesRefactor());
+        }
+    }
+
+    public abstract class FmodSyntaxToAudioSyntaxRefactor : Refactor
+    {
+        protected const string FmodSyntaxNamespace = "RoyTheunissen.FMODSyntax";
+        protected const string AudioSyntaxNamespace = "RoyTheunissen.AudioSyntax";
+
+        protected const string FmodSyntaxSystemName = "FmodSyntaxSystem";
+        protected const string GeneralSystemName = "AudioSyntaxSystem";
+        protected const string UnityAudioSystemName = "UnityAudioSyntaxSystem";
+        protected const string CullPlaybacksMethod = "CullPlaybacks";
+        protected const string StopAllActivePlaybacksMethod = "StopAllActivePlaybacks";
+        protected const string StopAllActiveEventPlaybacksMethod = "StopAllActiveEventPlaybacks";
+        protected const string UpdateMethod = "Update";
+    }
+
+    public sealed class FmodSyntaxNamespaceToAudioSyntaxNamespaceRefactor : FmodSyntaxToAudioSyntaxRefactor
+    {
+        protected override string NotNecessaryDisplayText =>
+            $"There seem to be no more occurrences of the deprecated " +
+            $"{FmodSyntaxNamespace} namespace.";
+
+        protected override string IsNecessaryDisplayText => $"The system has detected that the FMOD-Syntax namespace " +
+                                                            $"'{FmodSyntaxNamespace}' is being used. This has since been renamed to " +
+                                                            $"'{AudioSyntaxNamespace}'.";
+
+        protected override string ConfirmationDialogueText =>
+            $"Are you sure you want to automatically replace the {FmodSyntaxNamespace} namespace with the {AudioSyntaxNamespace} namespace?";
+
+        protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
+        {
+            bool isNecessary = IsContainedInScripts(FmodSyntaxNamespace);
+
+            urgency = Migration.IssueUrgencies.Required;
+
+            return isNecessary;
+        }
+
+        protected override void OnPerform()
+        {
+            ReplaceInScripts(FmodSyntaxNamespace, AudioSyntaxNamespace);
+        }
+    }
+
+    public sealed class FmodSyntaxOutdatedSystemReferencesRefactor : FmodSyntaxToAudioSyntaxRefactor
+    {
         private readonly Dictionary<string, string> outdatedSystemReferenceReplacements = new()
         {
             { $"{FmodSyntaxSystemName}.{CullPlaybacksMethod}", $"{GeneralSystemName}.{UpdateMethod}" },
@@ -60,111 +93,31 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        protected override void OnUpdateConditions()
+        protected override string IsNecessaryDisplayText => $"There used to be one system called '{FmodSyntaxSystemName}'. This has " +
+                                                            $"been replaced by a general system '{GeneralSystemName}' which in turn " +
+                                                            $"updates both '{FmodSyntaxSystemName}' and '{UnityAudioSystemName}'. " +
+                                                            $"The '{CullPlaybacksMethod}' method has also been renamed " +
+                                                            $"to '{UpdateMethod}' because it now does more than just culling " +
+                                                            $"playbacks.\n\n" + OutdatedSystemReferencesDisplayText;
+
+        protected override string NotNecessaryDisplayText => $"There seem to be no more outdated references to '{FmodSyntaxSystemName}'.";
+
+        protected override string ConfirmationDialogueText => $"Are you sure you want to automatically update references to the old system " +
+                                                              $"'{FmodSyntaxSystemName}' with references to the new system '{GeneralSystemName}' " +
+                                                              $"where possible?";
+
+        protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
         {
-            DetectOutdatedNamespaceUsage();
-            DetectOutdatedSystemReferences();
+            bool isNecessary = AreReplacementsNecessary(outdatedSystemReferenceReplacements);
+
+            urgency = Migration.IssueUrgencies.Optional;
+            
+            return isNecessary;
         }
 
-        protected override void DrawContents()
-        {
-            if (hasDetectedOutdatedNamespaceUsage)
-            {
-                EditorGUILayout.HelpBox($"The system has detected that the FMOD-Syntax namespace " +
-                                        $"'{FmodSyntaxNamespace}' is being used. This has since been renamed to " +
-                                        $"'{AudioSyntaxNamespace}'.", MessageType.Error);
-                bool shouldFixNamespacesAutomatically = GUILayout.Button("Fix Automatically");
-                if (shouldFixNamespacesAutomatically)
-                {
-                    bool confirmed = EditorUtility.DisplayDialog(
-                        "Automatically fix namespaces",
-                        $"Are you sure you want to automatically replace the {FmodSyntaxNamespace} namespace with " +
-                        $"the {AudioSyntaxNamespace} namespace?\n\nWe recommend that you commit your changes to " +
-                        $"version control first so that you don't lose any work.",
-                        "Yes, I have saved my work.", "No");
-                    
-                    if (confirmed)
-                        FixFmodSyntaxNamespaces();
-                }
-            }
-            else
-            {
-                DrawingUtilities.HelpBoxAffirmative($"There seem to be no more occurrences of the deprecated " +
-                                   $"{FmodSyntaxNamespace} namespace.");
-            }
-            
-            EditorGUILayout.Space();
-            
-            if (hasDetectedOutdatedSystemReferences)
-            {
-                EditorGUILayout.HelpBox($"There used to be one system called '{FmodSyntaxSystemName}'. This has " +
-                                        $"been replaced by a general system '{GeneralSystemName}' which in turn " +
-                                        $"updates both '{FmodSyntaxSystemName}' and '{UnityAudioSystemName}'. " +
-                                        $"The '{CullPlaybacksMethod}' method has also been renamed " +
-                                        $"to '{UpdateMethod}' because it now does more than just culling " +
-                                        $"playbacks.\n\n" + OutdatedSystemReferencesDisplayText,
-                    MessageType.Warning);
-                
-                bool shouldFixSystemReferencesAutomatically = GUILayout.Button("Fix Automatically");
-                if (shouldFixSystemReferencesAutomatically)
-                {
-                    bool confirmed = EditorUtility.DisplayDialog(
-                        "Automatically fix system references",
-                        $"Are you sure you want to automatically update references to the old system " +
-                        $"'{FmodSyntaxSystemName}' with references to the new system '{GeneralSystemName}' " +
-                        $"where possible?\n\nWe recommend that you commit your changes to version control first so " +
-                        $"that you don't lose any work.",
-                        "Yes, I have saved my work.", "No");
-                    
-                    if (confirmed)
-                        FixOutdatedSystemReferences();
-                }
-            }
-            else
-            {
-                DrawingUtilities.HelpBoxAffirmative(
-                    $"There seem to be no more outdated references to '{FmodSyntaxSystemName}'.");
-            }
-        }
-        
-        private void DetectOutdatedNamespaceUsage()
-        {
-            hasDetectedOutdatedNamespaceUsage = false;
-            
-            if (VersionMigratingFrom >= VersionFmodSyntaxToAudioSyntax)
-                return;
-
-            hasDetectedOutdatedNamespaceUsage = IsContainedInScripts(FmodSyntaxNamespace);
-            
-            if (hasDetectedOutdatedNamespaceUsage)
-                ReportIssue(IssueUrgencies.Required);
-        }
-        
-        private void DetectOutdatedSystemReferences()
-        {
-            hasDetectedOutdatedSystemReferences = false;
-            
-            if (VersionMigratingFrom >= VersionFmodSyntaxToAudioSyntax)
-                return;
-            
-            hasDetectedOutdatedSystemReferences = AreReplacementsNecessary(outdatedSystemReferenceReplacements);
-            
-            if (hasDetectedOutdatedSystemReferences)
-                ReportIssue(IssueUrgencies.Optional);
-        }
-        
-        private void FixFmodSyntaxNamespaces()
-        {
-            ReplaceInScripts(FmodSyntaxNamespace, AudioSyntaxNamespace);
-            
-            ReportRefactorPerformed();
-        }
-        
-        private void FixOutdatedSystemReferences()
+        protected override void OnPerform()
         {
             ReplaceInScripts(outdatedSystemReferenceReplacements);
-            
-            ReportRefactorPerformed();
         }
     }
 }

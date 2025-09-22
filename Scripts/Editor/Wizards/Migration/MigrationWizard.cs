@@ -35,7 +35,7 @@ namespace RoyTheunissen.AudioSyntax
         
         private int refreshProgressId;
 
-        private static readonly Migration[] migrations = { new MigrationFmodSyntaxToAudioSyntax() };
+        private static readonly Migration[] Migrations = { Migration.Create<MigrationFmodSyntaxToAudioSyntax>() };
         
 #if ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
         [MenuItem(OpenMenuPath, false, Priority)]
@@ -60,24 +60,24 @@ namespace RoyTheunissen.AudioSyntax
         {
             Refresh();
 
-            for (int i = 0; i < migrations.Length; i++)
+            for (int i = 0; i < Migrations.Length; i++)
             {
-                migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
-                migrations[i].IssueDetectedEvent += HandleIssueDetectedEvent;
-                
-                migrations[i].RefactorPerformedEvent -= HandleRefactorPerformedEvent;
-                migrations[i].RefactorPerformedEvent += HandleRefactorPerformedEvent;
+                Migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
+                Migrations[i].IssueDetectedEvent += HandleIssueDetectedEvent;
             }
+            
+            Refactor.RefactorPerformedEvent -= HandleRefactorPerformedEvent;
+            Refactor.RefactorPerformedEvent += HandleRefactorPerformedEvent;
         }
 
         private void OnDisable()
         {
-            for (int i = 0; i < migrations.Length; i++)
+            for (int i = 0; i < Migrations.Length; i++)
             {
-                migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
-                
-                migrations[i].RefactorPerformedEvent -= HandleRefactorPerformedEvent;
+                Migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
             }
+            
+            Refactor.RefactorPerformedEvent -= HandleRefactorPerformedEvent;
         }
 
         private void HandleIssueDetectedEvent(Migration migration, Migration.IssueUrgencies urgency)
@@ -97,7 +97,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        private void HandleRefactorPerformedEvent(Migration migration)
+        private void HandleRefactorPerformedEvent(Refactor refactor)
         {
             Refresh();
         }
@@ -112,15 +112,15 @@ namespace RoyTheunissen.AudioSyntax
             hasDetectedIssuesThatNeedToBeResolvedFirst = false;
             hasDetectedIssuesThatShouldBeResolvedFirst = false;
 
-            int refreshStepCount = 2 + migrations.Length;
+            int refreshStepCount = 2 + Migrations.Length;
             int refreshStep = 0;
             Progress.Report(refreshProgressId, refreshStep++, refreshStepCount);
             
             if (versionMigratingFrom < versionMigratingTo)
             {
-                for (int i = 0; i < migrations.Length; i++)
+                for (int i = 0; i < Migrations.Length; i++)
                 {
-                    migrations[i].UpdateConditions(versionMigratingFrom);
+                    Migrations[i].UpdateConditions(versionMigratingFrom);
                     
                     Progress.Report(refreshProgressId, refreshStep++, refreshStepCount);
                 }
@@ -162,9 +162,9 @@ namespace RoyTheunissen.AudioSyntax
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUIStyle.none, GUI.skin.verticalScrollbar);
 
-            for (int i = 0; i < migrations.Length; i++)
+            for (int i = 0; i < Migrations.Length; i++)
             {
-                Migration migration = migrations[i];
+                Migration migration = Migrations[i];
                 if (versionMigratingFrom >= migration.VersionMigratingTo)
                     continue;
 
