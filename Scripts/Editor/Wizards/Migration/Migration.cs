@@ -24,8 +24,11 @@ namespace RoyTheunissen.AudioSyntax
         
         public abstract string DocumentationURL { get; }
 
-        private bool isNecessary;
-        public bool IsNecessary => isNecessary;
+        private bool isNecessaryForCurrentVersion;
+        public bool IsNecessaryForCurrentVersion => isNecessaryForCurrentVersion;
+
+        private bool hasNecessaryRefactors;
+        public bool HasNecessaryRefactors => hasNecessaryRefactors;
 
         private IssueUrgencies urgency;
         public IssueUrgencies Urgency => urgency;
@@ -41,10 +44,12 @@ namespace RoyTheunissen.AudioSyntax
 
         public void UpdateConditions(int versionMigratingFrom)
         {
-            isNecessary = false;
+            isNecessaryForCurrentVersion = versionMigratingFrom < VersionMigratingTo;
+
+            hasNecessaryRefactors = false;
             urgency = IssueUrgencies.Optional;
             
-            if (versionMigratingFrom >= VersionMigratingTo)
+            if (!isNecessaryForCurrentVersion)
                 return;
 
             for (int i = 0; i < refactors.Count; i++)
@@ -53,7 +58,7 @@ namespace RoyTheunissen.AudioSyntax
 
                 if (refactors[i].IsNecessary)
                 {
-                    isNecessary = true;
+                    hasNecessaryRefactors = true;
                     if (refactors[i].Urgency > urgency)
                         urgency = refactors[i].Urgency;
                 }
@@ -81,7 +86,7 @@ namespace RoyTheunissen.AudioSyntax
         
         public void PerformAllRefactors()
         {
-            if (!isNecessary)
+            if (!isNecessaryForCurrentVersion || !hasNecessaryRefactors)
                 return;
             
             for (int i = 0; i < refactors.Count; i++)

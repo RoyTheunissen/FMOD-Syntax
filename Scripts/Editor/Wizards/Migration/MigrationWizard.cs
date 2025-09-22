@@ -94,7 +94,7 @@ namespace RoyTheunissen.AudioSyntax
                 {
                     Migrations[i].UpdateConditions(versionMigratingFrom);
 
-                    if (Migrations[i].IsNecessary)
+                    if (Migrations[i].HasNecessaryRefactors)
                     {
                         hasDetectedIssues = true;
                         if (Migrations[i].Urgency > detectedIssueUrgency)
@@ -144,7 +144,7 @@ namespace RoyTheunissen.AudioSyntax
             for (int i = 0; i < Migrations.Length; i++)
             {
                 Migration migration = Migrations[i];
-                if (!migration.IsNecessary)
+                if (!migration.IsNecessaryForCurrentVersion)
                     continue;
 
                 BeginSettingsBox(migration.DisplayName);
