@@ -53,7 +53,7 @@ namespace RoyTheunissen.AudioSyntax
 
         protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
         {
-            bool isNecessary = IsContainedInScripts(FmodSyntaxNamespace);
+            bool isNecessary = IsReplacementNecessary(FmodSyntaxNamespace, AudioSyntaxNamespace);
 
             urgency = Migration.IssueUrgencies.Required;
 

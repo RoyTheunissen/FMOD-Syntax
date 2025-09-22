@@ -111,7 +111,7 @@ namespace RoyTheunissen.AudioSyntax
             return IsProjectRelativePathInsideThisPackage(assetPath);
         }
 
-        protected bool IsContainedInScripts(string text)
+        private bool IsContainedInScripts(string text)
         {
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
@@ -128,6 +128,11 @@ namespace RoyTheunissen.AudioSyntax
             }
 
             return false;
+        }
+        
+        protected bool IsReplacementNecessary(string from, string to)
+        {
+            return IsContainedInScripts(from);
         }
 
         protected bool AreReplacementsNecessary(Dictionary<string, string> replacements)
