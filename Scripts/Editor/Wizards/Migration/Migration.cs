@@ -1,10 +1,21 @@
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine;
 
 namespace RoyTheunissen.AudioSyntax
 {
-    public partial class MigrationWizard
+    /// <summary>
+    /// Base class for a migration that the Migration Wizard can perform.
+    /// For example migrating from FMOD-Syntax to Audio-Syntax.
+    /// </summary>
+    public abstract class Migration
     {
+        public enum IssueUrgencies
+        {
+            Required,
+            Optional,
+        }
+        
         private static readonly string[] AudioSyntaxBasePaths =
         {
             "FMOD-Syntax/",
@@ -12,7 +23,53 @@ namespace RoyTheunissen.AudioSyntax
             "com.roytheunissen.fmod-syntax/",
             "com.roytheunissen.audio-syntax/",
         };
+        
+        public abstract string DisplayName { get; }
 
+        private int versionMigratingFrom;
+        protected int VersionMigratingFrom => versionMigratingFrom;
+
+        public abstract int VersionMigratingTo { get; }
+        
+        public abstract string Description { get; }
+        
+        public abstract string DocumentationURL { get; }
+        
+        public delegate void IssueDetectedHandler(Migration migration, IssueUrgencies urgency);
+        public event IssueDetectedHandler IssueDetectedEvent;
+        
+        public delegate void RefactorPerformedHandler(Migration migration);
+        public event RefactorPerformedHandler RefactorPerformedEvent;
+
+        public void UpdateConditions(int versionMigratingFrom)
+        {
+            this.versionMigratingFrom = versionMigratingFrom;
+            
+            OnUpdateConditions();
+        }
+
+        protected abstract void OnUpdateConditions();
+
+        public void OnGUI()
+        {
+            EditorGUILayout.HelpBox(Description, MessageType.Info);
+            
+            bool didClickDocumentation = EditorGUILayout.LinkButton("Documentation");
+            if (didClickDocumentation)
+                Application.OpenURL(DocumentationURL);
+            
+            EditorGUILayout.Space();
+            
+            DrawContents();
+        }
+
+        protected abstract void DrawContents();
+
+        protected void ReportIssue(IssueUrgencies urgency)
+        {
+            IssueDetectedEvent?.Invoke(this, urgency);
+        }
+        
         public static bool IsProjectRelativePathInsideThisPackage(string projectRelativePath)
         {
             if (projectRelativePath.StartsWith("Assets/"))
@@ -37,7 +94,7 @@ namespace RoyTheunissen.AudioSyntax
             return IsProjectRelativePathInsideThisPackage(assetPath);
         }
 
-        private bool IsContainedInScripts(string text)
+        protected bool IsContainedInScripts(string text)
         {
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
@@ -56,7 +113,7 @@ namespace RoyTheunissen.AudioSyntax
             return false;
         }
 
-        private bool AreReplacementsNecessary(Dictionary<string, string> replacements)
+        protected bool AreReplacementsNecessary(Dictionary<string, string> replacements)
         {
             foreach (KeyValuePair<string, string> oldTextNewTextPair in replacements)
             {
@@ -67,7 +124,7 @@ namespace RoyTheunissen.AudioSyntax
             return false;
         }
 
-        private void ReplaceInScripts(string oldText, string newText, bool partOfBatch = false)
+        protected void ReplaceInScripts(string oldText, string newText, bool partOfBatch = false)
         {
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
@@ -88,7 +145,7 @@ namespace RoyTheunissen.AudioSyntax
                 AssetDatabase.Refresh();
         }
 
-        private void ReplaceInScripts(Dictionary<string, string> replacements)
+        protected void ReplaceInScripts(Dictionary<string, string> replacements)
         {
             foreach (KeyValuePair<string, string> oldTextNewTextPair in replacements)
             {
@@ -97,8 +154,8 @@ namespace RoyTheunissen.AudioSyntax
 
             AssetDatabase.Refresh();
         }
-        
-        private string GetDisplayTextForReplacements(Dictionary<string, string> replacements)
+
+        protected string GetDisplayTextForReplacements(Dictionary<string, string> replacements)
         {
             string text = string.Empty;
             int count = replacements.Count;
@@ -114,6 +171,12 @@ namespace RoyTheunissen.AudioSyntax
             }
 
             return text;
+        }
+
+        protected void ReportRefactorPerformed()
+        {
+            // TODO: Move this to Refactor class
+            RefactorPerformedEvent?.Invoke(this);
         }
     }
 }

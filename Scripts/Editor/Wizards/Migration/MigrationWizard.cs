@@ -1,5 +1,6 @@
-// #define ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
+#define ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
 
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -33,6 +34,8 @@ namespace RoyTheunissen.AudioSyntax
         private bool hasDetectedIssuesThatShouldBeResolvedFirst;
         
         private int refreshProgressId;
+
+        private static readonly Migration[] migrations = { new MigrationFmodSyntaxToAudioSyntax() };
         
 #if ALLOW_OPENING_AUDIO_SYNTAX_MIGRATION_WIZARD_EXPLICITLY
         [MenuItem(OpenMenuPath, false, Priority)]
@@ -56,11 +59,51 @@ namespace RoyTheunissen.AudioSyntax
         private void OnEnable()
         {
             Refresh();
+
+            for (int i = 0; i < migrations.Length; i++)
+            {
+                migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
+                migrations[i].IssueDetectedEvent += HandleIssueDetectedEvent;
+                
+                migrations[i].RefactorPerformedEvent -= HandleRefactorPerformedEvent;
+                migrations[i].RefactorPerformedEvent += HandleRefactorPerformedEvent;
+            }
+        }
+
+        private void OnDisable()
+        {
+            for (int i = 0; i < migrations.Length; i++)
+            {
+                migrations[i].IssueDetectedEvent -= HandleIssueDetectedEvent;
+                
+                migrations[i].RefactorPerformedEvent -= HandleRefactorPerformedEvent;
+            }
+        }
+
+        private void HandleIssueDetectedEvent(Migration migration, Migration.IssueUrgencies urgency)
+        {
+            switch (urgency)
+            {
+                case Migration.IssueUrgencies.Required:
+                    hasDetectedIssuesThatNeedToBeResolvedFirst = true;
+                    break;
+                
+                case Migration.IssueUrgencies.Optional:
+                    hasDetectedIssuesThatShouldBeResolvedFirst = true;
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(urgency), urgency, null);
+            }
         }
         
+        private void HandleRefactorPerformedEvent(Migration migration)
+        {
+            Refresh();
+        }
+
         private void Refresh()
         {
-            const int refreshSteps = 3;
             refreshProgressId = Progress.Start(ProgressTitle, ProgressInfo);
             
             versionMigratingFrom = AudioSyntaxSettings.Instance.Version;
@@ -69,18 +112,21 @@ namespace RoyTheunissen.AudioSyntax
             hasDetectedIssuesThatNeedToBeResolvedFirst = false;
             hasDetectedIssuesThatShouldBeResolvedFirst = false;
 
-            Progress.Report(refreshProgressId, 1, refreshSteps);
+            int refreshStepCount = 2 + migrations.Length;
+            int refreshStep = 0;
+            Progress.Report(refreshProgressId, refreshStep++, refreshStepCount);
             
             if (versionMigratingFrom < versionMigratingTo)
             {
-                DetectOutdatedNamespaceUsage();
-                
-                Progress.Report(refreshProgressId, 2, refreshSteps);
-                
-                DetectOutdatedSystemReferences();
+                for (int i = 0; i < migrations.Length; i++)
+                {
+                    migrations[i].UpdateConditions(versionMigratingFrom);
+                    
+                    Progress.Report(refreshProgressId, refreshStep++, refreshStepCount);
+                }
             }
             
-            Progress.Report(refreshProgressId, 3, refreshSteps);
+            Progress.Report(refreshProgressId, refreshStep++, refreshStepCount);
             
             Progress.Finish(refreshProgressId);
         }
@@ -116,7 +162,18 @@ namespace RoyTheunissen.AudioSyntax
 
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUIStyle.none, GUI.skin.verticalScrollbar);
 
-            DrawMigrationFromFmodSyntaxToAudioSyntax();
+            for (int i = 0; i < migrations.Length; i++)
+            {
+                Migration migration = migrations[i];
+                if (versionMigratingFrom >= migration.VersionMigratingTo)
+                    continue;
+
+                BeginSettingsBox(migration.DisplayName);
+                
+                migration.OnGUI();
+                
+                EndSettingsBox();
+            }
             
             EditorGUILayout.EndScrollView();
             
@@ -131,16 +188,6 @@ namespace RoyTheunissen.AudioSyntax
                 if (shouldFinalize)
                     FinalizeMigration();
             }
-        }
-
-        private void ReportIssueThatNeedsToBeResolvedFirst()
-        {
-            hasDetectedIssuesThatNeedToBeResolvedFirst = true;
-        }
-        
-        private void ReportIssueThatShouldBeResolvedFirst()
-        {
-            hasDetectedIssuesThatShouldBeResolvedFirst = true;
         }
 
         private void FinalizeMigration()
