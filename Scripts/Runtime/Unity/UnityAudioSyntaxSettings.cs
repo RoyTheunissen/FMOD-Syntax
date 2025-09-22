@@ -11,9 +11,6 @@ namespace RoyTheunissen.AudioSyntax
     /// <summary>
     /// Scriptable object that holds all the settings for the Unity Audio Syntax system.
     /// </summary>
-    [CreateAssetMenu(
-        menuName = AudioSyntaxMenuPaths.CreateScriptableObject + "Unity Audio Syntax Settings",
-        fileName = nameof(UnityAudioSyntaxSettings))]
     public sealed class UnityAudioSyntaxSettings : ScriptableObject 
     {
         public static readonly string SettingsFilename = $"{nameof(UnityAudioSyntaxSettings)}.asset";

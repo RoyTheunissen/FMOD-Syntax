@@ -10,7 +10,7 @@ namespace RoyTheunissen.AudioSyntax
     /// <summary>
     /// Config for a simple one-off audio event as played back by Unity's native audio system.
     /// </summary>
-    [CreateAssetMenu(fileName = "AudioOneOffConfig", menuName = "ScriptableObject/Audio/One-Off Audio Config (Unity)")]
+    [CreateAssetMenu(fileName = nameof(UnityAudioEventOneOffConfig), menuName = AudioSyntaxMenuPaths.CreateScriptableObject + "Unity Audio Event Config (One-Off)")]
     public sealed class UnityAudioEventOneOffConfig : UnityAudioEventConfigGeneric<UnityAudioOneOffPlayback>
     {
         [Space]
