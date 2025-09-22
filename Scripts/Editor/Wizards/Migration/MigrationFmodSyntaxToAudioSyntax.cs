@@ -21,6 +21,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             refactors.Add(new FmodSyntaxNamespaceToAudioSyntaxNamespaceRefactor());
             refactors.Add(new FmodSyntaxOutdatedSystemReferencesRefactor());
+            refactors.Add(new FmodSyntaxAudioReferencePlaybackTypeRefactor());
         }
     }
 
@@ -118,6 +119,34 @@ namespace RoyTheunissen.AudioSyntax
         protected override void OnPerform()
         {
             ReplaceInScripts(outdatedSystemReferenceReplacements);
+        }
+    }
+    
+    public sealed class FmodSyntaxAudioReferencePlaybackTypeRefactor : FmodSyntaxToAudioSyntaxRefactor
+    {
+        private const string OldPlaybackType = "FmodParameterlessAudioPlayback";
+        private const string NewPlaybackType = "IAudioPlayback";
+
+        protected override string IsNecessaryDisplayText => $"Playing an AudioReference assignable via the inspector used to return an instance of '{OldPlaybackType}' but given that it now supports Unity native audio as well, it now returns a '{NewPlaybackType}' instead.";
+
+        protected override string NotNecessaryDisplayText => $"There seem to be no more outdated references to '{OldPlaybackType}'.";
+
+        protected override string ConfirmationDialogueText => $"Are you sure you want to automatically update references to " +
+                                                              $"'{OldPlaybackType}' with references to '{NewPlaybackType}' " +
+                                                              $"where possible?";
+
+        protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
+        {
+            bool isNecessary = IsReplacementNecessary(OldPlaybackType, NewPlaybackType);
+
+            urgency = Migration.IssueUrgencies.Required;
+            
+            return isNecessary;
+        }
+
+        protected override void OnPerform()
+        {
+            ReplaceInScripts(OldPlaybackType, NewPlaybackType);
         }
     }
 }
