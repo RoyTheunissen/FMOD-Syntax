@@ -62,5 +62,22 @@ namespace RoyTheunissen.AudioSyntax
             this.defaultMixerGroup = defaultMixerGroup;
             this.unityAudioConfigRootFolder = new FolderReference(unityAudioConfigRootFolder);
         }
+        
+#if UNITY_EDITOR && UNITY_AUDIO_SYNTAX
+        private const string OpenSettingsMenuPath = AudioSyntaxMenuPaths.Root + "Open Unity Settings File";
+        
+        [MenuItem(OpenSettingsMenuPath, false)]
+        public static void OpenSettings()
+        {
+            Selection.activeObject = Instance;
+            EditorGUIUtility.PingObject(Instance);
+        }
+        
+        [MenuItem(OpenSettingsMenuPath, true)]
+        public static bool OpenSettingsValidation()
+        {
+            return Instance != null;
+        }
+#endif // UNITY_EDITOR
     }
 }

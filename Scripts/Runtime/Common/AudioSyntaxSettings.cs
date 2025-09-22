@@ -93,5 +93,22 @@ namespace RoyTheunissen.AudioSyntax
 
             this.shouldGenerateAssemblyDefinition = shouldGenerateAssemblyDefinition;
         }
+        
+#if UNITY_EDITOR
+        private const string OpenSettingsMenuPath = AudioSyntaxMenuPaths.Root + "Open General Settings File";
+        
+        [MenuItem(OpenSettingsMenuPath, false)]
+        public static void OpenSettings()
+        {
+            Selection.activeObject = Instance;
+            EditorGUIUtility.PingObject(Instance);
+        }
+        
+        [MenuItem(OpenSettingsMenuPath, true)]
+        public static bool OpenSettingsValidation()
+        {
+            return Instance != null;
+        }
+#endif // UNITY_EDITOR
     }
 }
