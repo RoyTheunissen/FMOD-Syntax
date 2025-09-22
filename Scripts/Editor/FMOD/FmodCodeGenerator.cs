@@ -21,13 +21,13 @@ namespace RoyTheunissen.AudioSyntax
             private readonly string name;
             public string Name => name;
 
-            private readonly List<EventFolder> childFolders = new List<EventFolder>();
+            private readonly List<EventFolder> childFolders = new();
             public List<EventFolder> ChildFolders => childFolders;
 
-            private readonly List<EditorEventRef> childEvents = new List<EditorEventRef>();
+            private readonly List<EditorEventRef> childEvents = new();
             public List<EditorEventRef> ChildEvents => childEvents;
 
-            private Dictionary<EditorEventRef, string> childEventToAliasPath = new Dictionary<EditorEventRef, string>();
+            private readonly Dictionary<EditorEventRef, string> childEventToAliasPath = new();
             public Dictionary<EditorEventRef, string> ChildEventToAliasPath => childEventToAliasPath;
 
             public EventFolder(string name)
@@ -140,7 +140,7 @@ namespace RoyTheunissen.AudioSyntax
         }
         
         private static string ScriptPathBase => AudioSyntaxSettings.Instance.GeneratedScriptsFolderPath;
-        private const string TemplatePathBase = "Templates/Fmod/";
+        private const string TemplatePathBase = "Templates/AudioSyntax/";
         
         private static string[] DeprecatedGeneratedScriptPaths => new[]
         {
@@ -173,61 +173,61 @@ namespace RoyTheunissen.AudioSyntax
         private const string VCAsTemplatePath = TemplatePathBase + "VCAs/";
 
         private static readonly CodeGenerator assemblyDefinitionGenerator =
-            new CodeGenerator(TemplatePathBase + "FMOD-Syntax.asmdef");
+            new CodeGenerator(TemplatePathBase + "Audio-Syntax.asmdef");
 
         private const string EventNameKeyword = "EventName";
 
         private static readonly CodeGenerator eventsScriptGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEvents.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEvents.cs");
         private static readonly CodeGenerator eventTypesScriptGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventTypes.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventTypes.cs"); // Currently FMOD-specific
         private static readonly CodeGenerator eventTypeGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventType.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodEventType.cs"); // Currently FMOD-specific
         private static readonly CodeGenerator eventFieldGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventField.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventField.cs");
         private static readonly CodeGenerator eventParameterGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventParameter.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventParameter.cs");
         private static readonly CodeGenerator eventParametersInitializationGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventParametersInitialization.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventParametersInitialization.cs");
         private static readonly CodeGenerator eventConfigPlayMethodWithParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventConfigPlayMethodWithParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventConfigPlayMethodWithParameters.cs");
         private static readonly CodeGenerator eventPlaybackPlayMethodWithParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventPlaybackPlayMethodWithParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventPlaybackPlayMethodWithParameters.cs");
         
         private static readonly CodeGenerator eventFolderGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventFolder.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventFolder.cs");
 
-        private static readonly CodeGenerator enumGenerator = new CodeGenerator(EventsTemplatePath + "FmodEnum.cs");
+        private static readonly CodeGenerator enumGenerator = new(EventsTemplatePath + "AudioEnum.cs");
         
         private static string GlobalParametersScriptPath => ScriptPathBase + "AudioGlobalParameters.cs";
         private static readonly CodeGenerator globalParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioGlobalParameters.cs");
         private static readonly CodeGenerator globalParameterGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameter.cs");
+            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameter.cs"); // Currently FMOD-specific
         
         private static readonly CodeGenerator banksScriptGenerator =
-            new CodeGenerator(BanksTemplatePath + "FmodBanks.cs");
+            new CodeGenerator(BanksTemplatePath + "AudioBanks.cs");
         private static readonly CodeGenerator bankFieldGenerator =
-            new CodeGenerator(BanksTemplatePath + "FmodBankField.cs");
+            new CodeGenerator(BanksTemplatePath + "AudioBankField.cs");
         
         private static readonly CodeGenerator busesScriptGenerator =
-            new CodeGenerator(BusesTemplatePath + "FmodBuses.cs");
+            new CodeGenerator(BusesTemplatePath + "AudioBuses.cs");
         private static readonly CodeGenerator busFieldGenerator =
-            new CodeGenerator(BusesTemplatePath + "FmodBusField.cs");
+            new CodeGenerator(BusesTemplatePath + "AudioBusField.cs");
         
         private static readonly CodeGenerator snapshotsScriptGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshots.cs");
+            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshots.cs");
         private static readonly CodeGenerator snapshotTypesScriptGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotTypes.cs");
+            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshotTypes.cs");
         private static readonly CodeGenerator snapshotTypeGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotType.cs");
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotType.cs"); // Currently FMOD-specific
         private static readonly CodeGenerator snapshotFieldsGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.cs");
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.cs"); // Currently FMOD-specific
         
         private static readonly CodeGenerator vcasScriptGenerator =
-            new CodeGenerator(VCAsTemplatePath + "FmodVCAs.cs");
+            new CodeGenerator(VCAsTemplatePath + "AudioVCAs.cs");
         private static readonly CodeGenerator vcaFieldGenerator =
-            new CodeGenerator(VCAsTemplatePath + "FmodVCAField.cs");
+            new CodeGenerator(VCAsTemplatePath + "AudioVCAField.cs");
         
         private const string RefactorOldEventReferencesMenuPath = "FMOD/Refactor Old Event References";
 
@@ -235,9 +235,9 @@ namespace RoyTheunissen.AudioSyntax
         
         private static AudioSyntaxSettings Settings => AudioSyntaxSettings.Instance;
         
-        [NonSerialized] private static List<string> eventUsingDirectives = new List<string>();
+        [NonSerialized] private static readonly List<string> eventUsingDirectives = new();
         [NonSerialized] private static string eventUsingDirectivesCode;
-        [NonSerialized] private static string[] eventUsingDirectivesDefault =
+        [NonSerialized] private static readonly string[] eventUsingDirectivesDefault =
         {
             "System",
             "System.Collections.Generic",
@@ -265,9 +265,9 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         [NonSerialized]
-        private static Dictionary<string, string> activeEventGuidToCurrentSyntaxPath = new Dictionary<string, string>();
+        private static Dictionary<string, string> activeEventGuidToCurrentSyntaxPath = new();
         
-        private static Dictionary<string, string> detectedEventChanges = new Dictionary<string, string>();
+        private static Dictionary<string, string> detectedEventChanges = new();
         
         [NonSerialized] private static readonly Dictionary<string, Type> labelParameterNameToUserSpecifiedType 
             = new Dictionary<string, Type>();

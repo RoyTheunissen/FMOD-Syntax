@@ -3,7 +3,7 @@ using RoyTheunissen.AudioSyntax;
 namespace ##Namespace##
 {
     /// <summary>
-    /// GENERATED: Contains FMOD buses so they can be accessed in a strongly-typed manner.
+    /// GENERATED: Contains Audio buses so they can be accessed in a strongly-typed manner.
     /// </summary>
     public static class AudioBuses
     {

@@ -3,7 +3,7 @@ using RoyTheunissen.AudioSyntax;
 namespace ##Namespace##
 {
     /// <summary>
-    /// GENERATED: Contains FMOD VCAs so they can be accessed in a strongly-typed manner.
+    /// GENERATED: Defines VCAs so they can be accessed in a strongly-typed manner.
     /// </summary>
     public static class AudioVCAs
     {

@@ -1,0 +1,10 @@
+##UsingDirectives##
+
+namespace ##Namespace##
+{
+    /// <summary>
+    /// GENERATED: Contains definitions of audio snapshots which is separated out from the declaration for readability.
+    /// To get an overview of which folders and events exist see 'AudioSnapshots.cs'
+    /// </summary>
+    ##Events##
+}
