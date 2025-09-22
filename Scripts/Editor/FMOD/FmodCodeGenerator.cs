@@ -154,22 +154,22 @@ namespace RoyTheunissen.AudioSyntax
             ScriptPathBase + "FmodGlobalParameters.cs",
         };
         
-        private static string EventsScriptPath => ScriptPathBase + "AudioEvents.cs";
-        private static string EventTypesScriptPath => ScriptPathBase + "AudioEventTypes.cs";
+        private static string EventsScriptPath => ScriptPathBase + "AudioEvents.g.cs";
+        private static string EventTypesScriptPath => ScriptPathBase + "AudioEventTypes.g.cs";
         private const string EventsTemplatePath = TemplatePathBase + "Events/";
         
-        private static string BanksScriptPath => ScriptPathBase + "AudioBanks.cs";
+        private static string BanksScriptPath => ScriptPathBase + "AudioBanks.g.cs";
         private const string BanksTemplatePath = TemplatePathBase + "Banks/";
         
-        private static string BusesScriptPath => ScriptPathBase + "AudioBuses.cs";
+        private static string BusesScriptPath => ScriptPathBase + "AudioBuses.g.cs";
         private const string BusesTemplatePath = TemplatePathBase + "Buses/";
         
         private const string SnapshotsTemplatePath = TemplatePathBase + "Snapshots/";
         
-        private static string SnapshotsScriptPath => ScriptPathBase + "AudioSnapshots.cs";
-        private static string SnapshotTypesScriptPath => ScriptPathBase + "AudioSnapshotTypes.cs";
+        private static string SnapshotsScriptPath => ScriptPathBase + "AudioSnapshots.g.cs";
+        private static string SnapshotTypesScriptPath => ScriptPathBase + "AudioSnapshotTypes.g.cs";
         
-        private static string VCAsScriptPath => ScriptPathBase + "AudioVCAs.cs";
+        private static string VCAsScriptPath => ScriptPathBase + "AudioVCAs.g.cs";
         private const string VCAsTemplatePath = TemplatePathBase + "VCAs/";
 
         private static readonly CodeGenerator assemblyDefinitionGenerator =
@@ -178,56 +178,56 @@ namespace RoyTheunissen.AudioSyntax
         private const string EventNameKeyword = "EventName";
 
         private static readonly CodeGenerator eventsScriptGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEvents.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEvents.g.cs");
         private static readonly CodeGenerator eventTypesScriptGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventTypes.cs"); // Currently FMOD-specific
+            new CodeGenerator(EventsTemplatePath + "FmodEventTypes.g.cs"); // Currently FMOD-specific
         private static readonly CodeGenerator eventTypeGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodEventType.cs"); // Currently FMOD-specific
+            new CodeGenerator(EventsTemplatePath + "FmodEventType.g.cs"); // Currently FMOD-specific
         private static readonly CodeGenerator eventFieldGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventField.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventField.g.cs");
         private static readonly CodeGenerator eventParameterGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventParameter.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventParameter.g.cs");
         private static readonly CodeGenerator eventParametersInitializationGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventParametersInitialization.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventParametersInitialization.g.cs");
         private static readonly CodeGenerator eventConfigPlayMethodWithParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventConfigPlayMethodWithParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventConfigPlayMethodWithParameters.g.cs");
         private static readonly CodeGenerator eventPlaybackPlayMethodWithParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventPlaybackPlayMethodWithParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventPlaybackPlayMethodWithParameters.g.cs");
         
         private static readonly CodeGenerator eventFolderGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioEventFolder.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioEventFolder.g.cs");
 
-        private static readonly CodeGenerator enumGenerator = new(EventsTemplatePath + "AudioEnum.cs");
+        private static readonly CodeGenerator enumGenerator = new(EventsTemplatePath + "AudioEnum.g.cs");
         
-        private static string GlobalParametersScriptPath => ScriptPathBase + "AudioGlobalParameters.cs";
+        private static string GlobalParametersScriptPath => ScriptPathBase + "AudioGlobalParameters.g.cs";
         private static readonly CodeGenerator globalParametersGenerator =
-            new CodeGenerator(EventsTemplatePath + "AudioGlobalParameters.cs");
+            new CodeGenerator(EventsTemplatePath + "AudioGlobalParameters.g.cs");
         private static readonly CodeGenerator globalParameterGenerator =
-            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameter.cs"); // Currently FMOD-specific
+            new CodeGenerator(EventsTemplatePath + "FmodGlobalParameter.g.cs"); // Currently FMOD-specific
         
         private static readonly CodeGenerator banksScriptGenerator =
-            new CodeGenerator(BanksTemplatePath + "AudioBanks.cs");
+            new CodeGenerator(BanksTemplatePath + "AudioBanks.g.cs");
         private static readonly CodeGenerator bankFieldGenerator =
-            new CodeGenerator(BanksTemplatePath + "AudioBankField.cs");
+            new CodeGenerator(BanksTemplatePath + "AudioBankField.g.cs");
         
         private static readonly CodeGenerator busesScriptGenerator =
-            new CodeGenerator(BusesTemplatePath + "AudioBuses.cs");
+            new CodeGenerator(BusesTemplatePath + "AudioBuses.g.cs");
         private static readonly CodeGenerator busFieldGenerator =
-            new CodeGenerator(BusesTemplatePath + "AudioBusField.cs");
+            new CodeGenerator(BusesTemplatePath + "AudioBusField.g.cs");
         
         private static readonly CodeGenerator snapshotsScriptGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshots.cs");
+            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshots.g.cs");
         private static readonly CodeGenerator snapshotTypesScriptGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshotTypes.cs");
+            new CodeGenerator(SnapshotsTemplatePath + "AudioSnapshotTypes.g.cs");
         private static readonly CodeGenerator snapshotTypeGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotType.cs"); // Currently FMOD-specific
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotType.g.cs"); // Currently FMOD-specific
         private static readonly CodeGenerator snapshotFieldsGenerator =
-            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.cs"); // Currently FMOD-specific
+            new CodeGenerator(SnapshotsTemplatePath + "FmodSnapshotFields.g.cs"); // Currently FMOD-specific
         
         private static readonly CodeGenerator vcasScriptGenerator =
-            new CodeGenerator(VCAsTemplatePath + "AudioVCAs.cs");
+            new CodeGenerator(VCAsTemplatePath + "AudioVCAs.g.cs");
         private static readonly CodeGenerator vcaFieldGenerator =
-            new CodeGenerator(VCAsTemplatePath + "AudioVCAField.cs");
+            new CodeGenerator(VCAsTemplatePath + "AudioVCAField.g.cs");
         
         private const string RefactorOldEventReferencesMenuPath = "FMOD/Refactor Old Event References";
 
