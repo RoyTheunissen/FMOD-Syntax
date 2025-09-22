@@ -144,7 +144,7 @@ namespace RoyTheunissen.AudioSyntax
             for (int i = 0; i < Migrations.Length; i++)
             {
                 Migration migration = Migrations[i];
-                if (versionMigratingFrom >= migration.VersionMigratingTo)
+                if (!migration.IsNecessary)
                     continue;
 
                 BeginSettingsBox(migration.DisplayName);

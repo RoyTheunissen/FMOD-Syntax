@@ -18,9 +18,6 @@ namespace RoyTheunissen.AudioSyntax
         
         public abstract string DisplayName { get; }
 
-        private int versionMigratingFrom;
-        protected int VersionMigratingFrom => versionMigratingFrom;
-
         public abstract int VersionMigratingTo { get; }
         
         public abstract string Description { get; }
@@ -44,10 +41,11 @@ namespace RoyTheunissen.AudioSyntax
 
         public void UpdateConditions(int versionMigratingFrom)
         {
-            this.versionMigratingFrom = versionMigratingFrom;
-
             isNecessary = false;
             urgency = IssueUrgencies.Optional;
+            
+            if (versionMigratingFrom >= VersionMigratingTo)
+                return;
 
             for (int i = 0; i < refactors.Count; i++)
             {
