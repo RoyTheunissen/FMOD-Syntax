@@ -54,7 +54,7 @@ namespace RoyTheunissen.AudioSyntax
 
         protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
         {
-            bool isNecessary = IsReplacementNecessary(FmodSyntaxNamespace, AudioSyntaxNamespace);
+            bool isNecessary = IsReplacementNecessary(FmodSyntaxNamespace, AudioSyntaxNamespace, FileScopes.Everything);
 
             urgency = Migration.IssueUrgencies.Required;
 
@@ -63,13 +63,13 @@ namespace RoyTheunissen.AudioSyntax
 
         protected override void OnPerform()
         {
-            ReplaceInScripts(FmodSyntaxNamespace, AudioSyntaxNamespace);
+            ReplaceInScripts(FmodSyntaxNamespace, AudioSyntaxNamespace, FileScopes.Everything);
         }
     }
 
     public sealed class FmodSyntaxOutdatedSystemReferencesRefactor : FmodSyntaxToAudioSyntaxRefactor
     {
-        private readonly Dictionary<string, string> outdatedSystemReferenceReplacements = new()
+        private readonly Dictionary<string, string> replacements = new()
         {
             { $"{FmodSyntaxSystemName}.{CullPlaybacksMethod}", $"{GeneralSystemName}.{UpdateMethod}" },
             { $"{FmodSyntaxSystemName}.{StopAllActivePlaybacksMethod}",
@@ -78,19 +78,18 @@ namespace RoyTheunissen.AudioSyntax
                 $"{GeneralSystemName}.{StopAllActiveEventPlaybacksMethod}" },
         };
         
-        [NonSerialized] private string cachedOutdatedSystemReferencesDisplayText;
-        [NonSerialized] private bool didCacheOutdatedSystemReferencesDisplayText;
-        private string OutdatedSystemReferencesDisplayText
+        [NonSerialized] private string cachedReplacementsDisplayText;
+        [NonSerialized] private bool didReplacementsDisplayText;
+        private string ReplacementsDisplayText
         {
             get
             {
-                if (!didCacheOutdatedSystemReferencesDisplayText)
+                if (!didReplacementsDisplayText)
                 {
-                    didCacheOutdatedSystemReferencesDisplayText = true;
-                    cachedOutdatedSystemReferencesDisplayText =
-                        GetDisplayTextForReplacements(outdatedSystemReferenceReplacements);
+                    didReplacementsDisplayText = true;
+                    cachedReplacementsDisplayText = GetDisplayTextForReplacements(replacements);
                 }
-                return cachedOutdatedSystemReferencesDisplayText;
+                return cachedReplacementsDisplayText;
             }
         }
 
@@ -99,7 +98,7 @@ namespace RoyTheunissen.AudioSyntax
                                                             $"updates both '{FmodSyntaxSystemName}' and '{UnityAudioSystemName}'. " +
                                                             $"The '{CullPlaybacksMethod}' method has also been renamed " +
                                                             $"to '{UpdateMethod}' because it now does more than just culling " +
-                                                            $"playbacks.\n\n" + OutdatedSystemReferencesDisplayText;
+                                                            $"playbacks.\n\n" + ReplacementsDisplayText;
 
         protected override string NotNecessaryDisplayText => $"There seem to be no more outdated references to '{FmodSyntaxSystemName}'.";
 
@@ -109,7 +108,7 @@ namespace RoyTheunissen.AudioSyntax
 
         protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
         {
-            bool isNecessary = AreReplacementsNecessary(outdatedSystemReferenceReplacements);
+            bool isNecessary = AreReplacementsNecessary(replacements, ~FileScopes.GeneratedCode);
 
             urgency = Migration.IssueUrgencies.Optional;
             
@@ -118,26 +117,49 @@ namespace RoyTheunissen.AudioSyntax
 
         protected override void OnPerform()
         {
-            ReplaceInScripts(outdatedSystemReferenceReplacements);
+            ReplaceInScripts(replacements, ~FileScopes.GeneratedCode);
         }
     }
     
     public sealed class FmodSyntaxAudioReferencePlaybackTypeRefactor : FmodSyntaxToAudioSyntaxRefactor
     {
-        private const string OldPlaybackType = "FmodParameterlessAudioPlayback";
+        private const string OldParameterlessPlaybackType = "FmodParameterlessAudioPlayback";
+        private const string OldFmodSpecificPlaybackType = "FmodAudioPlayback";
+        
         private const string NewPlaybackType = "IAudioPlayback";
 
-        protected override string IsNecessaryDisplayText => $"Playing an AudioReference assignable via the inspector used to return an instance of '{OldPlaybackType}' but given that it now supports Unity native audio as well, it now returns a '{NewPlaybackType}' instead.";
+        protected override string IsNecessaryDisplayText => $"Playing an AudioReference assignable via the inspector used to return an instance of '{OldParameterlessPlaybackType}' but given that it now supports Unity native audio as well, it now returns a '{NewPlaybackType}' instead.\n\n" + ReplacementsDisplayText;
 
-        protected override string NotNecessaryDisplayText => $"There seem to be no more outdated references to '{OldPlaybackType}'.";
+        protected override string NotNecessaryDisplayText => $"There seem to be no more outdated references to '{OldParameterlessPlaybackType}' / '{OldFmodSpecificPlaybackType}'.";
 
         protected override string ConfirmationDialogueText => $"Are you sure you want to automatically update references to " +
-                                                              $"'{OldPlaybackType}' with references to '{NewPlaybackType}' " +
+                                                              $"'{OldParameterlessPlaybackType}' / '{OldFmodSpecificPlaybackType}' with references to '{NewPlaybackType}' " +
                                                               $"where possible?";
+        
+        private readonly Dictionary<string, string> replacements = new()
+        {
+            { OldParameterlessPlaybackType, NewPlaybackType },
+            { OldFmodSpecificPlaybackType, NewPlaybackType },
+        };
+        
+        [NonSerialized] private string cachedReplacementsDisplayText;
+        [NonSerialized] private bool didCacheReplacementsDisplayText;
+        private string ReplacementsDisplayText
+        {
+            get
+            {
+                if (!didCacheReplacementsDisplayText)
+                {
+                    didCacheReplacementsDisplayText = true;
+                    cachedReplacementsDisplayText = GetDisplayTextForReplacements(replacements);
+                }
+                return cachedReplacementsDisplayText;
+            }
+        }
 
         protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
         {
-            bool isNecessary = IsReplacementNecessary(OldPlaybackType, NewPlaybackType);
+            bool isNecessary = IsReplacementNecessary(OldParameterlessPlaybackType, NewPlaybackType, ~FileScopes.GeneratedCode);
 
             urgency = Migration.IssueUrgencies.Required;
             
@@ -146,7 +168,23 @@ namespace RoyTheunissen.AudioSyntax
 
         protected override void OnPerform()
         {
-            ReplaceInScripts(OldPlaybackType, NewPlaybackType);
+            // NOTE: It's fine for generated code to generate types that inherit from FmodParameterlessAudioPlayback / FmodAudioPlayback
+            ReplaceInScripts(OldParameterlessPlaybackType, NewPlaybackType, ~FileScopes.GeneratedCode);
+            ReplaceInScripts(OldFmodSpecificPlaybackType, NewPlaybackType, ~FileScopes.GeneratedCode);
+
+            // The above refactor actually should not be done for implementations of IOnFmodPlayback's methods.
+            // So we will go looking for those and put those back the way they were, that's easier than trying to figure
+            // out whether an occurrence of the old playback type is an IOnFmodPlayback method and then not replacing it.
+            string onFmodPlaybackRegistrationMethod = "OnFmodPlaybackRegistered({0} ";
+            string onFmodPlaybackUnregistrationMethod = "OnFmodPlaybackUnregistered({0} ";
+            ReplaceInScripts(
+                string.Format(onFmodPlaybackRegistrationMethod, NewPlaybackType),
+                string.Format(onFmodPlaybackRegistrationMethod, OldFmodSpecificPlaybackType),
+                ~FileScopes.GeneratedCode);
+            ReplaceInScripts(
+                string.Format(onFmodPlaybackUnregistrationMethod, NewPlaybackType),
+                string.Format(onFmodPlaybackUnregistrationMethod, OldFmodSpecificPlaybackType),
+                ~FileScopes.GeneratedCode);
         }
     }
 }

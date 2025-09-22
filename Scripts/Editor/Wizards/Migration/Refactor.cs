@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -17,6 +18,13 @@ namespace RoyTheunissen.AudioSyntax
             "com.roytheunissen.fmod-syntax/",
             "com.roytheunissen.audio-syntax/",
         };
+
+        [Flags]
+        protected enum FileScopes
+        {
+            GeneratedCode = 1 << 0,
+            Everything = ~0,
+        }
         
         private bool isNecessary;
         public bool IsNecessary => isNecessary;
@@ -112,14 +120,31 @@ namespace RoyTheunissen.AudioSyntax
 
             return IsProjectRelativePathInsideThisPackage(assetPath);
         }
+        
+        private bool IsScriptGeneratedCode(MonoScript monoScript)
+        {
+            // TODO: Make sure generated code uses the .g.cs extension?
+            return monoScript.text.Contains("/// GENERATED: ");
+        }
+        
+        private bool IsScriptInsideScope(MonoScript monoScript, FileScopes scope)
+        {
+            // Do not ever refactor scripts that are part of this package itself.
+            if (IsScriptInsideThisPackage(monoScript))
+                return false;
 
-        private bool IsContainedInScripts(string text)
+            if (!scope.HasFlag(FileScopes.GeneratedCode) && IsScriptGeneratedCode(monoScript))
+                return false;
+
+            return true;
+        }
+
+        private bool IsContainedInScripts(string text, FileScopes scope)
         {
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
             {
-                // WE are allowed to reference it, for example in this very script :V
-                if (IsScriptInsideThisPackage(monoScripts[i]))
+                if (!IsScriptInsideScope(monoScripts[i], scope))
                     continue;
 
                 string scriptText = monoScripts[i].text;
@@ -132,28 +157,28 @@ namespace RoyTheunissen.AudioSyntax
             return false;
         }
         
-        protected bool IsReplacementNecessary(string from, string to)
+        protected bool IsReplacementNecessary(string from, string to, FileScopes scope)
         {
-            return IsContainedInScripts(from);
+            return IsContainedInScripts(from, scope);
         }
 
-        protected bool AreReplacementsNecessary(Dictionary<string, string> replacements)
+        protected bool AreReplacementsNecessary(Dictionary<string, string> replacements, FileScopes scope)
         {
             foreach (KeyValuePair<string, string> oldTextNewTextPair in replacements)
             {
-                if (IsContainedInScripts(oldTextNewTextPair.Key))
+                if (IsContainedInScripts(oldTextNewTextPair.Key, scope))
                     return true;
             }
 
             return false;
         }
 
-        protected void ReplaceInScripts(string oldText, string newText, bool partOfBatch = false)
+        protected void ReplaceInScripts(string oldText, string newText, FileScopes scope, bool partOfBatch = false)
         {
             MonoScript[] monoScripts = AssetLoading.GetAllAssetsOfType<MonoScript>();
             for (int i = 0; i < monoScripts.Length; i++)
             {
-                if (IsScriptInsideThisPackage(monoScripts[i]))
+                if (!IsScriptInsideScope(monoScripts[i], scope))
                     continue;
 
                 string scriptText = monoScripts[i].text;
@@ -169,11 +194,11 @@ namespace RoyTheunissen.AudioSyntax
                 AssetDatabase.Refresh();
         }
 
-        protected void ReplaceInScripts(Dictionary<string, string> replacements)
+        protected void ReplaceInScripts(Dictionary<string, string> replacements, FileScopes scope)
         {
             foreach (KeyValuePair<string, string> oldTextNewTextPair in replacements)
             {
-                ReplaceInScripts(oldTextNewTextPair.Key, oldTextNewTextPair.Value, true);
+                ReplaceInScripts(oldTextNewTextPair.Key, oldTextNewTextPair.Value, scope, true);
             }
 
             AssetDatabase.Refresh();
