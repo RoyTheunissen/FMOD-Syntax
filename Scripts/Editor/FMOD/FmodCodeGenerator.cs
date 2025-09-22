@@ -142,22 +142,34 @@ namespace RoyTheunissen.AudioSyntax
         private static string ScriptPathBase => AudioSyntaxSettings.Instance.GeneratedScriptsFolderPath;
         private const string TemplatePathBase = "Templates/Fmod/";
         
-        private static string EventsScriptPath => ScriptPathBase + "FmodEvents.cs";
-        private static string EventTypesScriptPath => ScriptPathBase + "FmodEventTypes.cs";
+        private static string[] DeprecatedGeneratedScriptPaths => new[]
+        {
+            ScriptPathBase + "FmodEvents.cs",
+            ScriptPathBase + "FmodEventTypes.cs",
+            ScriptPathBase + "FmodBanks.cs",
+            ScriptPathBase + "FmodBuses.cs",
+            ScriptPathBase + "FmodSnapshots.cs",
+            ScriptPathBase + "FmodSnapshotTypes.cs",
+            ScriptPathBase + "FmodVCAs.cs",
+            ScriptPathBase + "FmodGlobalParameters.cs",
+        };
+        
+        private static string EventsScriptPath => ScriptPathBase + "AudioEvents.cs";
+        private static string EventTypesScriptPath => ScriptPathBase + "AudioEventTypes.cs";
         private const string EventsTemplatePath = TemplatePathBase + "Events/";
         
-        private static string BanksScriptPath => ScriptPathBase + "FmodBanks.cs";
+        private static string BanksScriptPath => ScriptPathBase + "AudioBanks.cs";
         private const string BanksTemplatePath = TemplatePathBase + "Banks/";
         
-        private static string BusesScriptPath => ScriptPathBase + "FmodBuses.cs";
+        private static string BusesScriptPath => ScriptPathBase + "AudioBuses.cs";
         private const string BusesTemplatePath = TemplatePathBase + "Buses/";
         
         private const string SnapshotsTemplatePath = TemplatePathBase + "Snapshots/";
         
-        private static string SnapshotsScriptPath => ScriptPathBase + "FmodSnapshots.cs";
-        private static string SnapshotTypesScriptPath => ScriptPathBase + "FmodSnapshotTypes.cs";
+        private static string SnapshotsScriptPath => ScriptPathBase + "AudioSnapshots.cs";
+        private static string SnapshotTypesScriptPath => ScriptPathBase + "AudioSnapshotTypes.cs";
         
-        private static string VCAsScriptPath => ScriptPathBase + "FmodVCAs.cs";
+        private static string VCAsScriptPath => ScriptPathBase + "AudioVCAs.cs";
         private const string VCAsTemplatePath = TemplatePathBase + "VCAs/";
 
         private static readonly CodeGenerator assemblyDefinitionGenerator =
@@ -187,7 +199,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private static readonly CodeGenerator enumGenerator = new CodeGenerator(EventsTemplatePath + "FmodEnum.cs");
         
-        private static string GlobalParametersScriptPath => ScriptPathBase + "FmodGlobalParameters.cs";
+        private static string GlobalParametersScriptPath => ScriptPathBase + "AudioGlobalParameters.cs";
         private static readonly CodeGenerator globalParametersGenerator =
             new CodeGenerator(EventsTemplatePath + "FmodGlobalParameters.cs");
         private static readonly CodeGenerator globalParameterGenerator =
@@ -770,6 +782,8 @@ namespace RoyTheunissen.AudioSyntax
         public static void GenerateCode()
         {
             ParseMetaData();
+            
+            RemoveDeprecatedGeneratedScripts();
 
             if (Settings.ShouldGenerateAssemblyDefinition)
                 GenerateAssemblyDefinition();
@@ -796,6 +810,22 @@ namespace RoyTheunissen.AudioSyntax
 
             if (detectedEventChanges.Count > 0)
                 TryRefactoringOldEventReferencesInternal(false);
+        }
+
+        private static void RemoveDeprecatedGeneratedScripts()
+        {
+            for (int i = 0; i < DeprecatedGeneratedScriptPaths.Length; i++)
+            {
+                RemoveFileIncludingMetaFile(DeprecatedGeneratedScriptPaths[i]);
+            }
+        }
+
+        private static void RemoveFileIncludingMetaFile(string path)
+        {
+            path = path.AddAssetsPrefix();
+            
+            if (AssetDatabase.AssetPathExists(path))
+                AssetDatabase.DeleteAsset(path);
         }
 
         private static void LoadPreviousMetaData()
