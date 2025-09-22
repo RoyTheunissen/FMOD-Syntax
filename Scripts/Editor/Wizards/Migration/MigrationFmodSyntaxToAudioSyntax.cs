@@ -130,7 +130,7 @@ namespace RoyTheunissen.AudioSyntax
         
         private const string NewPlaybackType = "IAudioPlayback";
 
-        protected override string IsNecessaryDisplayText => $"Playing an AudioReference assignable via the inspector used to return an instance of '{OldParameterlessPlaybackType}' but given that it now supports Unity native audio as well, it now returns a '{NewPlaybackType}' instead.\n\n" + ReplacementsDisplayText;
+        protected override string IsNecessaryDisplayText => $"Playing an AudioReference assignable via the inspector used to return an instance of '{OldParameterlessPlaybackType}' but given that it now supports Unity native audio as well, it now returns an '{NewPlaybackType}' instead.\n\n" + ReplacementsDisplayText;
 
         protected override string NotNecessaryDisplayText => $"There seem to be no more outdated references to '{OldParameterlessPlaybackType}' / '{OldFmodSpecificPlaybackType}'.";
 
