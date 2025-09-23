@@ -74,7 +74,7 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly CodeGenerator banksScriptGenerator = 
             new(BanksTemplatePath + "AudioBanks.g.cs");
 
-        private const string RefactorOldEventReferencesMenuPath = "FMOD/Refactor Old Event References";
+        private const string RefactorOldEventReferencesMenuPath = "Refactor Old Event References";
 
         private static EventFolder rootEventFolder;
         

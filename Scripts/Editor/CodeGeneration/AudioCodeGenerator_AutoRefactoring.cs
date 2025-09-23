@@ -13,9 +13,19 @@ namespace RoyTheunissen.AudioSyntax
 {
     public static partial class AudioCodeGenerator
     {
+#if FMOD_AUDIO_SYNTAX
+        private const string PrefixFMOD = "FMOD/";
+        private const int PriorityFMOD = 999999998;
+#endif // FMOD_AUDIO_SYNTAX
+        
+        private const int Priority = 3000;
+        
         private static readonly char[] AllowedWordEndingCharacters = { '.', '(', ')', '[', ']', '{', '}', ';' };
         
-        [MenuItem(RefactorOldEventReferencesMenuPath, false, 999999998)]
+#if FMOD_AUDIO_SYNTAX
+        [MenuItem(PrefixFMOD + RefactorOldEventReferencesMenuPath, false, PriorityFMOD)]
+#endif // FMOD_AUDIO_SYNTAX
+        [MenuItem(AudioSyntaxMenuPaths.Root + RefactorOldEventReferencesMenuPath, false, Priority)]
         private static void TryRefactoringOldEventReferences()
         {
             LoadPreviousMetaData();
@@ -25,7 +35,10 @@ namespace RoyTheunissen.AudioSyntax
             TryRefactoringOldEventReferencesInternal(true);
         }
         
-        [MenuItem(RefactorOldEventReferencesMenuPath, true, 999999998)]
+#if FMOD_AUDIO_SYNTAX
+        [MenuItem(PrefixFMOD + RefactorOldEventReferencesMenuPath, true, PriorityFMOD)]
+#endif // FMOD_AUDIO_SYNTAX
+        [MenuItem(AudioSyntaxMenuPaths.Root + RefactorOldEventReferencesMenuPath, true, Priority)]
         private static bool TryRefactoringOldEventReferencesValidate()
         {
             return File.Exists(PreviousMetaDataFilePath);
