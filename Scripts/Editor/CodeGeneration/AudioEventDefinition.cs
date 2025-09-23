@@ -25,6 +25,13 @@ namespace RoyTheunissen.AudioSyntax
         {
         }
     }
+    
+    public abstract class FmodSnapshotEventDefinition : AudioEventDefinition
+    {
+        public FmodSnapshotEventDefinition(string path) : base(AudioSyntaxSystems.FMOD, path)
+        {
+        }
+    }
 #endif // FMOD_AUDIO_SYNTAX
     
 #if UNITY_AUDIO_SYNTAX
