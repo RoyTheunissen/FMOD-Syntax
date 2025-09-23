@@ -35,25 +35,12 @@ namespace RoyTheunissen.AudioSyntax
         {
             get;
         }
-        
-        private readonly string displayName;
-        public string DisplayName => displayName;
-        
-        private readonly string filteredName;
-        public string FilteredName => filteredName;
-        
-        private readonly string fieldName;
-        public string FieldName => fieldName;
 
-        protected AudioEventDefinition(AudioSyntaxSystems system, string path, string name, string guid)
+        protected AudioEventDefinition(AudioSyntaxSystems system, string path, string guid)
         {
             this.system = system;
             this.path = path;
             this.guid = guid;
-            
-            displayName = FmodSyntaxUtilities.GetDisplayNameFromPath(name);
-            filteredName = FmodSyntaxUtilities.GetFilteredNameFromPath(name);
-            fieldName = FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(name);
         }
         
         public string GetFilteredPath(bool stripSpecialCharacters = false)
@@ -73,7 +60,7 @@ namespace RoyTheunissen.AudioSyntax
         public override string Name => eventRef.name;
 
         protected FmodEventDefinition(EditorEventRef eventRef)
-            : base(AudioSyntaxSystems.FMOD, eventRef.name, eventRef.GetFilteredPath(), eventRef.Guid.ToString())
+            : base(AudioSyntaxSystems.FMOD, eventRef.GetFilteredPath(), eventRef.Guid.ToString())
         {
             this.eventRef = eventRef;
 
@@ -113,7 +100,7 @@ namespace RoyTheunissen.AudioSyntax
 
         protected UnityAudioEventDefinition(UnityAudioEventConfigBase config)
             : base(AudioSyntaxSystems.UnityNativeAudio,
-                UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config), config.name,
+                UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config),
                 AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(config)))
         {
         }
