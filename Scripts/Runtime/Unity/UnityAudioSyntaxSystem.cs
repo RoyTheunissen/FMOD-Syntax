@@ -128,6 +128,16 @@ namespace RoyTheunissen.AudioSyntax
             audioSource.name = "AudioSource - AVAILABLE";
 #endif // DEBUG_AUDIO_SOURCE_POOLING
         }
+
+        public static ConfigType LoadAudioEventConfigAtRuntime<ConfigType>(string path)
+            where ConfigType : UnityAudioEventConfigBase
+        {
+            path = AudioSyntaxMenuPaths.RootNoSpace + path;
+         
+            // TODO: Support loading this via Addressables.
+            
+            return Resources.Load<ConfigType>(path);
+        }
         
         /// <summary>
         /// Do not call this yourself. Call AudioSyntaxSystem.RegisterActiveEventPlayback instead.

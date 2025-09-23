@@ -65,8 +65,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private ConfigType LoadConfig()
         {
-            // TODO: Load this from Resources or via Addressables or whatever.
-            return null;
+            return UnityAudioSyntaxSystem.LoadAudioEventConfigAtRuntime<ConfigType>(Path);
         }
     }
 }
