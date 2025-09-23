@@ -485,15 +485,14 @@ namespace RoyTheunissen.AudioSyntax
             
             detectedEventChanges.Clear();
             
-            GenerateEventsScript(true, EventsScriptPath, EditorEventRefExtensions.EventPrefix,
-                eventsScriptGenerator, eventTypeGenerator, EventContainerClass);
-            GenerateEventsScript(false, EventTypesScriptPath, EditorEventRefExtensions.EventPrefix,
-                eventTypesScriptGenerator, eventTypeGenerator, EventContainerClass);
+            // Organize the events in a folder hierarchy.
+            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.EventPrefix, EventContainerClass);
+            GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, eventTypeGenerator, EventContainerClass);
+            GenerateEventsScript(false, EventTypesScriptPath, eventTypesScriptGenerator, eventTypeGenerator, EventContainerClass);
 
-            GenerateEventsScript(true, SnapshotsScriptPath, EditorEventRefExtensions.SnapshotPrefix,
-                snapshotsScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
-            GenerateEventsScript(false, SnapshotTypesScriptPath, EditorEventRefExtensions.SnapshotPrefix,
-                snapshotTypesScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
+            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.SnapshotPrefix, SnapshotContainerClass);
+            GenerateEventsScript(true, SnapshotsScriptPath, snapshotsScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
+            GenerateEventsScript(false, SnapshotTypesScriptPath, snapshotTypesScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
             
             // NOTE: This re-uses the using directives from the generated events. Therefore this should be called after
             // the events are generated.
@@ -553,36 +552,24 @@ namespace RoyTheunissen.AudioSyntax
             globalParametersGenerator.GenerateFile(GlobalParametersScriptPath);
         }
 
-        private static void GenerateEventsScript(bool isFields, string eventsScriptPath, string eventPrefix,
-            CodeGenerator codeGenerator, CodeGenerator typeGenerator, string containerName)
+        private static EventFolder BuildFmodEventsHierarchy(string eventPrefix, string containerName)
         {
-            eventUsingDirectives.Clear();
-            eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
-
-            // We either only declare the event fields or we define the events types. Separating this out into separate
-            // files makes it easier to just have a look at which events were generated at all.
-            //CodeGenerator codeGenerator = isFields ? eventsScriptGenerator : eventTypesScriptGenerator;
-            codeGenerator.Reset();
-            
-            codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
-
             // Generate a config & playback class for every FMOD event.
             EditorEventRef[] events = EventManager.Events
                 .Where(e => e.Path.StartsWith(eventPrefix))
                 .OrderBy(e => e.Path).ToArray();
 
             // Organize the events in a folder hierarchy.
-            rootEventFolder = new EventFolder(containerName);
+            EventFolder root = new(containerName);
             foreach (EditorEventRef e in events)
             {
                 string path = e.GetFilteredPath(true);
 
-                EventFolder folder = rootEventFolder;
+                EventFolder folder = root;
                 
-                if (Settings.SyntaxFormat ==
-                    AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
+                if (Settings.SyntaxFormat == AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
                 {
-                    folder = rootEventFolder.GetOrCreateChildFolderFromPathRecursively(path);
+                    folder = root.GetOrCreateChildFolderFromPathRecursively(path);
                 }
 
                 folder.ChildEvents.Add(e);
@@ -608,12 +595,28 @@ namespace RoyTheunissen.AudioSyntax
                 // code without it breaking. Outputs some nice warnings instead via an Obsolete attribute.
                 if (shouldGenerateAlias)
                 {
-                    EventFolder previousFolder = rootEventFolder
+                    EventFolder previousFolder = root
                         .GetOrCreateChildFolderFromPathRecursively(previousSyntaxPath.Replace(".", "/"));
 
                     previousFolder.ChildEventToAliasPath[e] = previousSyntaxPath;
                 }
             }
+
+            return root;
+        }
+
+        private static void GenerateEventsScript(bool isFields, string eventsScriptPath,
+            CodeGenerator codeGenerator, CodeGenerator typeGenerator, string containerName)
+        {
+            eventUsingDirectives.Clear();
+            eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
+
+            // We either only declare the event fields or we define the events types. Separating this out into separate
+            // files makes it easier to just have a look at which events were generated at all.
+            //CodeGenerator codeGenerator = isFields ? eventsScriptGenerator : eventTypesScriptGenerator;
+            codeGenerator.Reset();
+            
+            codeGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
             
             // Generate code for the events per folder.
             parameterlessEventsCode = "";
