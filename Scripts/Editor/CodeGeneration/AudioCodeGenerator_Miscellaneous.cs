@@ -37,6 +37,17 @@ namespace RoyTheunissen.AudioSyntax
         {
             // NOTE: These are all together because that way data can be cached more easily.
 
+            GenerateBanksScript(out List<FMOD.Studio.Bus> buses, out List<FMOD.Studio.VCA> VCAs);
+
+            // Now that we know the buses, we can also generate a file for accessing those.
+            GenerateBusesScript(buses);
+
+            // Now that we know the VCAs, we can also generate a file for accessing those.
+            GenerateVCAsScript(VCAs);
+        }
+
+        private static void GenerateBanksScript(out List<FMOD.Studio.Bus> buses, out List<FMOD.Studio.VCA> VCAs)
+        {
             banksScriptGenerator.Reset();
 
             banksScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
@@ -49,8 +60,8 @@ namespace RoyTheunissen.AudioSyntax
             EditorUtils.System.getBankList(out Bank[] banks);
 
             banks = banks.OrderBy(b => b.getPath()).ToArray();
-            List<FMOD.Studio.Bus> buses = new();
-            List<FMOD.Studio.VCA> VCAs = new();
+            buses = new();
+            VCAs = new();
             foreach (Bank bank in banks)
             {
                 bankFieldGenerator.Reset();
@@ -82,8 +93,10 @@ namespace RoyTheunissen.AudioSyntax
 
             banksScriptGenerator.ReplaceKeyword("Banks", banksCode);
             banksScriptGenerator.GenerateFile(BanksScriptPath);
-
-            // Now that we know the buses, we can also generate a file for accessing those.
+        }
+        
+        private static void GenerateBusesScript(List<FMOD.Studio.Bus> buses)
+        {
             busesScriptGenerator.Reset();
 
             busesScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
@@ -106,8 +119,10 @@ namespace RoyTheunissen.AudioSyntax
 
             busesScriptGenerator.ReplaceKeyword("Buses", busesCode);
             busesScriptGenerator.GenerateFile(BusesScriptPath);
-
-            // Now that we know the VCAs, we can also generate a file for accessing those.
+        }
+        
+        private static void GenerateVCAsScript(List<FMOD.Studio.VCA> VCAs)
+        {
             vcasScriptGenerator.Reset();
 
             vcasScriptGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
