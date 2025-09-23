@@ -110,8 +110,8 @@ namespace RoyTheunissen.AudioSyntax
         public override bool IsOneShot => Config is UnityAudioEventOneOffConfig;
 
         public UnityAudioEventDefinition(UnityAudioEventConfigBase config)
-            : base(AudioSyntaxSystems.UnityNativeAudio, config.name,
-                UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config),
+            : base(AudioSyntaxSystems.UnityNativeAudio,
+                UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config), config.name,
                 AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(config)))
         {
         }
