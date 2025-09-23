@@ -41,7 +41,7 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly CodeGenerator eventsScriptGenerator = 
             new(EventsTemplatePath + "AudioEvents.g.cs");
         private static readonly CodeGenerator eventTypesScriptGenerator =
-            new(EventsTemplatePath + "FmodEventTypes.g.cs"); // TODO: Not FMOD-specific any more! Should rename
+            new(EventsTemplatePath + "AudioEventTypes.g.cs");
         private static readonly CodeGenerator fmodEventTypeGenerator = 
             new(EventsTemplatePath + "FmodEventType.g.cs"); // FMOD-specific
         private static readonly CodeGenerator unityEventTypeGenerator = 
