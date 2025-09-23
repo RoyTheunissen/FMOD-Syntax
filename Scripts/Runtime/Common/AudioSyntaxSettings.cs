@@ -30,7 +30,19 @@ namespace RoyTheunissen.AudioSyntax
         public AudioSyntaxSystems ActiveSystems => activeSystems;
 
         [SerializeField] private string generatedScriptsFolderPath;
-        public string GeneratedScriptsFolderPath => generatedScriptsFolderPath;
+        public string GeneratedScriptsFolderPath
+        {
+            get
+            {
+                string path = generatedScriptsFolderPath.ToUnityPath();
+                
+                // FIX: Make sure it ends with a / otherwise you can get some strange behaviour
+                if (!path.EndsWith(Path.AltDirectorySeparatorChar))
+                    path += Path.AltDirectorySeparatorChar;
+                
+                return path;
+            }
+        }
 
         [SerializeField] private string namespaceForGeneratedCode;
         public string NamespaceForGeneratedCode => namespaceForGeneratedCode;
