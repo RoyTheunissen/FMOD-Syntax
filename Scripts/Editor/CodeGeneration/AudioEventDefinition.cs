@@ -1,3 +1,5 @@
+using UnityEditor;
+
 #if FMOD_AUDIO_SYNTAX
 using FMODUnity;
 #endif // FMOD_AUDIO_SYNTAX
@@ -15,32 +17,36 @@ namespace RoyTheunissen.AudioSyntax
         private string path;
         public string Path => path;
 
-        public AudioEventDefinition(AudioSyntaxSystems system, string path)
+        private string guid;
+        public string Guid => guid;
+
+        public AudioEventDefinition(AudioSyntaxSystems system, string path, string guid)
         {
             this.system = system;
             this.path = path;
+            this.guid = guid;
         }
     }
     
 #if FMOD_AUDIO_SYNTAX
     public abstract class FmodEventDefinition : AudioEventDefinition
     {
-        public FmodEventDefinition(EditorEventRef eventRef, string filteredPath)
-            : base(AudioSyntaxSystems.FMOD, filteredPath)
+        public FmodEventDefinition(EditorEventRef eventRef)
+            : base(AudioSyntaxSystems.FMOD, eventRef.GetFilteredPath(), eventRef.Guid.ToString())
         {
         }
     }
     
     public sealed class FmodAudioEventDefinition : FmodEventDefinition
     {
-        public FmodAudioEventDefinition(EditorEventRef eventRef, string filteredPath) : base(eventRef, filteredPath)
+        public FmodAudioEventDefinition(EditorEventRef eventRef) : base(eventRef)
         {
         }
     }
     
     public sealed class FmodSnapshotEventDefinition : FmodEventDefinition
     {
-        public FmodSnapshotEventDefinition(EditorEventRef eventRef, string filteredPath) : base(eventRef, filteredPath)
+        public FmodSnapshotEventDefinition(EditorEventRef eventRef) : base(eventRef)
         {
         }
     }
@@ -54,7 +60,8 @@ namespace RoyTheunissen.AudioSyntax
 
         public UnityAudioEventDefinition(UnityAudioEventConfigBase config)
             : base(AudioSyntaxSystems.UnityNativeAudio,
-                UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config))
+                UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config),
+                AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(config)))
         {
         }
     }
