@@ -491,6 +491,9 @@ namespace RoyTheunissen.AudioSyntax
 #if FMOD_AUDIO_SYNTAX
             GetFmodEvents(eventDefinitions, EditorEventRefExtensions.EventPrefix, false);
 #endif // FMOD_AUDIO_SYNTAX
+#if UNITY_AUDIO_SYNTAX
+            GetUnityEvents(eventDefinitions);
+#endif // UNITY_AUDIO_SYNTAX
             BuildEventsHierarchy(rootEventFolder, eventDefinitions);
             
             GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, eventTypeGenerator, EventContainerClass);
@@ -636,6 +639,21 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 #endif // FMOD_AUDIO_SYNTAX
+        
+#if UNITY_AUDIO_SYNTAX
+        private static void GetUnityEvents(List<AudioEventDefinition> eventDefinitions)
+        {
+            UnityAudioEventConfigBase[] configs = AssetLoading.GetAllAssetsOfType<UnityAudioEventConfigBase>();
+
+            // Organize the events in a folder hierarchy.
+            foreach (UnityAudioEventConfigBase config in configs)
+            {
+                UnityAudioEventDefinition eventDefinition = new(config);
+                
+                eventDefinitions.Add(eventDefinition);
+            }
+        }
+#endif // UNITY_AUDIO_SYNTAX
 
         private static void GenerateEventsScript(bool isFields, string eventsScriptPath,
             CodeGenerator codeGenerator, CodeGenerator typeGenerator, string containerName)

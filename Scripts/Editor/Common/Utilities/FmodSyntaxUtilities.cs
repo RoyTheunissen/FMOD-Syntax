@@ -69,8 +69,11 @@ namespace RoyTheunissen.AudioSyntax
             
             const char separator = '/';
             
-            // Events start with something like event:/ , so get rid of that first.
-            path = path.Substring(path.IndexOf(separator, StringComparison.Ordinal) + 1);
+            // FMOD Events start with something like event:/ , so if that exists, get rid of that first.
+            const string fmodEventCategorySuffix = ":/";
+            int fmodEventCategorySuffixIndex = path.IndexOf(fmodEventCategorySuffix, StringComparison.Ordinal);
+            if (fmodEventCategorySuffixIndex != -1)
+                path = path.Substring(fmodEventCategorySuffixIndex + fmodEventCategorySuffix.Length);
             
             if (stripSpecialCharacters)
             {
