@@ -1,3 +1,7 @@
+#if FMOD_AUDIO_SYNTAX
+using FMODUnity;
+#endif // FMOD_AUDIO_SYNTAX
+
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
@@ -19,28 +23,38 @@ namespace RoyTheunissen.AudioSyntax
     }
     
 #if FMOD_AUDIO_SYNTAX
-    public abstract class FmodAudioEventDefinition : AudioEventDefinition
+    public abstract class FmodEventDefinition : AudioEventDefinition
     {
-        public FmodAudioEventDefinition(string path) : base(AudioSyntaxSystems.FMOD, path)
+        public FmodEventDefinition(EditorEventRef eventRef, string filteredPath)
+            : base(AudioSyntaxSystems.FMOD, filteredPath)
         {
         }
     }
     
-    public abstract class FmodSnapshotEventDefinition : AudioEventDefinition
+    public sealed class FmodAudioEventDefinition : FmodEventDefinition
     {
-        public FmodSnapshotEventDefinition(string path) : base(AudioSyntaxSystems.FMOD, path)
+        public FmodAudioEventDefinition(EditorEventRef eventRef, string filteredPath) : base(eventRef, filteredPath)
+        {
+        }
+    }
+    
+    public sealed class FmodSnapshotEventDefinition : FmodEventDefinition
+    {
+        public FmodSnapshotEventDefinition(EditorEventRef eventRef, string filteredPath) : base(eventRef, filteredPath)
         {
         }
     }
 #endif // FMOD_AUDIO_SYNTAX
     
 #if UNITY_AUDIO_SYNTAX
-    public abstract class UnityAudioEventDefinition : AudioEventDefinition
+    public sealed class UnityAudioEventDefinition : AudioEventDefinition
     {
         private UnityAudioEventConfigBase config;
         public UnityAudioEventConfigBase Config => config;
 
-        public UnityAudioEventDefinition(string path) : base(AudioSyntaxSystems.UnityNativeAudio, path)
+        public UnityAudioEventDefinition(UnityAudioEventConfigBase config)
+            : base(AudioSyntaxSystems.UnityNativeAudio,
+                UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config))
         {
         }
     }
