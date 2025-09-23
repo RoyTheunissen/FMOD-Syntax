@@ -34,33 +34,10 @@ namespace RoyTheunissen.AudioSyntax
             this.modeProperty = modeProperty;
         }
 
-        private string GetDropdownPathForUnityAudioEventConfig(string assetPath, bool multipleAudioSystemsActive)
+        private string GetDropdownPathForUnityAudioEventConfig(
+            UnityAudioEventConfigBase config, bool multipleAudioSystemsActive)
         {
-            string dropdownPath = assetPath.RemoveSuffix(".asset");
-
-            string basePath = UnityAudioSyntaxSettings.Instance == null
-                ? string.Empty
-                : UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolder.Path.ToUnityPath();
-            
-            if (!string.IsNullOrEmpty(basePath))
-            {
-                if (!basePath.EndsWith("/"))
-                    basePath += "/";
-                
-                // Determine the path relative to the specified folder.
-                dropdownPath = dropdownPath.RemovePrefix(basePath);
-            }
-            else
-            {
-                // No base folder was defined. Let's TRY and have some intelligent filtering.
-
-                // No use in specifying that it's in the Assets folder. We know. 
-                dropdownPath = dropdownPath.RemoveAssetsPrefix();
-                
-                // This used to do the same base path inference that the setup wizard now does, but that seems overkill
-                // to do this every time you ask for a path. If you want shorter paths, then set up the base path
-                // correctly. That is much more performant.
-            }
+            string dropdownPath = UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config);
             
             // Specify the audio system if multiple are active.
             if (multipleAudioSystemsActive)
@@ -98,8 +75,9 @@ namespace RoyTheunissen.AudioSyntax
                 for (int i = 0; i < unityAudioEventConfigs.Length; i++)
                 {
                     string assetPath = AssetDatabase.GetAssetPath(unityAudioEventConfigs[i]);
-                    
-                    paths[i] = GetDropdownPathForUnityAudioEventConfig(assetPath, multipleAudioSystemsActive);
+
+                    paths[i] = GetDropdownPathForUnityAudioEventConfig(
+                        unityAudioEventConfigs[i], multipleAudioSystemsActive);
 
                     guids[i] = AssetDatabase.AssetPathToGUID(assetPath);
                 }

@@ -75,6 +75,38 @@ namespace RoyTheunissen.AudioSyntax
         {
             return Instance != null;
         }
+        
+        public static string GetFilteredPathForUnityAudioEventConfig(UnityAudioEventConfigBase config)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(config);
+            string filteredPath = assetPath.RemoveSuffix(".asset");
+
+            string basePath = Instance == null
+                ? string.Empty
+                : Instance.UnityAudioConfigRootFolder.Path.ToUnityPath();
+            
+            if (!string.IsNullOrEmpty(basePath))
+            {
+                if (!basePath.EndsWith("/"))
+                    basePath += "/";
+                
+                // Determine the path relative to the specified folder.
+                filteredPath = filteredPath.RemovePrefix(basePath);
+            }
+            else
+            {
+                // No base folder was defined. Let's TRY and have some intelligent filtering.
+
+                // No use in specifying that it's in the Assets folder. We know. 
+                filteredPath = filteredPath.RemoveAssetsPrefix();
+                
+                // This used to do the same base path inference that the setup wizard now does, but that seems overkill
+                // to do this every time you ask for a path. If you want shorter paths, then set up the base path
+                // correctly. That is much more performant.
+            }
+            
+            return filteredPath;
+        }
 #endif // UNITY_EDITOR
     }
 }
