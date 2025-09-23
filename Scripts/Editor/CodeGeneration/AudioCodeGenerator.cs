@@ -487,20 +487,27 @@ namespace RoyTheunissen.AudioSyntax
             
             // Organize the events in a folder hierarchy.
             rootEventFolder = new(EventContainerClass);
+            List<AudioEventDefinition> eventDefinitions = new();
 #if FMOD_AUDIO_SYNTAX
-            BuildFmodEventsHierarchy(rootEventFolder, FMODUnity.EditorEventRefExtensions.EventPrefix, false);
+            GetFmodEvents(eventDefinitions, EditorEventRefExtensions.EventPrefix, false);
 #endif // FMOD_AUDIO_SYNTAX
+            BuildEventsHierarchy(rootEventFolder, eventDefinitions);
             
             GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, eventTypeGenerator, EventContainerClass);
             GenerateEventsScript(false, EventTypesScriptPath, eventTypesScriptGenerator, eventTypeGenerator, EventContainerClass);
 
-            rootEventFolder = new(EventContainerClass);
 #if FMOD_AUDIO_SYNTAX
-            BuildFmodEventsHierarchy(rootEventFolder, FMODUnity.EditorEventRefExtensions.SnapshotPrefix, true);
-#endif // FMOD_AUDIO_SYNTAX
+            // Also build separate event files for FMOD snapshots. This is a special kind of event that can tweak
+            // various mixing settings. It's an FMOD-specific concept, there are currently no plans to do an equivalent
+            // for the Unity Audio Syntax implementation so this whole block can be FMOD-specific code.
+            rootEventFolder = new(SnapshotContainerClass);
+            eventDefinitions.Clear();
+            GetFmodEvents(eventDefinitions, EditorEventRefExtensions.SnapshotPrefix, true);
+            BuildEventsHierarchy(rootEventFolder, eventDefinitions);
             
             GenerateEventsScript(true, SnapshotsScriptPath, snapshotsScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
             GenerateEventsScript(false, SnapshotTypesScriptPath, snapshotTypesScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
+#endif // FMOD_AUDIO_SYNTAX
             
             // NOTE: This re-uses the using directives from the generated events. Therefore this should be called after
             // the events are generated.
@@ -563,25 +570,13 @@ namespace RoyTheunissen.AudioSyntax
             globalParametersGenerator.ReplaceKeyword("GlobalParameters", globalParametersCode);
             globalParametersGenerator.GenerateFile(GlobalParametersScriptPath);
         }
-
-#if FMOD_AUDIO_SYNTAX
-        private static void BuildFmodEventsHierarchy(EventFolder root, string eventPrefix, bool isSnapshots)
+        
+        private static void BuildEventsHierarchy(EventFolder root, List<AudioEventDefinition> events)
         {
-            // Generate a config & playback class for every FMOD event.
-            EditorEventRef[] events = EventManager.Events
-                .Where(e => e.Path.StartsWith(eventPrefix))
-                .OrderBy(e => e.Path).ToArray();
-
-            // Organize the events in a folder hierarchy.
-            foreach (EditorEventRef e in events)
+            // Organize the events into a folder hierarchy.
+            foreach (AudioEventDefinition eventDefinition in events)
             {
-                string path = e.GetFilteredPath(true);
-
-                FmodEventDefinition eventDefinition;
-                if (isSnapshots)
-                    eventDefinition = new FmodSnapshotEventDefinition(e);
-                else
-                    eventDefinition = new FmodAudioEventDefinition(e);
+                string path = eventDefinition.GetFilteredPath(true);
 
                 EventFolder folder = root;
                 
@@ -596,7 +591,7 @@ namespace RoyTheunissen.AudioSyntax
                 string currentPath = path;
                 
                 bool eventExistedDuringPreviousCodeGeneration = metaDataFromPreviousCodeGeneration
-                    .EventGuidToPreviousSyntaxPath.TryGetValue(e.Guid.ToString(), out string previousSyntaxPath);
+                    .EventGuidToPreviousSyntaxPath.TryGetValue(eventDefinition.Guid, out string previousSyntaxPath);
                 bool shouldGenerateAlias = false;
                 if (eventExistedDuringPreviousCodeGeneration)
                 {
@@ -618,6 +613,26 @@ namespace RoyTheunissen.AudioSyntax
 
                     previousFolder.ChildEventToAliasPath[eventDefinition] = previousSyntaxPath;
                 }
+            }
+        }
+
+#if FMOD_AUDIO_SYNTAX
+        private static void GetFmodEvents(List<AudioEventDefinition> eventDefinitions, string eventPrefix, bool isSnapshots)
+        {
+            EditorEventRef[] events = EventManager.Events
+                .Where(e => e.Path.StartsWith(eventPrefix))
+                .OrderBy(e => e.Path).ToArray();
+
+            // Organize the events in a folder hierarchy.
+            foreach (EditorEventRef e in events)
+            {
+                FmodEventDefinition eventDefinition;
+                if (isSnapshots)
+                    eventDefinition = new FmodSnapshotEventDefinition(e);
+                else
+                    eventDefinition = new FmodAudioEventDefinition(e);
+                
+                eventDefinitions.Add(eventDefinition);
             }
         }
 #endif // FMOD_AUDIO_SYNTAX
