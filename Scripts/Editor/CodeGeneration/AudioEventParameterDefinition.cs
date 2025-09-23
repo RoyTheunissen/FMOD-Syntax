@@ -1,4 +1,6 @@
+#if FMOD_AUDIO_SYNTAX
 using FMODUnity;
+#endif // FMOD_AUDIO_SYNTAX
 
 namespace RoyTheunissen.AudioSyntax
 {

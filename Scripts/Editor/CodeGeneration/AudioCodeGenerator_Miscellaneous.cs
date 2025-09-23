@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FMOD.Studio;
+
+#if FMOD_AUDIO_SYNTAX
 using FMODUnity;
+using FMOD.Studio;
+#endif // FMOD_AUDIO_SYNTAX
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -35,6 +38,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private static void GenerateMiscellaneousScripts()
         {
+#if FMOD_AUDIO_SYNTAX
             // NOTE: These are all together because that way data can be cached more easily.
 
             GenerateBanksScript(out List<FMOD.Studio.Bus> buses, out List<FMOD.Studio.VCA> VCAs);
@@ -44,8 +48,10 @@ namespace RoyTheunissen.AudioSyntax
 
             // Now that we know the VCAs, we can also generate a file for accessing those.
             GenerateVCAsScript(VCAs);
+#endif // FMOD_AUDIO_SYNTAX
         }
 
+#if FMOD_AUDIO_SYNTAX
         private static void GenerateBanksScript(out List<FMOD.Studio.Bus> buses, out List<FMOD.Studio.VCA> VCAs)
         {
             banksScriptGenerator.Reset();
@@ -146,6 +152,7 @@ namespace RoyTheunissen.AudioSyntax
             vcasScriptGenerator.ReplaceKeyword("VCAs", VCAsCode);
             vcasScriptGenerator.GenerateFile(VCAsScriptPath);
         }
+#endif // FMOD_AUDIO_SYNTAX
 
         /// <summary>
         /// JsonUtility does not support serializing dictionaries, so we can instead serialize it as an array of strings.

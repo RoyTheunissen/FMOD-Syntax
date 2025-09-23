@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using FMODUnity;
 using UnityEditor;
 using UnityEngine;
+
+#if FMOD_AUDIO_SYNTAX
+using FMODUnity;
+#endif // FMOD_AUDIO_SYNTAX
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -28,6 +31,7 @@ namespace RoyTheunissen.AudioSyntax
             return File.Exists(PreviousMetaDataFilePath);
         }
         
+#if FMOD_AUDIO_SYNTAX
         private static void FindChangedEvents()
         {
             EditorEventRef[] events = EventManager.Events
@@ -51,6 +55,7 @@ namespace RoyTheunissen.AudioSyntax
                 }
             }
         }
+#endif // FMOD_AUDIO_SYNTAX
 
         private static void TryRefactoringOldEventReferencesInternal(bool isTriggeredExplicitlyViaMenu)
         {

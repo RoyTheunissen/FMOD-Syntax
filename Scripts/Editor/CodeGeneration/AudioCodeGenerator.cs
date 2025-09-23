@@ -1,12 +1,13 @@
-#if FMOD_AUDIO_SYNTAX
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using System.Linq;
-using FMODUnity;
 using UnityEngine;
+
+#if FMOD_AUDIO_SYNTAX
+using FMODUnity;
+#endif // FMOD_AUDIO_SYNTAX
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -319,7 +320,7 @@ namespace RoyTheunissen.AudioSyntax
                 // we don't know 100% sure that the selected Snapshot supports that. Otherwise it's very tedious to set
                 // the intensity parameter on some generic Snapshot. You would have to see if it is one of the known
                 // types that has the parameter, defeating the purpose of allowing users to select one via the inspector
-                if (e.Path.StartsWith(EditorEventRefExtensions.SnapshotPrefix) && string.Equals(
+                if (e is FmodSnapshotEventDefinition && string.Equals(
                         parameter.FilteredName, "Intensity", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
@@ -485,11 +486,19 @@ namespace RoyTheunissen.AudioSyntax
             detectedEventChanges.Clear();
             
             // Organize the events in a folder hierarchy.
-            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.EventPrefix, EventContainerClass, false);
+            rootEventFolder = new(EventContainerClass);
+#if FMOD_AUDIO_SYNTAX
+            BuildFmodEventsHierarchy(rootEventFolder, FMODUnity.EditorEventRefExtensions.EventPrefix, false);
+#endif // FMOD_AUDIO_SYNTAX
+            
             GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, eventTypeGenerator, EventContainerClass);
             GenerateEventsScript(false, EventTypesScriptPath, eventTypesScriptGenerator, eventTypeGenerator, EventContainerClass);
 
-            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.SnapshotPrefix, SnapshotContainerClass, true);
+            rootEventFolder = new(EventContainerClass);
+#if FMOD_AUDIO_SYNTAX
+            BuildFmodEventsHierarchy(rootEventFolder, FMODUnity.EditorEventRefExtensions.SnapshotPrefix, true);
+#endif // FMOD_AUDIO_SYNTAX
+            
             GenerateEventsScript(true, SnapshotsScriptPath, snapshotsScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
             GenerateEventsScript(false, SnapshotTypesScriptPath, snapshotTypesScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
             
@@ -535,11 +544,14 @@ namespace RoyTheunissen.AudioSyntax
         {
             // Also generate a field for every FMOD global parameter.
             string globalParametersCode = string.Empty;
+            
+#if FMOD_AUDIO_SYNTAX
             foreach (EditorParamRef fmodParameter in EventManager.Parameters)
             {
                 FmodAudioEventParameterDefinition globalParameter = new(fmodParameter, null);
                 globalParametersCode += GetParameterCode(globalParameterGenerator, globalParameter);
             }
+#endif // FMOD_AUDIO_SYNTAX
             
             globalParametersGenerator.Reset();
             globalParametersGenerator.ReplaceKeyword("Namespace", Settings.NamespaceForGeneratedCode);
@@ -552,7 +564,8 @@ namespace RoyTheunissen.AudioSyntax
             globalParametersGenerator.GenerateFile(GlobalParametersScriptPath);
         }
 
-        private static EventFolder BuildFmodEventsHierarchy(string eventPrefix, string containerName, bool isSnapshots)
+#if FMOD_AUDIO_SYNTAX
+        private static void BuildFmodEventsHierarchy(EventFolder root, string eventPrefix, bool isSnapshots)
         {
             // Generate a config & playback class for every FMOD event.
             EditorEventRef[] events = EventManager.Events
@@ -560,7 +573,6 @@ namespace RoyTheunissen.AudioSyntax
                 .OrderBy(e => e.Path).ToArray();
 
             // Organize the events in a folder hierarchy.
-            EventFolder root = new(containerName);
             foreach (EditorEventRef e in events)
             {
                 string path = e.GetFilteredPath(true);
@@ -607,9 +619,8 @@ namespace RoyTheunissen.AudioSyntax
                     previousFolder.ChildEventToAliasPath[eventDefinition] = previousSyntaxPath;
                 }
             }
-
-            return root;
         }
+#endif // FMOD_AUDIO_SYNTAX
 
         private static void GenerateEventsScript(bool isFields, string eventsScriptPath,
             CodeGenerator codeGenerator, CodeGenerator typeGenerator, string containerName)
@@ -839,4 +850,3 @@ namespace RoyTheunissen.AudioSyntax
         }
     }
 }
-#endif // FMOD_AUDIO_SYNTAX
