@@ -1,9 +1,6 @@
-#if FMOD_AUDIO_SYNTAX
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FMODUnity;
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -15,11 +12,11 @@ namespace RoyTheunissen.AudioSyntax
         private readonly List<EventFolder> childFolders = new();
         public List<EventFolder> ChildFolders => childFolders;
 
-        private readonly List<EditorEventRef> childEvents = new();
-        public List<EditorEventRef> ChildEvents => childEvents;
+        private readonly List<AudioEventDefinition> childEvents = new();
+        public List<AudioEventDefinition> ChildEvents => childEvents;
 
-        private readonly Dictionary<EditorEventRef, string> childEventToAliasPath = new();
-        public Dictionary<EditorEventRef, string> ChildEventToAliasPath => childEventToAliasPath;
+        private readonly Dictionary<AudioEventDefinition, string> childEventToAliasPath = new();
+        public Dictionary<AudioEventDefinition, string> ChildEventToAliasPath => childEventToAliasPath;
 
         public EventFolder(string name)
         {
@@ -60,4 +57,3 @@ namespace RoyTheunissen.AudioSyntax
         }
     }
 }
-#endif // FMOD_AUDIO_SYNTAX

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 
 #if FMOD_AUDIO_SYNTAX
@@ -20,20 +21,66 @@ namespace RoyTheunissen.AudioSyntax
         private string guid;
         public string Guid => guid;
 
-        public AudioEventDefinition(AudioSyntaxSystems system, string path, string guid)
+        protected readonly List<AudioEventParameterDefinition> parameters = new();
+        public IReadOnlyList<AudioEventParameterDefinition> Parameters => parameters;
+
+        public bool IsParameterless => parameters.Count == 0;
+
+        public abstract bool IsOneShot
+        {
+            get;
+        }
+
+        public abstract string Name
+        {
+            get;
+        }
+        
+        private readonly string displayName;
+        public string DisplayName => displayName;
+        
+        private readonly string filteredName;
+        public string FilteredName => filteredName;
+        
+        private readonly string fieldName;
+        public string FieldName => fieldName;
+
+        public AudioEventDefinition(AudioSyntaxSystems system, string path, string name, string guid)
         {
             this.system = system;
             this.path = path;
             this.guid = guid;
+            
+            displayName = FmodSyntaxUtilities.GetDisplayNameFromPath(name);
+            filteredName = FmodSyntaxUtilities.GetFilteredNameFromPath(name);
+            fieldName = FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(name);
+        }
+        
+        public string GetFilteredPath(bool stripSpecialCharacters = false)
+        {
+            return FmodSyntaxUtilities.GetFilteredPath(Path, stripSpecialCharacters);
         }
     }
-    
+
 #if FMOD_AUDIO_SYNTAX
     public abstract class FmodEventDefinition : AudioEventDefinition
     {
+        private readonly EditorEventRef eventRef;
+        public EditorEventRef EventRef => eventRef;
+
+        public override bool IsOneShot => eventRef.IsOneShot;
+
+        public override string Name => eventRef.name;
+
         public FmodEventDefinition(EditorEventRef eventRef)
-            : base(AudioSyntaxSystems.FMOD, eventRef.GetFilteredPath(), eventRef.Guid.ToString())
+            : base(AudioSyntaxSystems.FMOD, eventRef.name, eventRef.GetFilteredPath(), eventRef.Guid.ToString())
         {
+            this.eventRef = eventRef;
+
+            for (int i = 0; i < eventRef.Parameters.Count; i++)
+            {
+                parameters.Add(new FmodAudioEventParameterDefinition(eventRef.Parameters[i], eventRef));
+            }
         }
     }
     
@@ -58,8 +105,12 @@ namespace RoyTheunissen.AudioSyntax
         private UnityAudioEventConfigBase config;
         public UnityAudioEventConfigBase Config => config;
 
+        public override string Name => Config.Name;
+
+        public override bool IsOneShot => Config is UnityAudioEventOneOffConfig;
+
         public UnityAudioEventDefinition(UnityAudioEventConfigBase config)
-            : base(AudioSyntaxSystems.UnityNativeAudio,
+            : base(AudioSyntaxSystems.UnityNativeAudio, config.name,
                 UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config),
                 AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(config)))
         {

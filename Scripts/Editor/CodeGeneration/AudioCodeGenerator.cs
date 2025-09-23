@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using System.Linq;
-using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
@@ -176,21 +175,21 @@ namespace RoyTheunissen.AudioSyntax
             return labelParameterNameToUserSpecifiedType.TryGetValue(name, out enumType);
         }
 
-        private static string GetParameterCode(CodeGenerator codeGenerator, EditorParamRef parameter)
+        private static string GetParameterCode(CodeGenerator codeGenerator, AudioEventParameterDefinition parameter)
         {
             // Generate a public static readonly field for this parameter with the specified GUID. Note that this is
             // done both for local event parameters as well as global event parameters.
             codeGenerator.Reset();
-            string name = parameter.GetFilteredName();
-            string type = parameter.GetWrapperType();
+            string name = parameter.FilteredName;
+            string type = parameter.WrapperType;
             codeGenerator.ReplaceKeyword("ParameterType", type);
             codeGenerator.ReplaceKeyword("ParameterName", name);
-            codeGenerator.ReplaceKeyword("ID1", parameter.ID.data1.ToString());
-            codeGenerator.ReplaceKeyword("ID2", parameter.ID.data2.ToString());
+            codeGenerator.ReplaceKeyword("ID1", parameter.ID1.ToString());
+            codeGenerator.ReplaceKeyword("ID2", parameter.ID2.ToString());
 
             // "Labelled parameters" require us to also generate an enum for its possible values.
             const string enumKeyword = "ParameterEnum";
-            if (parameter.Type == ParameterType.Labeled)
+            if (parameter.IsLabeled)
             {
                 bool hasUserSpecifiedEnum = GetUserSpecifiedLabelParameterType(parameter.Name, out Type enumType);
                 if (hasUserSpecifiedEnum)
@@ -271,7 +270,7 @@ namespace RoyTheunissen.AudioSyntax
             return existingEventPathsByGuid;
         }
         
-        private static string GetEventTypeCode(CodeGenerator generator, EditorEventRef e, string eventName = "", string attribute = "")
+        private static string GetEventTypeCode(CodeGenerator generator, AudioEventDefinition e, string eventName = "", string attribute = "")
         {
             if (string.IsNullOrEmpty(eventName))
                 eventName = GetEventSyntaxName(e);
@@ -291,13 +290,13 @@ namespace RoyTheunissen.AudioSyntax
             return generator.GetCode();
         }
 
-        private static void GetEventTypeParametersCode(CodeGenerator generator, EditorEventRef e, string eventName)
+        private static void GetEventTypeParametersCode(CodeGenerator generator, AudioEventDefinition e, string eventName)
         {
             const string eventParametersKeyword = "EventParameters";
             const string configPlayMethodWithParametersKeyword = "ConfigPlayMethodWithParameters";
             
             // If there's no parameters for this event then we can just get rid of the keywords and leave it there.
-            if (e.LocalParameters.Count <= 0)
+            if (e.IsParameterless)
             {
                 generator.RemoveKeywordLines(configPlayMethodWithParametersKeyword);
                 generator.RemoveKeywordLines(eventParametersKeyword);
@@ -311,9 +310,9 @@ namespace RoyTheunissen.AudioSyntax
             string parameterArgumentsWithTypeFullyQualified = string.Empty;
             string parameterInitializationsFromArguments = string.Empty;
             int validParameterCount = 0;
-            for (int i = 0; i < e.LocalParameters.Count; i++)
+            for (int i = 0; i < e.Parameters.Count; i++)
             {
-                EditorParamRef parameter = e.LocalParameters[i];
+                AudioEventParameterDefinition parameter = e.Parameters[i];
 
                 // For snapshots we support an "Intensity" parameter by default, so don't explicitly create one.
                 // We do it this way so you can have a reference to a Snapshot and then set its intensity, even though
@@ -321,7 +320,7 @@ namespace RoyTheunissen.AudioSyntax
                 // the intensity parameter on some generic Snapshot. You would have to see if it is one of the known
                 // types that has the parameter, defeating the purpose of allowing users to select one via the inspector
                 if (e.Path.StartsWith(EditorEventRefExtensions.SnapshotPrefix) && string.Equals(
-                        parameter.GetFilteredName(), "Intensity", StringComparison.OrdinalIgnoreCase))
+                        parameter.FilteredName, "Intensity", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -334,10 +333,10 @@ namespace RoyTheunissen.AudioSyntax
                 // Also cache this for generating custom play methods with all the parameters in it, it's to support
                 // a syntax like 'Events.Footstep.Play(SurfaceValues.Dirt)' where the Play method has strongly-typed
                 // arguments for all of its parameters.
-                string parameterName = parameter.GetFilteredName();
-                string argumentName = parameter.GetArgumentName();
-                string argumentType = parameter.GetArgumentType();
-                string argumentTypeFullyQualified = parameter.GetArgumentTypeFullyQualified(e);
+                string parameterName = parameter.FilteredName;
+                string argumentName = parameter.ArgumentName;
+                string argumentType = parameter.ArgumentType;
+                string argumentTypeFullyQualified = parameter.ArgumentTypeFullyQualified;
                 string spacing = i == 0 ? string.Empty : ", ";
                 parameterArguments += spacing + $"{argumentName}";
                 parameterArgumentsWithType += spacing + $"{argumentType} {argumentName}";
@@ -357,9 +356,9 @@ namespace RoyTheunissen.AudioSyntax
 
             // THEN write an InitializeParameters function to pass along the instance to the parameters.
             string eventParametersInitializationCode = string.Empty;
-            foreach (EditorParamRef parameter in e.LocalParameters)
+            foreach (AudioEventParameterDefinition parameter in e.Parameters)
             {
-                string parameterName = parameter.GetFilteredName();
+                string parameterName = parameter.FilteredName;
                 eventParametersInitializationCode += $"{parameterName}.InitializeAsEventParameter(Instance);\r\n";
             }
 
@@ -417,7 +416,7 @@ namespace RoyTheunissen.AudioSyntax
             return FmodSyntaxUtilities.GetFilteredNameFromPath(filteredPath);
         }
         
-        private static string GetEventSyntaxName(EditorEventRef e)
+        private static string GetEventSyntaxName(AudioEventDefinition e)
         {
             return GetEventSyntaxName(e.GetFilteredPath(true));
         }
@@ -444,12 +443,12 @@ namespace RoyTheunissen.AudioSyntax
             return Path.Combine(eventDirectories, eventName).ToUnityPath().Replace("/", ".");
         }
 
-        private static string GetEventSyntaxPath(EditorEventRef e)
+        private static string GetEventSyntaxPath(AudioEventDefinition e)
         {
             return GetEventSyntaxPath(e.GetFilteredPath(true));
         }
 
-        private static string GetEventCode(EditorEventRef e, string eventName = "", string attribute = "")
+        private static string GetEventCode(AudioEventDefinition e, string eventName = "", string attribute = "")
         {
             // By default we use the event's own name, but when we're generating aliases we actually want to generate
             // a Config/Playback that has an old name but points to the GUID of the newly named event, so we want to 
@@ -486,11 +485,11 @@ namespace RoyTheunissen.AudioSyntax
             detectedEventChanges.Clear();
             
             // Organize the events in a folder hierarchy.
-            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.EventPrefix, EventContainerClass);
+            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.EventPrefix, EventContainerClass, false);
             GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, eventTypeGenerator, EventContainerClass);
             GenerateEventsScript(false, EventTypesScriptPath, eventTypesScriptGenerator, eventTypeGenerator, EventContainerClass);
 
-            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.SnapshotPrefix, SnapshotContainerClass);
+            rootEventFolder = BuildFmodEventsHierarchy(EditorEventRefExtensions.SnapshotPrefix, SnapshotContainerClass, true);
             GenerateEventsScript(true, SnapshotsScriptPath, snapshotsScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
             GenerateEventsScript(false, SnapshotTypesScriptPath, snapshotTypesScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
             
@@ -536,9 +535,10 @@ namespace RoyTheunissen.AudioSyntax
         {
             // Also generate a field for every FMOD global parameter.
             string globalParametersCode = string.Empty;
-            foreach (EditorParamRef parameter in EventManager.Parameters)
+            foreach (EditorParamRef fmodParameter in EventManager.Parameters)
             {
-                globalParametersCode += GetParameterCode(globalParameterGenerator, parameter);
+                FmodAudioEventParameterDefinition globalParameter = new(fmodParameter, null);
+                globalParametersCode += GetParameterCode(globalParameterGenerator, globalParameter);
             }
             
             globalParametersGenerator.Reset();
@@ -552,7 +552,7 @@ namespace RoyTheunissen.AudioSyntax
             globalParametersGenerator.GenerateFile(GlobalParametersScriptPath);
         }
 
-        private static EventFolder BuildFmodEventsHierarchy(string eventPrefix, string containerName)
+        private static EventFolder BuildFmodEventsHierarchy(string eventPrefix, string containerName, bool isSnapshots)
         {
             // Generate a config & playback class for every FMOD event.
             EditorEventRef[] events = EventManager.Events
@@ -565,6 +565,12 @@ namespace RoyTheunissen.AudioSyntax
             {
                 string path = e.GetFilteredPath(true);
 
+                FmodEventDefinition eventDefinition;
+                if (isSnapshots)
+                    eventDefinition = new FmodSnapshotEventDefinition(e);
+                else
+                    eventDefinition = new FmodAudioEventDefinition(e);
+
                 EventFolder folder = root;
                 
                 if (Settings.SyntaxFormat == AudioSyntaxSettings.SyntaxFormats.SubclassesPerFolder)
@@ -572,7 +578,7 @@ namespace RoyTheunissen.AudioSyntax
                     folder = root.GetOrCreateChildFolderFromPathRecursively(path);
                 }
 
-                folder.ChildEvents.Add(e);
+                folder.ChildEvents.Add(eventDefinition);
                 folder.ChildEvents.Sort((x, y) => String.Compare(x.Path, y.Path, StringComparison.Ordinal));
                 
                 string currentPath = path;
@@ -598,7 +604,7 @@ namespace RoyTheunissen.AudioSyntax
                     EventFolder previousFolder = root
                         .GetOrCreateChildFolderFromPathRecursively(previousSyntaxPath.Replace(".", "/"));
 
-                    previousFolder.ChildEventToAliasPath[e] = previousSyntaxPath;
+                    previousFolder.ChildEventToAliasPath[eventDefinition] = previousSyntaxPath;
                 }
             }
 
@@ -702,7 +708,7 @@ namespace RoyTheunissen.AudioSyntax
             string eventAliasesCode = "";
             string eventTypesCode = string.Empty;
             string eventsCode = string.Empty;
-            foreach (EditorEventRef e in eventFolder.ChildEvents)
+            foreach (AudioEventDefinition e in eventFolder.ChildEvents)
             {
                 // Log it in the active event GUIDs. This way we can keep track of which events we had previously and
                 // which paths / GUIDs they had. Then we can figure out if they were renamed/moved, then add those
@@ -712,7 +718,7 @@ namespace RoyTheunissen.AudioSyntax
                 // in EventManager.cs and make it expose a list of renamed events. Would require changing FMOD even
                 // further though, and the changes are already stacking up...
                 if (isDeclaration)
-                    activeEventGuidToCurrentSyntaxPath[e.Guid.ToString()] = GetEventSyntaxPath(e);
+                    activeEventGuidToCurrentSyntaxPath[e.Guid] = GetEventSyntaxPath(e);
 
                 // Types
                 if (!isDeclaration)
@@ -722,7 +728,7 @@ namespace RoyTheunissen.AudioSyntax
                 if (isDeclaration)
                     eventsCode += GetEventCode(e);
 
-                if (e.LocalParameters.Count == 0)
+                if (e.IsParameterless)
                 {
                     parameterlessEventsCode += $"{{ \"{e.Guid}\", new FmodParameterlessAudioConfig(\"{e.Guid}\") }},\r\n";
                 }
@@ -734,10 +740,10 @@ namespace RoyTheunissen.AudioSyntax
                 AudioSyntaxSettings.SyntaxFormats previousSyntaxFormat = metaDataFromPreviousCodeGeneration.SyntaxFormat;
                 AudioSyntaxSettings.SyntaxFormats currentSyntaxFormat = Settings.SyntaxFormat;
                 
-                foreach (KeyValuePair<EditorEventRef, string> eventPreviousPathPair in
+                foreach (KeyValuePair<AudioEventDefinition, string> eventPreviousPathPair in
                          eventFolder.ChildEventToAliasPath)
                 {
-                    EditorEventRef e = eventPreviousPathPair.Key;
+                    AudioEventDefinition e = eventPreviousPathPair.Key;
                     string currentSyntaxPath = GetEventSyntaxPath(e);
                     string previousSyntaxPath = eventPreviousPathPair.Value;
 
