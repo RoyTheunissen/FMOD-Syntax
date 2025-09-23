@@ -45,7 +45,7 @@ namespace RoyTheunissen.AudioSyntax
         private readonly string fieldName;
         public string FieldName => fieldName;
 
-        public AudioEventDefinition(AudioSyntaxSystems system, string path, string name, string guid)
+        protected AudioEventDefinition(AudioSyntaxSystems system, string path, string name, string guid)
         {
             this.system = system;
             this.path = path;
@@ -72,7 +72,7 @@ namespace RoyTheunissen.AudioSyntax
 
         public override string Name => eventRef.name;
 
-        public FmodEventDefinition(EditorEventRef eventRef)
+        protected FmodEventDefinition(EditorEventRef eventRef)
             : base(AudioSyntaxSystems.FMOD, eventRef.name, eventRef.GetFilteredPath(), eventRef.Guid.ToString())
         {
             this.eventRef = eventRef;
@@ -100,20 +100,44 @@ namespace RoyTheunissen.AudioSyntax
 #endif // FMOD_AUDIO_SYNTAX
     
 #if UNITY_AUDIO_SYNTAX
-    public sealed class UnityAudioEventDefinition : AudioEventDefinition
+    public abstract class UnityAudioEventDefinition : AudioEventDefinition
     {
-        private UnityAudioEventConfigBase config;
-        public UnityAudioEventConfigBase Config => config;
+        public abstract UnityAudioEventConfigBase Config
+        {
+            get;
+        }
 
         public override string Name => Config.Name;
 
         public override bool IsOneShot => Config is UnityAudioEventOneOffConfig;
 
-        public UnityAudioEventDefinition(UnityAudioEventConfigBase config)
+        protected UnityAudioEventDefinition(UnityAudioEventConfigBase config)
             : base(AudioSyntaxSystems.UnityNativeAudio,
                 UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config), config.name,
                 AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(config)))
         {
+        }
+    }
+    
+    public sealed class UnityAudioEventOneOffDefinition : UnityAudioEventDefinition
+    {
+        private UnityAudioEventOneOffConfig config;
+        public override UnityAudioEventConfigBase Config => config;
+
+        public UnityAudioEventOneOffDefinition(UnityAudioEventOneOffConfig config) : base(config)
+        {
+            this.config = config;
+        }
+    }
+    
+    public sealed class UnityAudioEventLoopingDefinition : UnityAudioEventDefinition
+    {
+        private UnityAudioEventLoopingConfig config;
+        public override UnityAudioEventConfigBase Config => config;
+
+        public UnityAudioEventLoopingDefinition(UnityAudioEventLoopingConfig config) : base(config)
+        {
+            this.config = config;
         }
     }
 #endif // UNITY_AUDIO_SYNTAX

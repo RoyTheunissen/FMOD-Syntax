@@ -648,7 +648,18 @@ namespace RoyTheunissen.AudioSyntax
             // Organize the events in a folder hierarchy.
             foreach (UnityAudioEventConfigBase config in configs)
             {
-                UnityAudioEventDefinition eventDefinition = new(config);
+                UnityAudioEventDefinition eventDefinition;
+                if (config is UnityAudioEventLoopingConfig loopingConfig)
+                    eventDefinition = new UnityAudioEventLoopingDefinition(loopingConfig);
+                else if (config is UnityAudioEventOneOffConfig oneOffConfig)
+                    eventDefinition = new UnityAudioEventOneOffDefinition(oneOffConfig);
+                else
+                {
+                    Debug.LogError($"Found invalid Unity Audio Event Config '{config}' that was neither " +
+                                   $"a {nameof(UnityAudioEventLoopingConfig)} nor a " +
+                                   $"{nameof(UnityAudioEventOneOffConfig)}.", config);
+                    continue;
+                }
                 
                 eventDefinitions.Add(eventDefinition);
             }
