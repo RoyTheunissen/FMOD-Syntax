@@ -69,18 +69,7 @@ namespace RoyTheunissen.AudioSyntax
         
         public PlaybackType Play(Transform origin, float volumeFactor = 1.0f)
         {
-            PlaybackType playback = new PlaybackType();
-            
-            AudioSource audioSource = UnityAudioSyntaxSystem.Instance.GetAudioSourceForPlayback(this);;
-            playback.Initialize(this, origin, volumeFactor, audioSource);
-            
-#if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
-            audioSource.name = "AudioSource - " + playback;
-#endif // DEBUG_AUDIO_SOURCE_POOLING
-
-            AudioSyntaxSystem.RegisterActiveEventPlayback(playback);
-
-            return playback;
+            return UnityAudioPlayback.Play<PlaybackType>(this, origin, volumeFactor);
         }
 
         public override UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f)

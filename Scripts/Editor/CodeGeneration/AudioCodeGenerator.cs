@@ -36,15 +36,20 @@ namespace RoyTheunissen.AudioSyntax
         private const string EventsTemplatePath = TemplatePathBase + "Events/";
 
         private const string EventNameKeyword = "EventName";
+        private const string EventPathKeyword = "EventPath";
 
         private static readonly CodeGenerator eventsScriptGenerator = 
             new(EventsTemplatePath + "AudioEvents.g.cs");
         private static readonly CodeGenerator eventTypesScriptGenerator =
-            new(EventsTemplatePath + "FmodEventTypes.g.cs"); // Currently FMOD-specific
-        private static readonly CodeGenerator eventTypeGenerator = 
-            new(EventsTemplatePath + "FmodEventType.g.cs"); // Currently FMOD-specific
-        private static readonly CodeGenerator eventFieldGenerator = 
-            new(EventsTemplatePath + "AudioEventField.g.cs");
+            new(EventsTemplatePath + "FmodEventTypes.g.cs"); // TODO: Not FMOD-specific any more! Should rename
+        private static readonly CodeGenerator fmodEventTypeGenerator = 
+            new(EventsTemplatePath + "FmodEventType.g.cs"); // FMOD-specific
+        private static readonly CodeGenerator unityEventTypeGenerator = 
+            new(EventsTemplatePath + "UnityEventType.g.cs"); // Unity-specific
+        private static readonly CodeGenerator fmodEventFieldGenerator = 
+            new(EventsTemplatePath + "FmodEventField.g.cs"); // FMOD-specific
+        private static readonly CodeGenerator unityEventFieldGenerator = 
+            new(EventsTemplatePath + "UnityEventField.g.cs"); // Unity-specific
         private static readonly CodeGenerator eventParameterGenerator =
             new(EventsTemplatePath + "AudioEventParameter.g.cs");
         private static readonly CodeGenerator eventParametersInitializationGenerator =
@@ -279,6 +284,9 @@ namespace RoyTheunissen.AudioSyntax
             generator.Reset();
             generator.ReplaceKeyword(EventNameKeyword, eventName);
             
+            generator.ReplaceKeyword("EventConfigBaseType", e.GetConfigBaseType(eventName));
+            generator.ReplaceKeyword("EventPlaybackBaseType", e.PlaybackBaseType);
+            
             // Parameters
             GetEventTypeParametersCode(generator, e, eventName);
 
@@ -458,10 +466,13 @@ namespace RoyTheunissen.AudioSyntax
                 eventName = GetEventSyntaxName(e);
             string fieldName = FmodSyntaxUtilities.GetFilteredNameFromPathLowerCase(eventName);
             
+            CodeGenerator eventFieldGenerator = GetEventFieldCodeGenerator(e);
+            
             eventFieldGenerator.Reset();
             eventFieldGenerator.ReplaceKeyword(EventNameKeyword, eventName);
+            eventFieldGenerator.ReplaceKeyword(EventPathKeyword, e.Path);
             eventFieldGenerator.ReplaceKeyword("eventName", fieldName);
-            eventFieldGenerator.ReplaceKeyword("GUID", e.Guid.ToString());
+            eventFieldGenerator.ReplaceKeyword("GUID", e.Guid);
             
             // Aliases have an Obsolete attribute, normal events don't and can just remove the keyword.
             if (string.IsNullOrEmpty(attribute))
@@ -496,8 +507,8 @@ namespace RoyTheunissen.AudioSyntax
 #endif // UNITY_AUDIO_SYNTAX
             BuildEventsHierarchy(rootEventFolder, eventDefinitions);
             
-            GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, eventTypeGenerator, EventContainerClass);
-            GenerateEventsScript(false, EventTypesScriptPath, eventTypesScriptGenerator, eventTypeGenerator, EventContainerClass);
+            GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, EventContainerClass);
+            GenerateEventsScript(false, EventTypesScriptPath, eventTypesScriptGenerator, EventContainerClass);
 
 #if FMOD_AUDIO_SYNTAX
             // Also build separate event files for FMOD snapshots. This is a special kind of event that can tweak
@@ -508,8 +519,8 @@ namespace RoyTheunissen.AudioSyntax
             GetFmodEvents(eventDefinitions, EditorEventRefExtensions.SnapshotPrefix, true);
             BuildEventsHierarchy(rootEventFolder, eventDefinitions);
             
-            GenerateEventsScript(true, SnapshotsScriptPath, snapshotsScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
-            GenerateEventsScript(false, SnapshotTypesScriptPath, snapshotTypesScriptGenerator, snapshotTypeGenerator, SnapshotContainerClass);
+            GenerateEventsScript(true, SnapshotsScriptPath, snapshotsScriptGenerator, SnapshotContainerClass);
+            GenerateEventsScript(false, SnapshotTypesScriptPath, snapshotTypesScriptGenerator, SnapshotContainerClass);
 #endif // FMOD_AUDIO_SYNTAX
             
             // NOTE: This re-uses the using directives from the generated events. Therefore this should be called after
@@ -667,7 +678,7 @@ namespace RoyTheunissen.AudioSyntax
 #endif // UNITY_AUDIO_SYNTAX
 
         private static void GenerateEventsScript(bool isFields, string eventsScriptPath,
-            CodeGenerator codeGenerator, CodeGenerator typeGenerator, string containerName)
+            CodeGenerator codeGenerator, string containerName)
         {
             eventUsingDirectives.Clear();
             eventUsingDirectives.AddRange(eventUsingDirectivesDefault);
@@ -689,12 +700,12 @@ namespace RoyTheunissen.AudioSyntax
                 // 'AudioEvents.NameOfEventPlayback playback;' and lets you type
                 // 'NameOfEventPlayback playback;' instead (without the 'AudioEvents.')
                 eventsCode = GenerateFolderCode(
-                    typeGenerator, containerName, rootEventFolder, isFields, out string eventTypesCodeToBePlacedOutsideOfRootFolder);
+                    containerName, rootEventFolder, isFields, out string eventTypesCodeToBePlacedOutsideOfRootFolder);
                 eventsCode = eventTypesCodeToBePlacedOutsideOfRootFolder + eventsCode;
             }
             else
             {
-                eventsCode = GenerateFolderCode(typeGenerator, containerName, rootEventFolder, isFields);
+                eventsCode = GenerateFolderCode(containerName, rootEventFolder, isFields);
             }
             codeGenerator.ReplaceKeyword("Events", eventsCode, true);
             
@@ -735,15 +746,48 @@ namespace RoyTheunissen.AudioSyntax
                    + code
                    + "#pragma warning restore 618\r\n";
         }
+        
+        private static CodeGenerator GetEventFieldCodeGenerator(AudioEventDefinition eventDefinition)
+        {
+            // Decide which type generator to use based on the event definition.
+            
+            if (eventDefinition is FmodEventDefinition)
+                return fmodEventFieldGenerator;
+            
+            if (eventDefinition is UnityAudioEventDefinition)
+                return unityEventFieldGenerator;
+            
+            Debug.LogError($"Tried to get audio event field code generator for audio event '{eventDefinition}' " +
+                           $"which is of an unknown type.");
+            return null;
+        }
 
-        private static string GenerateFolderCode(CodeGenerator typeGenerator, string containerName,
+        private static CodeGenerator GetEventTypeCodeGenerator(AudioEventDefinition eventDefinition)
+        {
+            // Decide which type generator to use based on the event definition.
+            
+            if (eventDefinition is FmodAudioEventDefinition)
+                return fmodEventTypeGenerator;
+            
+            if (eventDefinition is FmodSnapshotEventDefinition)
+                return snapshotTypeGenerator;
+            
+            if (eventDefinition is UnityAudioEventDefinition)
+                return unityEventTypeGenerator;
+            
+            Debug.LogError($"Tried to get audio event type code generator for audio event '{eventDefinition}' " +
+                           $"which is of an unknown type.");
+            return null;
+        }
+
+        private static string GenerateFolderCode(string containerName,
             EventFolder eventFolder, bool isDeclaration, out string eventTypesCodeToBePlacedOutsideOfRootFolder)
         {
             string childFoldersCode = "";
             for (int i = 0; i < eventFolder.ChildFolders.Count; i++)
             {
                 EventFolder childFolder = eventFolder.ChildFolders[i];
-                string childFolderCode = GenerateFolderCode(typeGenerator, containerName, childFolder, isDeclaration);
+                string childFolderCode = GenerateFolderCode(containerName, childFolder, isDeclaration);
                 childFoldersCode += childFolderCode + "\r\n";
             }
             
@@ -765,6 +809,8 @@ namespace RoyTheunissen.AudioSyntax
             string eventsCode = string.Empty;
             foreach (AudioEventDefinition e in eventFolder.ChildEvents)
             {
+                CodeGenerator typeGenerator = GetEventTypeCodeGenerator(e);
+                
                 // Log it in the active event GUIDs. This way we can keep track of which events we had previously and
                 // which paths / GUIDs they had. Then we can figure out if they were renamed/moved, then add those
                 // back with an alias and an Obsolete tag so everything doesn't break immediately and you get a chance
@@ -818,6 +864,7 @@ namespace RoyTheunissen.AudioSyntax
                         string currentEventPlaybackType = GetEventPlaybackType(currentSyntaxPath, currentSyntaxFormat);
                         string attribute =
                             $"[Obsolete(\"FMOD Event Type '{previousEventPlaybackType}' has been changed to '{currentEventPlaybackType}'\")]";
+                        CodeGenerator typeGenerator = GetEventTypeCodeGenerator(e);
                         string eventTypeAliasCode = GetEventTypeCode(typeGenerator, e, previousName, attribute);
                         eventTypeAliasesCode += eventTypeAliasCode;
                     }
@@ -888,9 +935,9 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         private static string GenerateFolderCode(
-            CodeGenerator typeGenerator, string containerName, EventFolder eventFolder, bool isDeclaration)
+            string containerName, EventFolder eventFolder, bool isDeclaration)
         {
-            return GenerateFolderCode(typeGenerator, containerName, eventFolder, isDeclaration, out string _);
+            return GenerateFolderCode(containerName, eventFolder, isDeclaration, out string _);
         }
     }
 }

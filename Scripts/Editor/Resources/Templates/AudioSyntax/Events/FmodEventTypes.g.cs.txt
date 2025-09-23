@@ -3,8 +3,8 @@
 namespace ##Namespace##
 {
     /// <summary>
-    /// GENERATED: Contains definition of FMOD events which is separated out from the declaration for readability.
-    /// To get an overview of which folders and events exist see 'FmodEvents.cs'
+    /// GENERATED: Contains definitions of audio events which are separated out from the declarations for readability.
+    /// To get an overview of which folders and events exist see 'AudioEvents.cs'
     /// </summary>
     ##Events##
 }

@@ -1,0 +1,12 @@
+public sealed class ##EventName##Config : ##EventConfigBaseType##
+{
+    public ##EventName##Config(string guid, string name, string path) : base(guid, name, path) { }
+    
+    ##ConfigPlayMethodWithParameters##
+}
+##Attributes##
+public sealed class ##EventName##Playback : ##EventPlaybackBaseType##
+{
+    ##EventParameters##
+}
+

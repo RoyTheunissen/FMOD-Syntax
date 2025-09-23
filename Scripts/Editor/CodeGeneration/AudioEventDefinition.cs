@@ -21,6 +21,11 @@ namespace RoyTheunissen.AudioSyntax
         private string guid;
         public string Guid => guid;
 
+        public abstract string PlaybackBaseType
+        {
+            get;
+        }
+
         protected readonly List<AudioEventParameterDefinition> parameters = new();
         public IReadOnlyList<AudioEventParameterDefinition> Parameters => parameters;
 
@@ -43,6 +48,8 @@ namespace RoyTheunissen.AudioSyntax
             this.guid = guid;
         }
         
+        public abstract string GetConfigBaseType(string eventName);
+        
         public string GetFilteredPath(bool stripSpecialCharacters = false)
         {
             return FmodSyntaxUtilities.GetFilteredPath(Path, stripSpecialCharacters);
@@ -58,6 +65,8 @@ namespace RoyTheunissen.AudioSyntax
         public override bool IsOneShot => eventRef.IsOneShot;
 
         public override string Name => eventRef.name;
+        
+        public override string PlaybackBaseType => "FmodAudioPlayback";
 
         protected FmodEventDefinition(EditorEventRef eventRef)
             : base(AudioSyntaxSystems.FMOD, eventRef.GetFilteredPath(), eventRef.Guid.ToString())
@@ -69,6 +78,8 @@ namespace RoyTheunissen.AudioSyntax
                 parameters.Add(new FmodAudioEventParameterDefinition(eventRef.Parameters[i], eventRef));
             }
         }
+        
+        public override string GetConfigBaseType(string eventName) => $"FmodAudioConfig<{eventName}Playback>";
     }
     
     public sealed class FmodAudioEventDefinition : FmodEventDefinition
@@ -98,6 +109,16 @@ namespace RoyTheunissen.AudioSyntax
 
         public override bool IsOneShot => Config is UnityAudioEventOneOffConfig;
 
+        protected abstract string UnityAudioEventConfigBaseType
+        {
+            get;
+        }
+        
+        public override string GetConfigBaseType(string eventName)
+        {
+            return $"UnityAudioEventPlayableConfig<{UnityAudioEventConfigBaseType}, {eventName}Playback>";
+        }
+
         protected UnityAudioEventDefinition(UnityAudioEventConfigBase config)
             : base(AudioSyntaxSystems.UnityNativeAudio,
                 UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config),
@@ -110,6 +131,9 @@ namespace RoyTheunissen.AudioSyntax
     {
         private UnityAudioEventOneOffConfig config;
         public override UnityAudioEventConfigBase Config => config;
+        
+        public override string PlaybackBaseType => "UnityAudioOneOffPlayback";
+        protected override string UnityAudioEventConfigBaseType => "UnityAudioEventOneOffConfig";
 
         public UnityAudioEventOneOffDefinition(UnityAudioEventOneOffConfig config) : base(config)
         {
@@ -121,6 +145,9 @@ namespace RoyTheunissen.AudioSyntax
     {
         private UnityAudioEventLoopingConfig config;
         public override UnityAudioEventConfigBase Config => config;
+        
+        public override string PlaybackBaseType => "UnityAudioLoopingPlayback";
+        protected override string UnityAudioEventConfigBaseType => "UnityAudioEventLoopingConfig";
 
         public UnityAudioEventLoopingDefinition(UnityAudioEventLoopingConfig config) : base(config)
         {

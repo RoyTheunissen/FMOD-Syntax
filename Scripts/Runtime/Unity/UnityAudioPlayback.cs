@@ -228,6 +228,24 @@ namespace RoyTheunissen.AudioSyntax
             if (existed)
                 handler(this, @event.Id);
         }
+        
+        public static PlaybackType Play<PlaybackType>(
+            UnityAudioEventConfigBase audioEventConfig, Transform origin, float volumeFactor = 1.0f)
+            where PlaybackType : UnityAudioPlayback, new()
+        {
+            PlaybackType playback = new PlaybackType();
+            
+            AudioSource audioSource = UnityAudioSyntaxSystem.Instance.GetAudioSourceForPlayback(audioEventConfig);
+            playback.Initialize(audioEventConfig, origin, volumeFactor, audioSource);
+            
+#if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
+            audioSource.name = "AudioSource - " + playback;
+#endif // DEBUG_AUDIO_SOURCE_POOLING
+
+            AudioSyntaxSystem.RegisterActiveEventPlayback(playback);
+
+            return playback;
+        }
     }
     
     public abstract class UnityAudioPlaybackGeneric<AudioConfigType, ThisType> : UnityAudioPlayback
