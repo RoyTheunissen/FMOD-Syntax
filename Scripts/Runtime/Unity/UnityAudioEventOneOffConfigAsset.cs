@@ -8,10 +8,10 @@ using Random = UnityEngine.Random;
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
-    /// Config for a simple one-off audio event as played back by Unity's native audio system.
+    /// Config asset for a simple one-off audio event as played back by Unity's native audio system.
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(UnityAudioEventOneOffConfig), menuName = AudioSyntaxMenuPaths.CreateScriptableObject + "Unity Audio Event Config (One-Off)")]
-    public sealed class UnityAudioEventOneOffConfig : UnityAudioEventConfigGeneric<UnityAudioOneOffPlayback>
+    [CreateAssetMenu(fileName = "OneOff", menuName = AudioSyntaxMenuPaths.CreateScriptableObject + "Unity Audio Event Config Asset (One-Off)")]
+    public sealed class UnityAudioEventOneOffConfigAsset : UnityAudioEventConfigGeneric<UnityAudioOneOffPlayback>
     {
         [Space]
         [SerializeField] private List<AudioClipMetaData> audioClips = new List<AudioClipMetaData>();
@@ -53,7 +53,7 @@ namespace RoyTheunissen.AudioSyntax
     /// <summary>
     /// Responsible for the playback of a simple one-off audio event as played back by Unity's native audio system.
     /// </summary>
-    public class UnityAudioOneOffPlayback : UnityAudioPlaybackGeneric<UnityAudioEventOneOffConfig, UnityAudioOneOffPlayback>
+    public class UnityAudioOneOffPlayback : UnityAudioPlaybackGeneric<UnityAudioEventOneOffConfigAsset, UnityAudioOneOffPlayback>
     {
         /// <summary>
         /// Padding in seconds for how long an audio source will remain allocated to an audio playback after completion.

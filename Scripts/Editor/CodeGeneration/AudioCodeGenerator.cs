@@ -654,21 +654,21 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX
         private static void GetUnityEvents(List<AudioEventDefinition> eventDefinitions)
         {
-            UnityAudioEventConfigBase[] configs = AssetLoading.GetAllAssetsOfType<UnityAudioEventConfigBase>();
+            UnityAudioEventConfigAssetBase[] configs = AssetLoading.GetAllAssetsOfType<UnityAudioEventConfigAssetBase>();
 
             // Organize the events in a folder hierarchy.
-            foreach (UnityAudioEventConfigBase config in configs)
+            foreach (UnityAudioEventConfigAssetBase config in configs)
             {
                 UnityAudioEventDefinition eventDefinition;
-                if (config is UnityAudioEventLoopingConfig loopingConfig)
+                if (config is UnityAudioEventLoopingConfigAsset loopingConfig)
                     eventDefinition = new UnityAudioEventLoopingDefinition(loopingConfig);
-                else if (config is UnityAudioEventOneOffConfig oneOffConfig)
+                else if (config is UnityAudioEventOneOffConfigAsset oneOffConfig)
                     eventDefinition = new UnityAudioEventOneOffDefinition(oneOffConfig);
                 else
                 {
                     Debug.LogError($"Found invalid Unity Audio Event Config '{config}' that was neither " +
-                                   $"a {nameof(UnityAudioEventLoopingConfig)} nor a " +
-                                   $"{nameof(UnityAudioEventOneOffConfig)}.", config);
+                                   $"a {nameof(UnityAudioEventLoopingConfigAsset)} nor a " +
+                                   $"{nameof(UnityAudioEventOneOffConfigAsset)}.", config);
                     continue;
                 }
                 

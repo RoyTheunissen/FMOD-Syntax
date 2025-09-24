@@ -100,26 +100,26 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX
     public abstract class UnityAudioEventDefinition : AudioEventDefinition
     {
-        public abstract UnityAudioEventConfigBase Config
+        public abstract UnityAudioEventConfigAssetBase Config
         {
             get;
         }
 
         public override string Name => Config.Name;
 
-        public override bool IsOneShot => Config is UnityAudioEventOneOffConfig;
+        public override bool IsOneShot => Config is UnityAudioEventOneOffConfigAsset;
 
-        protected abstract string UnityAudioEventConfigBaseType
+        protected abstract string UnityAudioEventConfigAssetBaseType
         {
             get;
         }
         
         public override string GetConfigBaseType(string eventName)
         {
-            return $"UnityAudioEventPlayableConfig<{UnityAudioEventConfigBaseType}, {eventName}Playback>";
+            return $"UnityAudioEventStaticAccessConfig<{UnityAudioEventConfigAssetBaseType}, {eventName}Playback>";
         }
 
-        protected UnityAudioEventDefinition(UnityAudioEventConfigBase config)
+        protected UnityAudioEventDefinition(UnityAudioEventConfigAssetBase config)
             : base(AudioSyntaxSystems.UnityNativeAudio,
                 UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config),
                 AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(config)))
@@ -129,13 +129,13 @@ namespace RoyTheunissen.AudioSyntax
     
     public sealed class UnityAudioEventOneOffDefinition : UnityAudioEventDefinition
     {
-        private UnityAudioEventOneOffConfig config;
-        public override UnityAudioEventConfigBase Config => config;
+        private UnityAudioEventOneOffConfigAsset config;
+        public override UnityAudioEventConfigAssetBase Config => config;
         
         public override string PlaybackBaseType => "UnityAudioOneOffPlayback";
-        protected override string UnityAudioEventConfigBaseType => "UnityAudioEventOneOffConfig";
+        protected override string UnityAudioEventConfigAssetBaseType => "UnityAudioEventOneOffConfigAsset";
 
-        public UnityAudioEventOneOffDefinition(UnityAudioEventOneOffConfig config) : base(config)
+        public UnityAudioEventOneOffDefinition(UnityAudioEventOneOffConfigAsset config) : base(config)
         {
             this.config = config;
         }
@@ -143,13 +143,13 @@ namespace RoyTheunissen.AudioSyntax
     
     public sealed class UnityAudioEventLoopingDefinition : UnityAudioEventDefinition
     {
-        private UnityAudioEventLoopingConfig config;
-        public override UnityAudioEventConfigBase Config => config;
+        private UnityAudioEventLoopingConfigAsset config;
+        public override UnityAudioEventConfigAssetBase Config => config;
         
         public override string PlaybackBaseType => "UnityAudioLoopingPlayback";
-        protected override string UnityAudioEventConfigBaseType => "UnityAudioEventLoopingConfig";
+        protected override string UnityAudioEventConfigAssetBaseType => "UnityAudioEventLoopingConfigAsset";
 
-        public UnityAudioEventLoopingDefinition(UnityAudioEventLoopingConfig config) : base(config)
+        public UnityAudioEventLoopingDefinition(UnityAudioEventLoopingConfigAsset config) : base(config)
         {
             this.config = config;
         }

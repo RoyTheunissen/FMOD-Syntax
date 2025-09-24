@@ -6,10 +6,10 @@ using UnityEngine;
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
-    /// Config for a looping audio event as played back by Unity's native audio system.
+    /// Config asset for a looping audio event as played back by Unity's native audio system.
     /// </summary>
-    [CreateAssetMenu(fileName = nameof(UnityAudioEventLoopingConfig), menuName = AudioSyntaxMenuPaths.CreateScriptableObject + "Unity Audio Event Config (Looping)")]
-    public class UnityAudioEventLoopingConfig : UnityAudioEventConfigGeneric<UnityAudioLoopingPlayback>
+    [CreateAssetMenu(fileName = "Loop", menuName = AudioSyntaxMenuPaths.CreateScriptableObject + "Unity Audio Event Config Asset (Looping)")]
+    public class UnityAudioEventLoopingConfigAsset : UnityAudioEventConfigGeneric<UnityAudioLoopingPlayback>
     {
         [Space]
         [SerializeField] private AudioLoopBookendConfig startAudio;
@@ -26,7 +26,7 @@ namespace RoyTheunissen.AudioSyntax
     /// <summary>
     /// Responsible for the playback of a looping audio event as played back by Unity's native audio system.
     /// </summary>
-    public class UnityAudioLoopingPlayback : UnityAudioPlaybackGeneric<UnityAudioEventLoopingConfig, UnityAudioLoopingPlayback>
+    public class UnityAudioLoopingPlayback : UnityAudioPlaybackGeneric<UnityAudioEventLoopingConfigAsset, UnityAudioLoopingPlayback>
     {
         protected override bool ShouldFireEventsOnlyOnce => false;
         

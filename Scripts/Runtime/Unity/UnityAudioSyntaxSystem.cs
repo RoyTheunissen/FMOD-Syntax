@@ -93,7 +93,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public AudioSource GetAudioSourceForPlayback(UnityAudioEventConfigBase audioEventConfig)
+        public AudioSource GetAudioSourceForPlayback(UnityAudioEventConfigAssetBase audioEventConfig)
         {
             AudioSource audioSource = audioSourcesPool.Get();
             
@@ -130,7 +130,7 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         public static ConfigType LoadAudioEventConfigAtRuntime<ConfigType>(string path)
-            where ConfigType : UnityAudioEventConfigBase
+            where ConfigType : UnityAudioEventConfigAssetBase
         {
             // TODO: Support loading this via Addressables.
          

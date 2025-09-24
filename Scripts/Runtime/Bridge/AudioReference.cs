@@ -28,8 +28,8 @@ namespace RoyTheunissen.AudioSyntax
         
         private Modes Mode => mode;
 
-        [SerializeField] private UnityAudioEventConfigBase unityAudioEventConfig;
-        public UnityAudioEventConfigBase UnityAudioEventConfig => unityAudioEventConfig;
+        [SerializeField] private UnityAudioEventConfigAssetBase unityAudioEventConfig;
+        public UnityAudioEventConfigAssetBase UnityAudioEventConfig => unityAudioEventConfig;
 
         [SerializeField] private string fmodEventGuid;
         

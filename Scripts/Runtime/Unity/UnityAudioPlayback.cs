@@ -18,7 +18,7 @@ namespace RoyTheunissen.AudioSyntax
             SmoothDamp,
         }
         
-        protected UnityAudioEventConfigBase BaseEventConfig;
+        protected UnityAudioEventConfigAssetBase BaseEventConfig;
         
         private IList<UnityAudioTag> Tags => BaseEventConfig.Tags;
 
@@ -103,7 +103,7 @@ namespace RoyTheunissen.AudioSyntax
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
 
         public void Initialize(
-            UnityAudioEventConfigBase audioEventConfig, Transform origin, float volumeFactorOverride, AudioSource audioSource)
+            UnityAudioEventConfigAssetBase audioEventConfig, Transform origin, float volumeFactorOverride, AudioSource audioSource)
         {
             BaseEventConfig = audioEventConfig;
             this.volumeFactorOverride = volumeFactorOverride;
@@ -230,7 +230,7 @@ namespace RoyTheunissen.AudioSyntax
         }
         
         public static PlaybackType Play<PlaybackType>(
-            UnityAudioEventConfigBase audioEventConfig, Transform origin, float volumeFactor = 1.0f)
+            UnityAudioEventConfigAssetBase audioEventConfig, Transform origin, float volumeFactor = 1.0f)
             where PlaybackType : UnityAudioPlayback, new()
         {
             PlaybackType playback = new PlaybackType();
@@ -249,7 +249,7 @@ namespace RoyTheunissen.AudioSyntax
     }
     
     public abstract class UnityAudioPlaybackGeneric<AudioConfigType, ThisType> : UnityAudioPlayback
-        where AudioConfigType : UnityAudioEventConfigBase
+        where AudioConfigType : UnityAudioEventConfigAssetBase
         where ThisType : UnityAudioPlayback, IAudioPlayback
     {
         protected AudioConfigType Config => (AudioConfigType)BaseEventConfig;

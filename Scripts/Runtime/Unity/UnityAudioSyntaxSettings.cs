@@ -149,7 +149,7 @@ namespace RoyTheunissen.AudioSyntax
             return Instance != null;
         }
         
-        public static string GetFilteredPathForUnityAudioEventConfig(UnityAudioEventConfigBase config)
+        public static string GetFilteredPathForUnityAudioEventConfig(UnityAudioEventConfigAssetBase config)
         {
             string assetPath = AssetDatabase.GetAssetPath(config);
             string filteredPath = assetPath.RemoveSuffix(".asset");

@@ -4,7 +4,7 @@ using UnityEngine;
 #if UNITY_AUDIO_SYNTAX
 namespace RoyTheunissen.AudioSyntax
 {
-    public abstract class UnityAudioEventPlayableConfig
+    public abstract class UnityAudioEventStaticAccessConfig
     {
         private string guid;
         public string Guid => guid;
@@ -15,7 +15,7 @@ namespace RoyTheunissen.AudioSyntax
         private readonly string path;
         public string Path => path;
         
-        public UnityAudioEventPlayableConfig(string guid, string path, string name)
+        public UnityAudioEventStaticAccessConfig(string guid, string path, string name)
         {
             this.guid = guid;
             this.path = path;
@@ -24,13 +24,13 @@ namespace RoyTheunissen.AudioSyntax
     }
     
     /// <summary>
-    /// Base class for generated event type to be referenced through code.
-    /// Supposed to load a UnityAudioEventConfigBase at runtime and use that to produce an instance of an
+    /// Base class for Unity audio event configs that are generated so that you can reference them through code.
+    /// Supposed to load a UnityAudioEventConfigAssetBase at runtime and use that to produce an instance of an
     /// UnityAudioPlayback which is responsible for handling the playback of an audio event.
     /// </summary>
-    public abstract class UnityAudioEventPlayableConfig<ConfigType, PlaybackType>
-        : UnityAudioEventPlayableConfig, IAudioConfig
-        where ConfigType : UnityAudioEventConfigBase
+    public abstract class UnityAudioEventStaticAccessConfig<ConfigType, PlaybackType>
+        : UnityAudioEventStaticAccessConfig, IAudioConfig
+        where ConfigType : UnityAudioEventConfigAssetBase
         where PlaybackType : UnityAudioPlayback, new()
     {
         [NonSerialized] private ConfigType cachedConfig;
@@ -48,7 +48,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        protected UnityAudioEventPlayableConfig(string guid, string path, string name)
+        protected UnityAudioEventStaticAccessConfig(string guid, string path, string name)
             : base(guid, path, name)
         {
         }

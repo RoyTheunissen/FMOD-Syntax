@@ -33,7 +33,7 @@ namespace RoyTheunissen.AudioSyntax
 #endif // FMOD_AUDIO_SYNTAX
         
 #if UNITY_AUDIO_SYNTAX
-        private string GetUnityDisplayText(bool supportsBothSystems, UnityAudioEventConfigBase unityAudioEventConfig)
+        private string GetUnityDisplayText(bool supportsBothSystems, UnityAudioEventConfigAssetBase unityAudioEventConfig)
         {
             string displayText = unityAudioEventConfig == null ? "" : unityAudioEventConfig.name;
             if (supportsBothSystems)
@@ -43,7 +43,7 @@ namespace RoyTheunissen.AudioSyntax
 #endif // UNITY_AUDIO_SYNTAX
         
         private string GetDisplayText(
-            bool supportsBothSystems, AudioReference.Modes mode, UnityAudioEventConfigBase unityAudioEventConfig,
+            bool supportsBothSystems, AudioReference.Modes mode, UnityAudioEventConfigAssetBase unityAudioEventConfig,
             string fmodEventGuid)
         {
 #if UNITY_AUDIO_SYNTAX && FMOD_AUDIO_SYNTAX
@@ -100,7 +100,7 @@ namespace RoyTheunissen.AudioSyntax
             // Figure out the display text and the content property.
             string displayedText = GetDisplayText(supportsBothSystems,
                 (AudioReference.Modes)modeProperty.intValue,
-                (UnityAudioEventConfigBase)unityAudioEventConfigProperty.objectReferenceValue,
+                (UnityAudioEventConfigAssetBase)unityAudioEventConfigProperty.objectReferenceValue,
                 fmodAudioEventConfigProperty.stringValue);
 
             Rect configRect = position;

@@ -35,7 +35,7 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         private string GetDropdownPathForUnityAudioEventConfig(
-            UnityAudioEventConfigBase config, bool multipleAudioSystemsActive)
+            UnityAudioEventConfigAssetBase config, bool multipleAudioSystemsActive)
         {
             string dropdownPath = UnityAudioSyntaxSettings.GetFilteredPathForUnityAudioEventConfig(config);
             
@@ -67,8 +67,8 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX
             if (supportedSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
             {
-                UnityAudioEventConfigBase[] unityAudioEventConfigs =
-                    AssetLoading.GetAllAssetsOfType<UnityAudioEventConfigBase>();
+                UnityAudioEventConfigAssetBase[] unityAudioEventConfigs =
+                    AssetLoading.GetAllAssetsOfType<UnityAudioEventConfigAssetBase>();
                 string[] paths = new string[unityAudioEventConfigs.Length];
                 string[] guids = new string[unityAudioEventConfigs.Length];
 
@@ -152,12 +152,12 @@ namespace RoyTheunissen.AudioSyntax
             }
             
             // If the item selected is supposed to update the unity property, do so.
-            // The GUID then represents the GUID of the UnityAudioEventConfigBase asset to load.
+            // The GUID then represents the GUID of the UnityAudioEventConfigAssetBase asset to load.
             if (dropdownItem.System.HasFlag(AudioSyntaxSystems.UnityNativeAudio) && !string.Equals(
                     dropdownItem.Guid, NoneSelectedGuid, StringComparison.OrdinalIgnoreCase))
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(dropdownItem.Guid);
-                UnityAudioEventConfigBase eventConfig = AssetDatabase.LoadAssetAtPath<UnityAudioEventConfigBase>(assetPath);
+                UnityAudioEventConfigAssetBase eventConfig = AssetDatabase.LoadAssetAtPath<UnityAudioEventConfigAssetBase>(assetPath);
                 unityAudioEventConfigProperty.objectReferenceValue = eventConfig;
             }
             else
