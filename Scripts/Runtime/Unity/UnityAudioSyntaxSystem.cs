@@ -133,9 +133,13 @@ namespace RoyTheunissen.AudioSyntax
             where ConfigType : UnityAudioEventConfigAssetBase
         {
             // TODO: Support loading this via Addressables.
-         
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+            Debug.LogError($"Supposed to load Audio Event Config Asset '{path}' from addressables...");
+            return null;
+#else
             path = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolderRelativeToResources + path;
             return Resources.Load<ConfigType>(path);
+#endif
         }
         
         /// <summary>
