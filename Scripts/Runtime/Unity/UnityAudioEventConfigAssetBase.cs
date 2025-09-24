@@ -46,6 +46,36 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         public abstract UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f);
+
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+        private static readonly Dictionary<string, UnityAudioEventConfigAssetBase> pathToAudioEventConfig = new();
+        
+        private void OnEnable()
+        {
+            bool alreadyExisted = pathToAudioEventConfig.ContainsKey(Path);
+            if (alreadyExisted)
+            {
+                Debug.LogError(
+                    $"Tried to register Audio Event Config '{Path}' as loaded but an Audio Event of that " +
+                    $"type was already loaded. Something went wrong in the loading flow. Either a path was " +
+                    $"duplicated or an asset was not unregistered properly. Will override the existing config.");
+            }
+
+            pathToAudioEventConfig[Path] = this;
+        }
+        
+        private void OnDisable()
+        {
+            pathToAudioEventConfig.Remove(Path);
+        }
+
+        public static ConfigType GetLoadedConfig<ConfigType>(string path)
+            where ConfigType : UnityAudioEventConfigAssetBase
+        {
+            pathToAudioEventConfig.TryGetValue(path, out UnityAudioEventConfigAssetBase result);
+            return result as ConfigType;
+        }
+#endif // UNITY_AUDIO_SYNTAX_ADDRESSABLES
     }
     
     /// <summary>
