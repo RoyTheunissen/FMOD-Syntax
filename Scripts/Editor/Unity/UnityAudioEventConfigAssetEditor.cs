@@ -11,7 +11,7 @@ namespace RoyTheunissen.AudioSyntax
     [CustomEditor(typeof(UnityAudioEventConfigAssetBase), true)]
     public class UnityAudioEventConfigAssetEditor : Editor
     {
-        private enum PathStatuses
+        public enum PathStatuses
         {
             Correct,
             CouldntDetermineRootFolder,
@@ -122,11 +122,12 @@ namespace RoyTheunissen.AudioSyntax
             UnityAudioEventConfigAssetBase[] configs = AssetLoading.GetAllAssetsOfType<UnityAudioEventConfigAssetBase>();
             for (int i = 0; i < configs.Length; i++)
             {
-                UpdateAudioEventConfigPaths(configs[i]);
+                UpdateAudioEventConfigPathInternal(configs[i], true);
             }
         }
-
-        private static void UpdateAudioEventConfigPaths(UnityAudioEventConfigAssetBase config)
+        
+        private static PathStatuses UpdateAudioEventConfigPathInternal(
+            UnityAudioEventConfigAssetBase config, bool logErrors)
         {
             string rootFolder = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolder;
             
@@ -141,8 +142,12 @@ namespace RoyTheunissen.AudioSyntax
                     break;
                     
                 case PathStatuses.NotInSpecifiedRootFolder:
-                    Debug.LogError($"Tried to automatically update path for Unity Audio Event Config Asset " +
-                                $"'{config.Name}' but it was not in the specified root folder '{rootFolder}'", config);
+                    if (logErrors)
+                    {
+                        Debug.LogError(
+                            $"Tried to automatically update path for Unity Audio Event Config Asset " +
+                            $"'{config.Name}' but it was not in the specified root folder '{rootFolder}'", config);
+                    }
                     break;
                     
                 case PathStatuses.NotUpToDateWithAsset:
@@ -159,6 +164,13 @@ namespace RoyTheunissen.AudioSyntax
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            return pathStatus;
+        }
+
+        public static PathStatuses UpdateAudioEventConfigPath(UnityAudioEventConfigAssetBase config)
+        {
+            return UpdateAudioEventConfigPathInternal(config, false);
         }
     }
 }
