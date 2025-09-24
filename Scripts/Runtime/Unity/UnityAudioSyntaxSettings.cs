@@ -14,7 +14,10 @@ namespace RoyTheunissen.AudioSyntax
     public sealed class UnityAudioSyntaxSettings : ScriptableObject 
     {
         public static readonly string SettingsFilename = $"{nameof(UnityAudioSyntaxSettings)}.asset";
-        public static readonly string PathRelativeToResources = $"AudioSyntax/" + SettingsFilename;
+        public static readonly string PathRelativeToResources = $"AudioSyntax/";
+        
+        // This is used at runtime, do not remove
+        public static readonly string SettingsPathRelativeToResources = PathRelativeToResources + SettingsFilename;
         
         [SerializeField] private AudioSource audioSourcePooledPrefab;
         public AudioSource AudioSourcePooledPrefab => audioSourcePooledPrefab;
@@ -45,7 +48,7 @@ namespace RoyTheunissen.AudioSyntax
                         didCacheInstance = cachedInstance != null;
                     }
 #else
-                    cachedInstance = Resources.Load<UnityAudioSyntaxSettings>(PathRelativeToResources);
+                    cachedInstance = Resources.Load<UnityAudioSyntaxSettings>(SettingsPathRelativeToResources);
 #endif // UNITY_EDITOR
                 }
                 return cachedInstance;
