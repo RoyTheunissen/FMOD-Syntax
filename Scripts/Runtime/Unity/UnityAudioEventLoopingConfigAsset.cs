@@ -9,7 +9,7 @@ namespace RoyTheunissen.AudioSyntax
     /// Config asset for a looping audio event as played back by Unity's native audio system.
     /// </summary>
     [CreateAssetMenu(fileName = "Loop", menuName = AudioSyntaxMenuPaths.CreateScriptableObject + "Unity Audio Event Config Asset (Looping)")]
-    public class UnityAudioEventLoopingConfigAsset : UnityAudioEventConfigGeneric<UnityAudioLoopingPlayback>
+    public class UnityAudioEventLoopingConfigAsset : UnityAudioEventConfigAsset<UnityAudioLoopingPlayback>
     {
         [Space]
         [SerializeField] private AudioLoopBookendConfig startAudio;

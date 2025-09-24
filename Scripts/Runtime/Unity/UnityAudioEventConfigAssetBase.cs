@@ -53,7 +53,7 @@ namespace RoyTheunissen.AudioSyntax
     /// is created and returned. You can then use this to manipulate the audio.
     /// </summary>
     /// <typeparam name="PlaybackType">The type of Playback instance that should be created when played.</typeparam>
-    public abstract class UnityAudioEventConfigGeneric<PlaybackType> : UnityAudioEventConfigAssetBase
+    public abstract class UnityAudioEventConfigAsset<PlaybackType> : UnityAudioEventConfigAssetBase
         where PlaybackType : UnityAudioPlayback, new()
     {
         public PlaybackType Play(float volumeFactor = 1.0f)
