@@ -31,6 +31,31 @@ namespace RoyTheunissen.AudioSyntax
                  "Resources folder so it can be loaded.")]
         [SerializeField, HideInInspector] private string unityAudioConfigRootFolder;
         public string UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
+        
+        [NonSerialized] private string cachedUnityAudioConfigRootFolderRelativeToResources;
+        [NonSerialized] private bool didCacheUnityAudioConfigRootFolderRelativeToResources;
+        public string UnityAudioConfigRootFolderRelativeToResources
+        {
+            get
+            {
+                if (!didCacheUnityAudioConfigRootFolderRelativeToResources || !Application.isPlaying)
+                {
+                    didCacheUnityAudioConfigRootFolderRelativeToResources = true;
+                    
+                    bool didFindValidPath = FindPathRelativeToResources(UnityAudioConfigRootFolder, out string path);
+                    if (!didFindValidPath)
+                    {
+                        Debug.LogError($"Tried to determine Unity Audio Config Root path relative to the " +
+                                       $"Resources folder, but it seems like the specified path '{path}' is not " +
+                                       $"relative to the Resources folder at all. Please review your " +
+                                       $"Unity Audio Syntax Settings file.", this);
+                    }
+
+                    cachedUnityAudioConfigRootFolderRelativeToResources = path;
+                }
+                return cachedUnityAudioConfigRootFolderRelativeToResources;
+            }
+        }
 
         [NonSerialized] private static UnityAudioSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;
@@ -62,6 +87,50 @@ namespace RoyTheunissen.AudioSyntax
             this.audioSourcePooledPrefab = audioSourcePooledPrefab;
             this.defaultMixerGroup = defaultMixerGroup;
             this.unityAudioConfigRootFolder = unityAudioConfigRootFolder;
+        }
+
+        private static bool FindPathRelativeToResources(string path, out string pathRelativeToResources)
+        {
+            bool isValid = true;
+            
+            const string resources = "Resources";
+            path = path.ToUnityPath().RemoveSuffix("/");
+            
+            if (string.IsNullOrEmpty(path) || string.Equals(path, resources, StringComparison.OrdinalIgnoreCase)
+                                           || path.EndsWith("/" + resources))
+            {
+                // Ends with Resources/
+                path = string.Empty;
+            }
+            else if (path.StartsWith(resources + "/"))
+            {
+                // Starts with Resources/
+                path = path.Substring(resources.Length + 1);
+            }
+            else
+            {
+                // Check if it has /Resources/ somewhere in the middle
+                const string resourcesWithSlashes = "/" + resources + "/";
+                int resourcesFolderIndex = path.IndexOf(resourcesWithSlashes, StringComparison.OrdinalIgnoreCase);
+                
+                if (resourcesFolderIndex == -1)
+                {
+                    // Didn't have Resources in it at all. That means the path is invalid.
+                    path = string.Empty;
+                    isValid = false;
+                }
+                else
+                {
+                    path = path.Substring(resourcesFolderIndex + resourcesWithSlashes.Length);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(path) && !path.EndsWith("/"))
+                path += "/";
+
+            pathRelativeToResources = path;
+            
+            return isValid;
         }
         
 #if UNITY_EDITOR && UNITY_AUDIO_SYNTAX
