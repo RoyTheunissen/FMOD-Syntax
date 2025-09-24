@@ -132,10 +132,9 @@ namespace RoyTheunissen.AudioSyntax
         public static ConfigType LoadAudioEventConfigAtRuntime<ConfigType>(string path)
             where ConfigType : UnityAudioEventConfigBase
         {
-            path = AudioSyntaxMenuPaths.RootNoSpace + path;
-         
             // TODO: Support loading this via Addressables.
-            
+         
+            path = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolderRelativeToResources + path;
             return Resources.Load<ConfigType>(path);
         }
         
