@@ -19,6 +19,9 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public abstract class UnityAudioEventConfigAssetBase : ScriptableObject, IAudioConfig
     {
+        [SerializeField, HideInInspector] private string path;
+        public string Path => path;
+        
         [SerializeField] private AudioMixerGroup mixerGroup;
         public AudioMixerGroup MixerGroup => mixerGroup;
     
@@ -36,25 +39,6 @@ namespace RoyTheunissen.AudioSyntax
         public IList<UnityAudioTag> Tags => tags;
 
         public string Name => name;
-
-        // TODO: Do we need to support this for Unity Audio Events?
-        // Not sure what the best way would be to go about it. This path depends on the asset's location in the project.
-        // At editor time this is easy to determine, but at runtime there's no way to find out. We would have to cache
-        // it. Is that desirable though? We *need* to use a path to be able to play Unity audio events from code, but
-        // that works slightly differently. A custom class is generated, and that one caches the GUID, path and name.
-        // We could do it, we could cache the path when you make the asset, the thing is that it would also have to
-        // be updated when you move the asset, and also all the paths would have to be updated if you were to change
-        // the audio event config base path in the Unity Audio Syntax System Settings config. So it's just a bunch of
-        // extra work with no clear use case. If you need this, let me know and I will consider supporting it.
-        public string Path
-        {
-            get
-            {
-                Debug.LogWarning($"Tried to ask for a path of a Unity Audio Event Config Asset '{name}'. " +
-                                 $"This is not currently supported.", this);
-                return "UNKNOWNPATH/" + name;
-            }
-        }
 
         IAudioPlayback IAudioConfig.Play(Transform source)
         {
