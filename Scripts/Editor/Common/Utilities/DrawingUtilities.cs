@@ -49,8 +49,12 @@ namespace RoyTheunissen.AudioSyntax
             bool shouldPick = GUILayout.Button(FolderIcon, GUILayout.Width(1.5f * height), GUILayout.Height(height));
             if (shouldPick)
             {
+                string startingPath = path.GetAbsolutePath();
+                if (!Directory.Exists(startingPath))
+                    startingPath = Application.dataPath;
+                
                 string selectedFolder = EditorUtility.OpenFolderPanel(
-                    $"Pick {label} Folder", path.GetAbsolutePath(), string.Empty);
+                    $"Pick {label} Folder", startingPath, string.Empty);
                 if (!string.IsNullOrEmpty(selectedFolder) && selectedFolder.StartsWith(Application.dataPath))
                 {
                     selectedFolder = selectedFolder.Substring(Application.dataPath.Length);
