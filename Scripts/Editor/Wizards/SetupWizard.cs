@@ -229,6 +229,17 @@ namespace RoyTheunissen.AudioSyntax
             
             if (ShouldAudioConfigsBeInsideResourcesFolder())
                 EnterSubdirectoryIfExists("Resources");
+            
+            EnterSubdirectoryIfExists("Configs", "Configuration", "Configurations", "Data", "Database");
+            
+            EnterSubdirectoryIfExists("Audio");
+
+            EnterSubdirectoryIfExists(
+                "AudioSyntax", "Audio Syntax", "Audio-Syntax",
+                "UnityAudioSyntax", "Unity Audio Syntax", "Unity-Audio-Syntax",
+                "FMODSyntax", "FMOD Syntax", "FMOD-Syntax",
+                "FMODAudioSyntax", "FMOD Audio Syntax", "FMOD-Audio-Syntax"
+                );
 
             string absolutePath = currentPath;
             string assetsFolderPath = Application.dataPath.RemoveSuffix("/");
