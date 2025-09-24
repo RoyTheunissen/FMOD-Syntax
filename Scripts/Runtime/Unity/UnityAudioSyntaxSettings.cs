@@ -29,7 +29,7 @@ namespace RoyTheunissen.AudioSyntax
                  "This is used at editor time to figure out short and useful relative paths for events based on the " +
                  "folder structure. At runtime, this is used to figure out where a config is relative to the " +
                  "Resources folder so it can be loaded.")]
-        [SerializeField] private string unityAudioConfigRootFolder;
+        [SerializeField, HideInInspector] private string unityAudioConfigRootFolder;
         public string UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
 
         [NonSerialized] private static UnityAudioSyntaxSettings cachedInstance;

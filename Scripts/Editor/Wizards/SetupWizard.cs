@@ -38,25 +38,6 @@ namespace RoyTheunissen.AudioSyntax
         
         private AudioSyntaxSystems activeSystems;
         
-        [NonSerialized] private GUIContent cachedFolderIcon;
-        [NonSerialized] private bool didCacheFolderIcon;
-        private GUIContent FolderIcon
-        {
-            get
-            {
-                if (!didCacheFolderIcon)
-                {
-                    didCacheFolderIcon = true;
-                    string path = "Folder Icon";
-                    if (EditorGUIUtility.isProSkin)
-                        path = "d_" + path;
-                    
-                    cachedFolderIcon = EditorGUIUtility.IconContent(path, string.Empty);
-                }
-                return cachedFolderIcon;
-            }
-        }
-        
         private string settingsFolderPath = string.Empty;
         private string generatedScriptsFolderPath = "Generated/Scripts/Audio";
         
@@ -351,11 +332,11 @@ namespace RoyTheunissen.AudioSyntax
 
                 EditorGUILayout.LabelField("Folders", EditorStyles.boldLabel);
 
-                settingsFolderPath = DrawFolderPathField(
+                settingsFolderPath = this.DrawFolderPathField(
                     settingsFolderPath, "Settings Config",
                     "Where to create the config file that has all the settings in it.");
-
-                generatedScriptsFolderPath = DrawFolderPathField(
+                
+                generatedScriptsFolderPath = this.DrawFolderPathField(
                     generatedScriptsFolderPath, "Generated Scripts",
                     "Where to place the generated scripts for events and such.");
 
@@ -408,7 +389,7 @@ namespace RoyTheunissen.AudioSyntax
                 isUnityAudioSyntaxSettingsFolderValid =
                     !IsFolderASubfolderOfResources(createUnitySyntaxSettingsAssetResourcesFolderPath);
                 BeginValidityChecks(isUnityAudioSyntaxSettingsFolderValid);
-                createUnitySyntaxSettingsAssetResourcesFolderPath = DrawFolderPathField(
+                createUnitySyntaxSettingsAssetResourcesFolderPath = this.DrawFolderPathField(
                     createUnitySyntaxSettingsAssetResourcesFolderPath, "Config Resources Folder",
                     "Which Resources folder to create the Unity Audio Syntax Settings file inside that has all the " +
                     "settings in it.");
@@ -444,7 +425,7 @@ namespace RoyTheunissen.AudioSyntax
                 if (ShouldAudioConfigsBeInsideResourcesFolder())
                     hintText += "\nMust be inside a Resources folder.";
                 EditorGUILayout.LabelField(hintText, EditorStyles.wordWrappedLabel);
-                unityAudioEventConfigRootFolder = DrawFolderPathField(
+                unityAudioEventConfigRootFolder = this.DrawFolderPathField(
                     unityAudioEventConfigRootFolder, "Audio Config Root Folder",
                     "Specifies which folder will contain the configs for all of your audio events. " +
                     "This is used to infer a path from the config.\n\n" +
@@ -597,38 +578,6 @@ namespace RoyTheunissen.AudioSyntax
             AssetDatabase.CreateAsset(scriptableObject, Path.Combine("Assets", path));
             
             return (Type)scriptableObject;
-        }
-
-        private string DrawFolderPathField(string currentPath, string label, string tooltip = null)
-        {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(new GUIContent(label, tooltip), GUILayout.Width(EditorGUIUtility.labelWidth));
-            currentPath = EditorGUILayout.TextField(currentPath);
-            float height = EditorGUIUtility.singleLineHeight;
-            bool shouldPick = GUILayout.Button(FolderIcon, GUILayout.Width(1.5f * height), GUILayout.Height(height));
-            if (shouldPick)
-            {
-                string selectedFolder = EditorUtility.OpenFolderPanel(
-                    $"Pick {label} Folder", Path.Combine(Application.dataPath, currentPath), string.Empty);
-                if (!string.IsNullOrEmpty(selectedFolder) && selectedFolder.StartsWith(Application.dataPath))
-                {
-                    selectedFolder = selectedFolder.Substring(Application.dataPath.Length);
-                    
-                    if (selectedFolder.StartsWith(Path.DirectorySeparatorChar) ||
-                        selectedFolder.StartsWith(Path.AltDirectorySeparatorChar))
-                    {
-                        selectedFolder = selectedFolder.Substring(1);
-                    }
-
-                    currentPath = selectedFolder;
-                    
-                    EditorApplication.delayCall += Repaint;
-                }
-            }
-            
-            EditorGUILayout.EndHorizontal();
-            
-            return currentPath;
         }
         
         private static bool IsScriptingDefineSymbolDefined(string symbol)
