@@ -26,10 +26,11 @@ namespace RoyTheunissen.AudioSyntax
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
         
         [Tooltip("Use this to specify the root folder in which all your Unity Audio Configs are located. " +
-                 "If you don't do this, it will try and infer what the location is using well-known Unity project " +
-                 "structures, but this is not guaranteed to work.")]
-        [SerializeField] private FolderReference unityAudioConfigRootFolder;
-        public FolderReference UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
+                 "This is used at editor time to figure out short and useful relative paths for events based on the " +
+                 "folder structure. At runtime, this is used to figure out where a config is relative to the " +
+                 "Resources folder so it can be loaded.")]
+        [SerializeField] private string unityAudioConfigRootFolder;
+        public string UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
 
         [NonSerialized] private static UnityAudioSyntaxSettings cachedInstance;
         [NonSerialized] private static bool didCacheInstance;
@@ -60,7 +61,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             this.audioSourcePooledPrefab = audioSourcePooledPrefab;
             this.defaultMixerGroup = defaultMixerGroup;
-            this.unityAudioConfigRootFolder = new FolderReference(unityAudioConfigRootFolder);
+            this.unityAudioConfigRootFolder = unityAudioConfigRootFolder;
         }
         
 #if UNITY_EDITOR && UNITY_AUDIO_SYNTAX
@@ -86,7 +87,7 @@ namespace RoyTheunissen.AudioSyntax
 
             string basePath = Instance == null
                 ? string.Empty
-                : Instance.UnityAudioConfigRootFolder.Path.ToUnityPath();
+                : Instance.UnityAudioConfigRootFolder.ToUnityPath();
             
             if (!string.IsNullOrEmpty(basePath))
             {
