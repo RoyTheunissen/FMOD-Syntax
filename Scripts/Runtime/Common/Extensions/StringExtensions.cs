@@ -197,6 +197,16 @@ namespace RoyTheunissen.AudioSyntax
             string absolutePath = projectPath.ToUnityPath().RemoveAssetsPrefix();
             return Application.dataPath + Path.AltDirectorySeparatorChar + absolutePath;
         }
+        
+        public static string GetProjectPath(this string absolutePath)
+        {
+            absolutePath = absolutePath.ToUnityPath();
+            string projectPath = RemoveSuffix(Application.dataPath, AssetsFolder);
+            projectPath = RemoveSuffix(projectPath, Path.AltDirectorySeparatorChar.ToString());
+            
+            string relativePath = ToUnityPath(Path.GetRelativePath(projectPath, absolutePath));
+            return relativePath;
+        }
 
         public static string GetWhitespacePreceding(this string text, int index, bool includingNewLines)
         {
