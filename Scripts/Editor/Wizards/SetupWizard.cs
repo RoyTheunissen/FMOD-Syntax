@@ -69,7 +69,6 @@ namespace RoyTheunissen.AudioSyntax
         private AudioSource audioSourcePooledPrefab;
         private AudioMixerGroup defaultMixerGroup;
         private string unityAudioEventConfigRootFolder = string.Empty;
-        private bool isUnityAudioConfigRootFolderValid;
 
         private bool CanInitialize
         {
@@ -80,10 +79,7 @@ namespace RoyTheunissen.AudioSyntax
 
                 if (activeSystems.HasFlag(AudioSyntaxSystems.UnityNativeAudio))
                 {
-                    if (audioSourcePooledPrefab == null || isUnityAudioSyntaxSettingsFolderValid)
-                        return false;
-                    
-                    if (!isUnityAudioConfigRootFolderValid)
+                    if (audioSourcePooledPrefab == null || !isUnityAudioSyntaxSettingsFolderValid)
                         return false;
                 }
 
@@ -187,7 +183,6 @@ namespace RoyTheunissen.AudioSyntax
             
             if (string.IsNullOrEmpty(unityAudioEventConfigRootFolder))
                 unityAudioEventConfigRootFolder = GetInferredUnityAudioConfigBasePathFromProjectStructure();
-            isUnityAudioConfigRootFolderValid = true;
         }
 
         private static bool ShouldAudioConfigsBeInsideResourcesFolder()
@@ -438,23 +433,15 @@ namespace RoyTheunissen.AudioSyntax
                 if (ShouldAudioConfigsBeInsideResourcesFolder())
                     hintText += "\nMust be inside a Resources folder.";
                 EditorGUILayout.LabelField(hintText, EditorStyles.wordWrappedLabel);
-                isUnityAudioConfigRootFolderValid = true;
-                BeginValidityChecks(isUnityAudioConfigRootFolderValid);
                 unityAudioEventConfigRootFolder = DrawFolderPathField(
                     unityAudioEventConfigRootFolder, "Audio Config Root Folder",
                     "Specifies which folder will contain the configs for all of your audio events. " +
                     "This is used to infer a path from the config.\n\n" +
                     "For example: 'Assets/_ProjectName/Configs/Audio/Player/Jump' will then be shortened to " +
                     "the more appropriate 'Player/Jump'.\n\nCurrently needs to be inside the Resources folder.");
-                if (!isUnityAudioConfigRootFolderValid)
-                {
-                    EditorGUILayout.LabelField(
-                        "Please specify a location that's inside a Resources folder.",
-                        EditorStyles.wordWrappedMiniLabel);
-                }
                 EndValidityChecks();
-                
-                if (isUnityAudioConfigRootFolderValid)
+
+                // Draw the current Unity audio event config root path.
                 {
                     string relativePath = GetUnityAudioEventConfigRootFolderPath();
                     string absolutePath = relativePath.GetAbsolutePath();
@@ -474,14 +461,6 @@ namespace RoyTheunissen.AudioSyntax
                 return true;
 
             return false;
-        }
-        
-        private static bool IsFolderResourcesFolderOrChildThereof(string path)
-        {
-            path = path.ToUnityPath().RemoveSuffix("/");
-
-            return path.StartsWith(ResourcesFolderSuffix + "/") || path.EndsWith("/" + ResourcesFolderSuffix)
-                                                                || path.Contains("/" + ResourcesFolderSuffix + "/");
         }
 
         private string GetResourcesFolderPath(string path)
@@ -576,7 +555,7 @@ namespace RoyTheunissen.AudioSyntax
             fileName = Path.GetFileNameWithoutExtension(fileName);
             UnityAudioSyntaxSettings settings = CreateScriptableObject<UnityAudioSyntaxSettings>(path, fileName);
             
-            string audioEventConfigRootPath = GetUnityAudioEventConfigRootFolderPath().GetProjectPath();
+            string audioEventConfigRootPath = GetUnityAudioEventConfigRootFolderPath();
             
             settings.InitializeFromWizard(audioSourcePooledPrefab, defaultMixerGroup, audioEventConfigRootPath);
             
