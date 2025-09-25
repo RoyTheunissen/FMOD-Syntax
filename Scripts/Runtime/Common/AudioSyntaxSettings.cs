@@ -104,6 +104,8 @@ namespace RoyTheunissen.AudioSyntax
             this.namespaceForGeneratedCode = namespaceForGeneratedCode;
 
             this.shouldGenerateAssemblyDefinition = shouldGenerateAssemblyDefinition;
+
+            version = TargetVersion;
         }
         
 #if UNITY_EDITOR
