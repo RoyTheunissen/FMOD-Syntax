@@ -52,6 +52,9 @@ namespace RoyTheunissen.AudioSyntax
         
         private void OnEnable()
         {
+            if (!Application.isPlaying)
+                return;
+            
             bool alreadyExisted = pathToAudioEventConfig.ContainsKey(Path);
             if (alreadyExisted)
             {
@@ -66,6 +69,9 @@ namespace RoyTheunissen.AudioSyntax
         
         private void OnDisable()
         {
+            if (!Application.isPlaying)
+                return;
+            
             pathToAudioEventConfig.Remove(Path);
         }
 
