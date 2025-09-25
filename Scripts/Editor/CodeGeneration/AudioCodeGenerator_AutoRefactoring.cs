@@ -30,7 +30,9 @@ namespace RoyTheunissen.AudioSyntax
         {
             LoadPreviousMetaData();
             
+#if FMOD_AUDIO_SYNTAX
             FindChangedEvents();
+#endif // FMOD_AUDIO_SYNTAX
             
             TryRefactoringOldEventReferencesInternal(true);
         }

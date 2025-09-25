@@ -153,6 +153,8 @@ namespace RoyTheunissen.AudioSyntax
             didCacheUserSpecifiedEnums = true;
             
             labelParameterNameToUserSpecifiedType.Clear();
+            
+#if FMOD_AUDIO_SYNTAX
             Type[] userSpecifiedTypes = TypeExtensions.GetAllTypesWithAttribute<FmodLabelTypeAttribute>();
             for (int i = 0; i < userSpecifiedTypes.Length; i++)
             {
@@ -172,6 +174,7 @@ namespace RoyTheunissen.AudioSyntax
                     }
                 }
             }
+#endif // FMOD_AUDIO_SYNTAX
         }
 
         public static bool GetUserSpecifiedLabelParameterType(string name, out Type enumType)
@@ -323,6 +326,7 @@ namespace RoyTheunissen.AudioSyntax
             {
                 AudioEventParameterDefinition parameter = e.Parameters[i];
 
+#if FMOD_AUDIO_SYNTAX
                 // For snapshots we support an "Intensity" parameter by default, so don't explicitly create one.
                 // We do it this way so you can have a reference to a Snapshot and then set its intensity, even though
                 // we don't know 100% sure that the selected Snapshot supports that. Otherwise it's very tedious to set
@@ -333,6 +337,7 @@ namespace RoyTheunissen.AudioSyntax
                 {
                     continue;
                 }
+#endif // FMOD_AUDIO_SYNTAX
 
                 validParameterCount++;
                 
@@ -751,8 +756,10 @@ namespace RoyTheunissen.AudioSyntax
         {
             // Decide which type generator to use based on the event definition.
             
+#if FMOD_AUDIO_SYNTAX
             if (eventDefinition is FmodEventDefinition)
                 return fmodEventFieldGenerator;
+#endif // FMOD_AUDIO_SYNTAX
             
             if (eventDefinition is UnityAudioEventDefinition)
                 return unityEventFieldGenerator;
@@ -766,11 +773,13 @@ namespace RoyTheunissen.AudioSyntax
         {
             // Decide which type generator to use based on the event definition.
             
+#if FMOD_AUDIO_SYNTAX
             if (eventDefinition is FmodAudioEventDefinition)
                 return fmodEventTypeGenerator;
             
             if (eventDefinition is FmodSnapshotEventDefinition)
                 return snapshotTypeGenerator;
+#endif // FMOD_AUDIO_SYNTAX
             
             if (eventDefinition is UnityAudioEventDefinition)
                 return unityEventTypeGenerator;
