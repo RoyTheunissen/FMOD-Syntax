@@ -1,3 +1,5 @@
+// #define DEBUG_AUDIO_EVENT_CONFIG_LOADING
+
 #if UNITY_AUDIO_SYNTAX
 
 using System.Collections.Generic;
@@ -11,6 +13,10 @@ using BrunoMikoski.ScriptableObjectCollections;
     using BrunoMikoski.ScriptableObjectCollections.Picker;
     #endif
 #endif
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif // UNITY_EDITOR
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -52,7 +58,14 @@ namespace RoyTheunissen.AudioSyntax
         
         private void OnEnable()
         {
-            if (!Application.isPlaying)
+            bool isActuallyPlaying = Application.isPlaying;
+            
+#if UNITY_EDITOR
+            if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
+                isActuallyPlaying = true;
+#endif // UNITY_EDITOR
+            
+            if (!isActuallyPlaying)
                 return;
             
             bool alreadyExisted = pathToAudioEventConfig.ContainsKey(Path);
@@ -65,6 +78,9 @@ namespace RoyTheunissen.AudioSyntax
             }
 
             pathToAudioEventConfig[Path] = this;
+#if DEBUG_AUDIO_EVENT_CONFIG_LOADING
+            Debug.Log($"<color=green>LOADED AUDIO EVENT '{Path}'</color>");
+#endif // DEBUG_AUDIO_EVENT_CONFIG_LOADING
         }
         
         private void OnDisable()
@@ -73,6 +89,10 @@ namespace RoyTheunissen.AudioSyntax
                 return;
             
             pathToAudioEventConfig.Remove(Path);
+            
+#if DEBUG_AUDIO_EVENT_CONFIG_LOADING
+            Debug.Log($"<color=red>UNLOADED AUDIO EVENT '{Path}'</color>");
+#endif // DEBUG_AUDIO_EVENT_CONFIG_LOADING
         }
 
         public static ConfigType GetLoadedConfig<ConfigType>(string path)
@@ -81,6 +101,29 @@ namespace RoyTheunissen.AudioSyntax
             pathToAudioEventConfig.TryGetValue(path, out UnityAudioEventConfigAssetBase result);
             return result as ConfigType;
         }
+
+#if UNITY_EDITOR
+        [InitializeOnLoadMethod]
+        static void ClearLoadedConfigs()
+        {
+            EditorApplication.playModeStateChanged -= HandlePlayModeStateChangedEvent;
+            EditorApplication.playModeStateChanged += HandlePlayModeStateChangedEvent;
+        }
+
+        private static void HandlePlayModeStateChangedEvent(PlayModeStateChange change)
+        {
+            // Need to clear this
+            if (change == PlayModeStateChange.ExitingEditMode)
+            {
+                pathToAudioEventConfig.Clear();
+#if DEBUG_AUDIO_EVENT_CONFIG_LOADING
+                Debug.Log($"<color=red>UNLOADED ALL AUDIO EVENTS BECAUSE EXITING EDIT MODE</color>");
+#endif // DEBUG_AUDIO_EVENT_CONFIG_LOADING
+            }
+        }
+#endif // UNITY_EDITOR
+        
+        
 #endif // UNITY_AUDIO_SYNTAX_ADDRESSABLES
     }
     
