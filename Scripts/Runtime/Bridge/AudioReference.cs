@@ -86,10 +86,11 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-#if FMOD_AUDIO_SYNTAX
         [NonSerialized] private static bool didCacheParameterlessFmodEvents;
-        private static readonly Dictionary<string, FmodParameterlessAudioConfig> parameterlessFmodEventsByGuid = new();
+        
+        private static readonly Dictionary<string, IAudioConfigParameterless> parameterlessFmodEventsByGuid = new();
 
+#if FMOD_AUDIO_SYNTAX
         public FmodParameterlessAudioPlayback PlayFMOD(Transform source = null)
         {
             return FmodAudioConfig.Play(source);
@@ -132,23 +133,17 @@ namespace RoyTheunissen.AudioSyntax
         [UnityEditor.InitializeOnLoadMethod]
         private static void Initialize()
         {
-#if FMOD_AUDIO_SYNTAX
             parameterlessFmodEventsByGuid.Clear();
             didCacheParameterlessFmodEvents = false;
-#endif // FMOD_AUDIO_SYNTAX
         }
 #endif // UNITY_EDITOR
         
         
-#if FMOD_AUDIO_SYNTAX
-        public static FmodParameterlessAudioConfig GetParameterlessEventConfig(string guid)
+        public static IAudioConfigParameterless GetParameterlessEventConfig(string guid)
         {
             CacheParameterlessFMODEventConfigs();
             
-            if (parameterlessFmodEventsByGuid.TryGetValue(guid, out FmodParameterlessAudioConfig result))
-                return result;
-
-            return null;
+            return parameterlessFmodEventsByGuid.GetValueOrDefault(guid);
         }
         
         private static void CacheParameterlessFMODEventConfigs()
@@ -169,17 +164,16 @@ namespace RoyTheunissen.AudioSyntax
                 // Get the dictionary of parameter events by GUID.
                 FieldInfo eventsByGuidDictionaryField = containerType.GetField(
                     "EventsByGuid", BindingFlags.Public | BindingFlags.Static);
-                Dictionary<string, FmodParameterlessAudioConfig> eventsByGuidDictionary = 
-                    (Dictionary<string, FmodParameterlessAudioConfig>)eventsByGuidDictionaryField.GetValue(null);
+                Dictionary<string, IAudioConfigParameterless> eventsByGuidDictionary = 
+                    (Dictionary<string, IAudioConfigParameterless>)eventsByGuidDictionaryField.GetValue(null);
                 
                 // Compile them all into one big dictionary.
-                foreach (KeyValuePair<string,FmodParameterlessAudioConfig> kvp in eventsByGuidDictionary)
+                foreach (KeyValuePair<string,IAudioConfigParameterless> kvp in eventsByGuidDictionary)
                 {
                     parameterlessFmodEventsByGuid.Add(kvp.Key, kvp.Value);
                 }
             }
         }
-#endif // FMOD_AUDIO_SYNTAX
 
         public override string ToString()
         {

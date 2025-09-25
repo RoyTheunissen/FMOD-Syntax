@@ -118,6 +118,11 @@ namespace RoyTheunissen.AudioSyntax
         {
             return $"UnityAudioEventStaticAccessConfig<{UnityAudioEventConfigAssetBaseType}, {eventName}Playback>";
         }
+        
+        public string GetParameterlessConfigBaseType(string eventName)
+        {
+            return $"UnityAudioEventParameterlessConfig<{UnityAudioEventConfigAssetBaseType}, {eventName}Playback>";
+        }
 
         protected UnityAudioEventDefinition(UnityAudioEventConfigAssetBase config)
             : base(AudioSyntaxSystems.UnityNativeAudio,

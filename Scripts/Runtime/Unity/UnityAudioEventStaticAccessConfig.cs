@@ -35,7 +35,7 @@ namespace RoyTheunissen.AudioSyntax
     {
         [NonSerialized] private ConfigType cachedConfig;
         [NonSerialized] private bool didCacheConfig;
-        private ConfigType Config
+        protected ConfigType Config
         {
             get
             {

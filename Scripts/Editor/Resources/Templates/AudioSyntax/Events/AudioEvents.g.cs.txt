@@ -12,8 +12,8 @@ namespace ##Namespace##
     [Preserve]
     public static class AudioParameterlessEvents 
     {
-        public static readonly Dictionary<string, FmodParameterlessAudioConfig> EventsByGuid =
-            new Dictionary<string, FmodParameterlessAudioConfig>
+        public static readonly Dictionary<string, IAudioConfigParameterless> EventsByGuid =
+            new Dictionary<string, IAudioConfigParameterless>
         {
             ##ParameterlessEventIds##
         };

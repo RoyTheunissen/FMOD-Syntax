@@ -14,7 +14,7 @@ namespace RoyTheunissen.AudioSyntax
     /// <summary>
     /// Config of a simple FMOD event without any parameters.
     /// </summary>
-    public sealed class FmodParameterlessAudioConfig : FmodAudioConfig<FmodParameterlessAudioPlayback>, IAudioConfig
+    public sealed class FmodParameterlessAudioConfig : FmodAudioConfig<FmodParameterlessAudioPlayback>, IAudioConfigParameterless
     {
         public FmodParameterlessAudioConfig(string guid) : base(guid)
         {

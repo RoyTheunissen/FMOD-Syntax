@@ -90,10 +90,12 @@ namespace RoyTheunissen.AudioSyntax
         {
             "System",
             "System.Collections.Generic",
-            "FMOD.Studio",
             "RoyTheunissen.AudioSyntax",
             "UnityEngine",
             "UnityEngine.Scripting",
+#if FMOD_AUDIO_SYNTAX
+            "FMOD.Studio",
+#endif // FMOD_AUDIO_SYNTAX
         };
 
         [NonSerialized] private static bool didSourceFilesChange;
@@ -871,7 +873,19 @@ namespace RoyTheunissen.AudioSyntax
 
                 if (e.IsParameterless)
                 {
-                    parameterlessEventsCode += $"{{ \"{e.Guid}\", new FmodParameterlessAudioConfig(\"{e.Guid}\") }},\r\n";
+                    if (e.System == AudioSyntaxSystems.FMOD)
+                    {
+                        parameterlessEventsCode += $"{{ \"{e.Guid}\", new FmodParameterlessAudioConfig(\"{e.Guid}\") }},\r\n";
+                    }
+                    else
+                    {
+#if UNITY_AUDIO_SYNTAX
+                        UnityAudioEventDefinition ue = e as UnityAudioEventDefinition;
+                        string filteredName = FmodSyntaxUtilities.GetFilteredNameFromPath(e.Path);
+                        string t = ue.GetParameterlessConfigBaseType(filteredName);
+                        parameterlessEventsCode += $"{{ \"{e.Guid}\", new {t}(\"{e.Guid}\", \"{e.Path}\", \"{filteredName}\") }},\r\n";
+#endif // UNITY_AUDIO_SYNTAX
+                    }
                 }
             }
 
@@ -968,7 +982,7 @@ namespace RoyTheunissen.AudioSyntax
                 eventFolderGenerator.ReplaceKeyword(eventAliasesKeyword, eventAliasesCode);
             }
 
-            string baseType = isDeclaration ? "" : " : FmodAudioFolder";
+            string baseType = isDeclaration ? "" : " : " + nameof(AudioFolder);
             eventFolderGenerator.ReplaceKeyword("BaseType", baseType);
             
             return eventFolderGenerator.GetCode();
