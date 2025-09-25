@@ -17,6 +17,11 @@
             "name": "com.brunomikoski.scriptableobjectcollection",
             "expression": "2.2.1",
             "define": "SCRIPTABLE_OBJECT_COLLECTION"
+        },
+        {
+            "name": "com.unity.addressables",
+            "expression": "0.1",
+            "define": "UNITY_AUDIO_SYNTAX_ADDRESSABLES"
         }
     ],
     "noEngineReferences": false
