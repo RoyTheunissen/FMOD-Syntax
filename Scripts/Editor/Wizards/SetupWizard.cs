@@ -20,6 +20,7 @@ namespace RoyTheunissen.AudioSyntax
         private const int Priority = 1;
         
         private const float Width = 500;
+        private const float Height = 602;
 
         private const string ResourcesFolderSuffix = "Resources";
         
@@ -129,7 +130,7 @@ namespace RoyTheunissen.AudioSyntax
         public static void OpenSetupWizard()
         {
             SetupWizard setupWizard = GetWindow<SetupWizard>(true, AudioSyntaxMenuPaths.ProjectName + " Setup Wizard");
-            setupWizard.minSize = setupWizard.maxSize = new Vector2(Width, 550);
+            setupWizard.minSize = setupWizard.maxSize = new Vector2(Width, Height);
             setupWizard.namespaceForGeneratedCode =
                 $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.Audio";
         }
@@ -335,6 +336,8 @@ namespace RoyTheunissen.AudioSyntax
                 settingsFolderPath = this.DrawFolderPathField(
                     settingsFolderPath, "Settings Config",
                     "Where to create the config file that has all the settings in it.");
+                EditorGUILayout.LabelField(GetAudioSyntaxSettingsFilePath(), EditorStyles.wordWrappedMiniLabel);
+                EditorGUILayout.Space();
                 
                 generatedScriptsFolderPath = this.DrawFolderPathField(
                     generatedScriptsFolderPath, "Generated Scripts",
@@ -349,7 +352,7 @@ namespace RoyTheunissen.AudioSyntax
 
                 GUIContent generateAsmdefLabel = new GUIContent(
                     "Make Assembly Definition",
-                    "Whether to generate an assembly definition file for the generated FMOD code. " +
+                    "Whether to generate an assembly definition file for the generated code. " +
                     "If the code is to be generated within one central runtime assembly definition for your game, " +
                     "you may want to turn this off.");
                 shouldGenerateAssemblyDefinition = EditorGUILayout.Toggle(
@@ -485,7 +488,7 @@ namespace RoyTheunissen.AudioSyntax
         private string GetUnitySyntaxSettingsAssetPath()
         {
             return GetResourcesFolderPath(createUnitySyntaxSettingsAssetResourcesFolderPath) +
-                   UnityAudioSyntaxSettings.PathRelativeToResources + "/" + UnityAudioSyntaxSettings.SettingsFilename;
+                   UnityAudioSyntaxSettings.PathRelativeToResources + UnityAudioSyntaxSettings.SettingsFilename;
         }
         
         private string GetUnityAudioEventConfigRootFolderPath()
@@ -525,6 +528,16 @@ namespace RoyTheunissen.AudioSyntax
                 activeSystemsProperty.intValue = (int)activeSystems;
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
+        }
+
+        private string GetAudioSyntaxSettingsFilePath()
+        {
+            string path = settingsFolderPath.GetAbsolutePath().ToUnityPath();
+            if (!path.EndsWith("/"))
+                path += "/";
+
+            path += nameof(AudioSyntaxSettings) + ".asset";
+            return path;
         }
 
         private void CreateAudioSyntaxSettingsFile()
