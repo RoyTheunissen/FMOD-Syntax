@@ -488,6 +488,21 @@ namespace RoyTheunissen.AudioSyntax
             return eventFieldGenerator.GetCode();
         }
 
+        private static List<AudioEventDefinition> FindEventDefinitions()
+        {
+            List<AudioEventDefinition> eventDefinitions = new();
+            
+#if FMOD_AUDIO_SYNTAX
+            GetFmodEvents(eventDefinitions, EditorEventRefExtensions.EventPrefix, false);
+#endif // FMOD_AUDIO_SYNTAX
+            
+#if UNITY_AUDIO_SYNTAX
+            GetUnityEvents(eventDefinitions);
+#endif // UNITY_AUDIO_SYNTAX
+
+            return eventDefinitions;
+        }
+
         [MenuItem("FMOD/Generate Audio Code %&g", false, 999999999)]
         [MenuItem(AudioSyntaxMenuPaths.Root + "Generate Audio Code", false, 999999999)]
         public static void GenerateCode()
@@ -503,13 +518,7 @@ namespace RoyTheunissen.AudioSyntax
             
             // Organize the events in a folder hierarchy.
             rootEventFolder = new(EventContainerClass);
-            List<AudioEventDefinition> eventDefinitions = new();
-#if FMOD_AUDIO_SYNTAX
-            GetFmodEvents(eventDefinitions, EditorEventRefExtensions.EventPrefix, false);
-#endif // FMOD_AUDIO_SYNTAX
-#if UNITY_AUDIO_SYNTAX
-            GetUnityEvents(eventDefinitions);
-#endif // UNITY_AUDIO_SYNTAX
+            List<AudioEventDefinition> eventDefinitions = FindEventDefinitions();
             BuildEventsHierarchy(rootEventFolder, eventDefinitions);
             
             GenerateEventsScript(true, EventsScriptPath, eventsScriptGenerator, EventContainerClass);

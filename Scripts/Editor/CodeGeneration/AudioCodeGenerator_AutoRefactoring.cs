@@ -30,9 +30,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             LoadPreviousMetaData();
             
-#if FMOD_AUDIO_SYNTAX
             FindChangedEvents();
-#endif // FMOD_AUDIO_SYNTAX
             
             TryRefactoringOldEventReferencesInternal(true);
         }
@@ -46,18 +44,15 @@ namespace RoyTheunissen.AudioSyntax
             return File.Exists(PreviousMetaDataFilePath);
         }
         
-#if FMOD_AUDIO_SYNTAX
         private static void FindChangedEvents()
         {
-            EditorEventRef[] events = EventManager.Events
-                .Where(e => e.Path.StartsWith(EditorEventRefExtensions.EventPrefix))
-                .OrderBy(e => e.Path).ToArray();
+            List<AudioEventDefinition> eventDefinitions = FindEventDefinitions();
             
             detectedEventChanges.Clear();
-            foreach (EditorEventRef e in events)
+            foreach (AudioEventDefinition e in eventDefinitions)
             {
                 bool eventExistedDuringPreviousCodeGeneration = metaDataFromPreviousCodeGeneration
-                    .EventGuidToPreviousSyntaxPath.TryGetValue(e.Guid.ToString(), out string previousSyntaxPath);
+                    .EventGuidToPreviousSyntaxPath.TryGetValue(e.Guid, out string previousSyntaxPath);
                 if (eventExistedDuringPreviousCodeGeneration)
                 {
                     string currentPath = e.GetFilteredPath(true);
@@ -70,7 +65,6 @@ namespace RoyTheunissen.AudioSyntax
                 }
             }
         }
-#endif // FMOD_AUDIO_SYNTAX
 
         private static void TryRefactoringOldEventReferencesInternal(bool isTriggeredExplicitlyViaMenu)
         {
