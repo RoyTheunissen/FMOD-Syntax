@@ -490,7 +490,7 @@ namespace RoyTheunissen.AudioSyntax
         private string GetUnitySyntaxSettingsAssetPath()
         {
             return GetResourcesFolderPath(createUnitySyntaxSettingsAssetResourcesFolderPath) +
-                   UnityAudioSyntaxSettings.PathRelativeToResources + UnityAudioSyntaxSettings.SettingsFilename;
+                   UnityAudioSyntaxSettings.PathRelativeToResources + UnityAudioSyntaxSettings.SettingsFilenameIncludingExtension;
         }
         
         private string GetUnityAudioEventConfigRootFolderPath()
@@ -560,7 +560,7 @@ namespace RoyTheunissen.AudioSyntax
         
         private void CreateUnityAudioSyntaxSettingsFile()
         {
-            string fileName = UnityAudioSyntaxSettings.SettingsFilename;
+            string fileName = UnityAudioSyntaxSettings.SettingsFilenameIncludingExtension;
             string path = GetUnitySyntaxSettingsAssetPath().RemoveSuffix(fileName);
 
             fileName = Path.GetFileNameWithoutExtension(fileName);

@@ -13,7 +13,8 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public sealed class UnityAudioSyntaxSettings : ScriptableObject 
     {
-        public static readonly string SettingsFilename = $"{nameof(UnityAudioSyntaxSettings)}.asset";
+        private static readonly string SettingsFilename = nameof(UnityAudioSyntaxSettings);
+        public static readonly string SettingsFilenameIncludingExtension = SettingsFilename + ".asset";
         public static readonly string PathRelativeToResources = $"AudioSyntax/";
         
         // This is used at runtime, do not remove
