@@ -43,7 +43,7 @@ namespace RoyTheunissen.AudioSyntax
                 if (guidFmodAudioConfigIsCachedFor != fmodEventGuid)
                 {
                     guidFmodAudioConfigIsCachedFor = fmodEventGuid;
-                    cachedFmodAudioConfig = GetParameterlessEventConfig(fmodEventGuid);
+                    cachedFmodAudioConfig = GetParameterlessEventConfig(fmodEventGuid) as FmodParameterlessAudioConfig;
                     if (!string.IsNullOrEmpty(fmodEventGuid) && cachedFmodAudioConfig == null)
                     {
                         Debug.LogError($"FMOD event was assigned to audio reference but its corresponding config could " +
