@@ -11,8 +11,8 @@ namespace RoyTheunissen.AudioSyntax
         public const string ProjectName = "Audio Syntax";
         public const string ProjectNameNoSpace = "AudioSyntax";
         public const string Root = ProjectName + "/";
-        public const string RootNoSpace = ProjectNameNoSpace + "/";
-        public const string CreateScriptableObject = "ScriptableObject/" + ProjectName + "/";
+        
+        public const string CreateUnityAudioConfig = "Audio/";
         public const string CreateSocItem = "ScriptableObject Collection/Collections/" + ProjectName + "/";
     }
 }
