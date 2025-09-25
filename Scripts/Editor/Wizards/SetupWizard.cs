@@ -169,9 +169,11 @@ namespace RoyTheunissen.AudioSyntax
 
         private static bool ShouldAudioConfigsBeInsideResourcesFolder()
         {
-            // Currently, yes, always. Once there is support for loading audio via Addressables however,
-            // this will no longer be mandatory.
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+            return false;
+#else
             return true;
+#endif // !UNITY_AUDIO_SYNTAX_ADDRESSABLES
         }
         
         private static string GetInferredUnityAudioConfigBasePathFromProjectStructure()
@@ -493,7 +495,11 @@ namespace RoyTheunissen.AudioSyntax
         
         private string GetUnityAudioEventConfigRootFolderPath()
         {
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+            return unityAudioEventConfigRootFolder;
+#else
             return GetResourcesFolderPath(unityAudioEventConfigRootFolder);
+#endif
         }
 
         private void FinalizeSetup()
