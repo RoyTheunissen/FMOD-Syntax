@@ -86,11 +86,11 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        [NonSerialized] private static bool didCacheParameterlessFmodEvents;
-        
-        private static readonly Dictionary<string, IAudioConfigParameterless> parameterlessFmodEventsByGuid = new();
-
 #if FMOD_AUDIO_SYNTAX
+        [NonSerialized] private static bool didCacheParameterlessEvents;
+        
+        private static readonly Dictionary<string, IAudioConfigParameterless> parameterlessEventsByGuid = new();
+
         public FmodParameterlessAudioPlayback PlayFMOD(Transform source = null)
         {
             return FmodAudioConfig.Play(source);
@@ -133,27 +133,30 @@ namespace RoyTheunissen.AudioSyntax
         [UnityEditor.InitializeOnLoadMethod]
         private static void Initialize()
         {
-            parameterlessFmodEventsByGuid.Clear();
-            didCacheParameterlessFmodEvents = false;
+#if FMOD_AUDIO_SYNTAX
+            parameterlessEventsByGuid.Clear();
+            didCacheParameterlessEvents = false;
+#endif // FMOD_AUDIO_SYNTAX
         }
 #endif // UNITY_EDITOR
         
         
+#if FMOD_AUDIO_SYNTAX
         public static IAudioConfigParameterless GetParameterlessEventConfig(string guid)
         {
-            CacheParameterlessFMODEventConfigs();
+            CacheParameterlessEventConfigs();
             
-            return parameterlessFmodEventsByGuid.GetValueOrDefault(guid);
+            return parameterlessEventsByGuid.GetValueOrDefault(guid);
         }
         
-        private static void CacheParameterlessFMODEventConfigs()
+        private static void CacheParameterlessEventConfigs()
         {
-            if (didCacheParameterlessFmodEvents)
+            if (didCacheParameterlessEvents)
                 return;
 
-            didCacheParameterlessFmodEvents = true;
+            didCacheParameterlessEvents = true;
             
-            parameterlessFmodEventsByGuid.Clear();
+            parameterlessEventsByGuid.Clear();
             
             const string containerClassName = "AudioParameterlessEvents";
             IEnumerable<Type> containerTypes = AppDomain.CurrentDomain.GetAssemblies()
@@ -170,10 +173,11 @@ namespace RoyTheunissen.AudioSyntax
                 // Compile them all into one big dictionary.
                 foreach (KeyValuePair<string,IAudioConfigParameterless> kvp in eventsByGuidDictionary)
                 {
-                    parameterlessFmodEventsByGuid.Add(kvp.Key, kvp.Value);
+                    parameterlessEventsByGuid.Add(kvp.Key, kvp.Value);
                 }
             }
         }
+#endif // FMOD_AUDIO_SYNTAX
 
         public override string ToString()
         {
