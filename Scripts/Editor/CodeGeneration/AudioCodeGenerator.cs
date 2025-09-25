@@ -16,6 +16,10 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public static partial class AudioCodeGenerator
     {
+        private const string GenerateCodeMenuPath = "Generate Audio Code";
+        private const string GenerateCodeMenuPathWithShortcut = GenerateCodeMenuPath + " %&g";
+        private const int GenerateCodeMenuPriority = 999999999;
+        
         private static string ScriptPathBase => AudioSyntaxSettings.Instance.GeneratedScriptsFolderPath;
         private const string TemplatePathBase = "Templates/AudioSyntax/";
         
@@ -503,8 +507,12 @@ namespace RoyTheunissen.AudioSyntax
             return eventDefinitions;
         }
 
-        [MenuItem("FMOD/Generate Audio Code %&g", false, 999999999)]
-        [MenuItem(AudioSyntaxMenuPaths.Root + "Generate Audio Code", false, 999999999)]
+#if !FMOD_AUDIO_SYNTAX
+        [MenuItem("FMOD/" + GenerateCodeMenuPath, false, GenerateCodeMenuPriority)]
+#endif // FMOD_AUDIO_SYNTAX
+#if FMOD_AUDIO_SYNTAX || UNITY_AUDIO_SYNTAX
+        [MenuItem(AudioSyntaxMenuPaths.Root + GenerateCodeMenuPathWithShortcut, false, GenerateCodeMenuPriority)]
+#endif // FMOD_AUDIO_SYNTAX || UNITY_AUDIO_SYNTAX
         public static void GenerateCode()
         {
             ParseMetaData();
@@ -547,6 +555,20 @@ namespace RoyTheunissen.AudioSyntax
 
             if (detectedEventChanges.Count > 0)
                 TryRefactoringOldEventReferencesInternal(false);
+        }
+
+#if FMOD_AUDIO_SYNTAX || UNITY_AUDIO_SYNTAX
+        [MenuItem(AudioSyntaxMenuPaths.Root + GenerateCodeMenuPathWithShortcut, true, GenerateCodeMenuPriority)]
+#endif // FMOD_AUDIO_SYNTAX || UNITY_AUDIO_SYNTAX
+        private static bool GenerateCodeValidation()
+        {
+#if FMOD_AUDIO_SYNTAX
+            return true;
+#elif UNITY_AUDIO_SYNTAX
+            return UnityAudioSyntaxSettings.Instance != null;
+#else
+            return false;
+#endif
         }
 
         private static void RemoveDeprecatedGeneratedScripts()
