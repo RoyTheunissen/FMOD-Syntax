@@ -94,6 +94,9 @@ namespace RoyTheunissen.AudioSyntax
             get;
         }
 
+        private bool isLazyLoading;
+        public bool IsLazyLoading => isLazyLoading;
+
         protected float time;
         protected float timePrevious;
 
@@ -102,15 +105,45 @@ namespace RoyTheunissen.AudioSyntax
         
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
 
-        public void Initialize(
-            UnityAudioEventConfigAssetBase audioEventConfig, Transform origin, float volumeFactorOverride, AudioSource audioSource)
+        private void InitializeInternal(Transform origin, float volumeFactorOverride)
         {
-            BaseEventConfig = audioEventConfig;
             this.volumeFactorOverride = volumeFactorOverride;
-            source = audioSource;
+            
+            source = UnityAudioSyntaxSystem.Instance.GetAudioSourceForPlayback();
             
             // Need to do this after a source is assigned because this also updates the source's spatial blend.
             Origin = origin;
+        }
+
+        private void Initialize(UnityAudioEventConfigAssetBase audioEventConfig,
+            Transform origin, float volumeFactorOverride)
+        {
+            InitializeInternal(origin, volumeFactorOverride);
+            
+            CompleteInitialization(audioEventConfig);
+        }
+
+        private void InitializeAsLazyLoading(Transform origin, float volumeFactorOverride)
+        {
+            InitializeInternal(origin, volumeFactorOverride);
+            
+            // Just mark the playback as being in the process of using lazy loading to load the config.
+            // When the config is loaded, the playback is notified and its initialization will be completed.
+            isLazyLoading = true;
+        }
+        
+        public void CompleteInitialization(UnityAudioEventConfigAssetBase config)
+        {
+            BaseEventConfig = config;
+            
+            // Assign the mixer group now that we know which config to use.
+            if (config.MixerGroup == null)
+                source.outputAudioMixerGroup = UnityAudioSyntaxSettings.Instance.DefaultMixerGroup;
+            else
+                source.outputAudioMixerGroup = config.MixerGroup;
+
+            if (isLazyLoading)
+                isLazyLoading = false;
 
             Start();
         }
@@ -229,20 +262,39 @@ namespace RoyTheunissen.AudioSyntax
                 handler(this, @event.Id);
         }
         
-        public static PlaybackType Play<PlaybackType>(
-            UnityAudioEventConfigAssetBase audioEventConfig, Transform origin, float volumeFactor = 1.0f)
+        private static void InitializePlayback<PlaybackType>(PlaybackType playback, 
+            UnityAudioEventConfigAssetBase audioEventConfig, Transform origin, float volumeFactor)
             where PlaybackType : UnityAudioPlayback, new()
         {
-            PlaybackType playback = new PlaybackType();
-            
-            AudioSource audioSource = UnityAudioSyntaxSystem.Instance.GetAudioSourceForPlayback(audioEventConfig);
-            playback.Initialize(audioEventConfig, origin, volumeFactor, audioSource);
+            playback.Initialize(audioEventConfig, origin, volumeFactor);
             
 #if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
             audioSource.name = "AudioSource - " + playback;
 #endif // DEBUG_AUDIO_SOURCE_POOLING
 
             AudioSyntaxSystem.RegisterActiveEventPlayback(playback);
+        }
+
+        public static PlaybackType Play<PlaybackType>(
+            UnityAudioEventConfigAssetBase audioEventConfig, Transform origin, float volumeFactor = 1.0f)
+            where PlaybackType : UnityAudioPlayback, new()
+        {
+            PlaybackType playback = new();
+            
+            InitializePlayback(playback, audioEventConfig, origin, volumeFactor);
+
+            return playback;
+        }
+
+        public static PlaybackType PlayWithLazyLoading<PlaybackType>(
+            Transform origin, float volumeFactor = 1.0f)
+            where PlaybackType : UnityAudioPlayback, new()
+        {
+            PlaybackType playback = new();
+            
+            // Config is not available yet and will finish loading later. Initialize a playback instance as best we can,
+            // its initialization will be completed once the config has finished loading.
+            playback.InitializeAsLazyLoading(origin, volumeFactor);
 
             return playback;
         }

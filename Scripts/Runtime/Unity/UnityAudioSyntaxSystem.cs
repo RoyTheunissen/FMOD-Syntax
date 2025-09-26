@@ -18,6 +18,12 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public sealed class UnityAudioSyntaxSystem 
     {
+        public enum LoadAudioEventConfigResults
+        {
+            Success,
+            RequiresLazyLoading,
+        }
+        
         private Pool<AudioSource> audioSourcesPool;
         
         private Transform cachedAudioSourceContainer;
@@ -98,15 +104,9 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public AudioSource GetAudioSourceForPlayback(UnityAudioEventConfigAssetBase audioEventConfig)
+        public AudioSource GetAudioSourceForPlayback()
         {
             AudioSource audioSource = audioSourcesPool.Get();
-            
-            // Assign the mixer group.
-            if (audioEventConfig.MixerGroup == null)
-                audioSource.outputAudioMixerGroup = defaultMixerGroup;
-            else
-                audioSource.outputAudioMixerGroup = audioEventConfig.MixerGroup;
             
             // Reset these to the default Unity values, just in case...
             audioSource.clip = null;
@@ -134,21 +134,15 @@ namespace RoyTheunissen.AudioSyntax
 #endif // DEBUG_AUDIO_SOURCE_POOLING
         }
 
-        public static bool TryLoadAudioEventConfigAtRuntime<ConfigType>(string path, out ConfigType config)
+        public static LoadAudioEventConfigResults TryLoadAudioEventConfigAtRuntime<ConfigType>(string path, out ConfigType config)
             where ConfigType : UnityAudioEventConfigAssetBase
         {
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
             bool wasLoaded = UnityAudioEventConfigAssetBase.TryGetLoadedConfig(path, out config);
-            if (!wasLoaded)
-            {
-                // Now is a good time to attempt lazy loading
-                TryLoadAudioEventConfigFromAddressables<ConfigType>(
-                    path, config =>
-                    {
-                        Debug.Log($"SUCCESS! Lazily loaded Audio Event '{config}' @ '{path}'.");
-                    });
-            }
-            return wasLoaded;
+            if (wasLoaded)
+                return LoadAudioEventConfigResults.Success;
+            
+            return LoadAudioEventConfigResults.RequiresLazyLoading;
 #else
             path = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolderRelativeToResources + path;
             config = Resources.Load<ConfigType>(path);
@@ -158,7 +152,7 @@ namespace RoyTheunissen.AudioSyntax
             // caching issue, although we have various systems in place for making sure they're automatically updated)
             // So long story short: not worth doing costly null checks EVERY TIME to catch a very rare problem that
             // will already be noticeable via an exception anyway.
-            return true;
+            return LoadAudioEventConfigResults.Success;
 #endif
         }
 
@@ -182,13 +176,12 @@ namespace RoyTheunissen.AudioSyntax
                 return default;
             }
             
-            Debug.Log($"Should try and lazy load Audio Event '{path}' @ '{address}'");
-            
             AsyncOperationHandle<ConfigType> handle = Addressables.LoadAssetAsync<ConfigType>(address);
             if (handle.IsDone)
                 callback?.Invoke(handle.Result);
             else
                 handle.Completed += operationHandle => callback?.Invoke(operationHandle.Result);
+            
             return handle;
         }
 #endif

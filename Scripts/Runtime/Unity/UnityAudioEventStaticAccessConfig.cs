@@ -33,10 +33,16 @@ namespace RoyTheunissen.AudioSyntax
         where ConfigType : UnityAudioEventConfigAssetBase
         where PlaybackType : UnityAudioPlayback, new()
     {
+        private enum ConfigStatuses
+        {
+            NotLoaded,
+            Loaded,
+            RequiresLazyLoading,
+        }
+        
         [NonSerialized] private ConfigType cachedConfig;
-        [NonSerialized] private bool didCacheConfig;
-        [NonSerialized] private bool configExisted;
-        protected ConfigType Config
+        [NonSerialized] private ConfigStatuses configStatus = ConfigStatuses.NotLoaded;
+        private ConfigType Config
         {
             get
             {
@@ -54,14 +60,23 @@ namespace RoyTheunissen.AudioSyntax
         {
             TryLoadConfig();
 
-            if (!configExisted)
+            if (configStatus == ConfigStatuses.RequiresLazyLoading)
             {
-                Debug.LogError($"Tried to play Unity Audio Event '{Path}' from code, but it was not loaded. " +
-                               $"Make sure it's referenced in the current scene or that it's loaded via Addressables.");
+                PlaybackType placeholder = UnityAudioPlayback.PlayWithLazyLoading<PlaybackType>(source);
                 
-                // TODO: Support lazy loading?
+                Debug.LogWarning($"Tried to play audio event '{Path}' via code but it was not loaded. Will load " +
+                                 $"it now, but you might notice a delay. Consider grouping the audio configs and " +
+                                 $"loading the entire group upfront before you need them.");
                 
-                return default;
+                UnityAudioSyntaxSystem.TryLoadAudioEventConfigFromAddressables<ConfigType>(Path, config =>
+                {
+                    placeholder.CompleteInitialization(config);
+                    
+                    cachedConfig = config;
+                    configStatus = ConfigStatuses.Loaded;
+                });
+
+                return placeholder;
             }
             
             return UnityAudioPlayback.Play<PlaybackType>(Config, source);
@@ -74,11 +89,24 @@ namespace RoyTheunissen.AudioSyntax
 
         private void TryLoadConfig()
         {
-            if (didCacheConfig && configExisted)
+            if (configStatus != ConfigStatuses.NotLoaded)
                 return;
             
-            didCacheConfig = true;
-            configExisted = UnityAudioSyntaxSystem.TryLoadAudioEventConfigAtRuntime(Path, out cachedConfig);
+            UnityAudioSyntaxSystem.LoadAudioEventConfigResults result =
+                UnityAudioSyntaxSystem.TryLoadAudioEventConfigAtRuntime(Path, out cachedConfig);
+            switch (result)
+            {
+                case UnityAudioSyntaxSystem.LoadAudioEventConfigResults.Success:
+                    configStatus = ConfigStatuses.Loaded;
+                    break;
+                
+                case UnityAudioSyntaxSystem.LoadAudioEventConfigResults.RequiresLazyLoading:
+                    configStatus = ConfigStatuses.RequiresLazyLoading;
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
