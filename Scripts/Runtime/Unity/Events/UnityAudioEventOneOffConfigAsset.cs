@@ -1,9 +1,6 @@
 #if UNITY_AUDIO_SYNTAX
 
-using System;
 using UnityEngine;
-using System.Collections.Generic;
-using Random = UnityEngine.Random;
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -19,13 +16,6 @@ namespace RoyTheunissen.AudioSyntax
 
         [SerializeField] private AudioEventConfigPropertyFloat pitch = new(1.0f, true);
         public AudioEventConfigPropertyFloat Pitch => pitch;
-
-        [Space]
-        [SerializeField] private bool randomizePitch;
-        public bool RandomizePitch => randomizePitch;
-        
-        [SerializeField] private float randomPitchOffset = 0.1f;
-        public float RandomPitchOffset => randomPitchOffset;
     }
 
     /// <summary>
@@ -56,11 +46,8 @@ namespace RoyTheunissen.AudioSyntax
             // Find the events associated with the clip that we decided to play, and add them to the list of events.
             if (clip.TimelineEvents != null)
                 timelineEventsToFire.AddRange(clip.TimelineEvents);
-
-            if (Config.RandomizePitch)
-                Source.pitch = 1.0f + Random.Range(-Config.RandomPitchOffset, Config.RandomPitchOffset);
-            else
-                Source.pitch = 1.0f;
+            
+            Source.pitch = Config.Pitch.Evaluate(this);
             
             // Can modify the volume specifically when invoking Play and also through the audio config.
             Source.volume = VolumeFactorOverride * Config.VolumeFactor.Evaluate(this);

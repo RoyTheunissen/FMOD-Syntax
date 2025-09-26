@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -20,29 +18,39 @@ namespace RoyTheunissen.AudioSyntax
     [Serializable]
     public abstract class AudioEventConfigProperty<ValueType>
     {
-        [SerializeField] protected ValueType value;
+        [SerializeField, HideInInspector] protected ValueType value;
 
         protected AudioEventConfigProperty(ValueType defaultValue)
         {
             value = defaultValue;
         }
 
-        public ValueType Evaluate(UnityAudioPlayback playback)
-        {
-            // TODO: Evaluate our automation/modulation based on the playback's Parameter values 
-            
-            return value;
-        }
+        public abstract ValueType Evaluate(UnityAudioPlayback playback);
     }
     
     [Serializable]
     public sealed class AudioEventConfigPropertyFloat : AudioEventConfigProperty<float>
     {
-        [SerializeField] private bool isSigned;
+        [SerializeField, HideInInspector] private bool isSigned;
+        
+        [SerializeField, HideInInspector] private bool applyRandomOffset;
+
+        [SerializeField] private float randomOffset = 0.1f;
         
         public AudioEventConfigPropertyFloat(float defaultValue, bool isSigned) : base(defaultValue)
         {
             this.isSigned = isSigned;
+        }
+
+        public override float Evaluate(UnityAudioPlayback playback)
+        {
+            // TODO: Support modulation / automation based on parameters
+            float value = this.value;
+            
+            if (applyRandomOffset)
+                value += Random.Range(-randomOffset, randomOffset);
+            
+            return value;
         }
     }
     
@@ -74,6 +82,12 @@ namespace RoyTheunissen.AudioSyntax
         
         public AudioEventConfigPropertyAudioClips(List<AudioClipMetaData> defaultValue) : base(defaultValue)
         {
+        }
+
+        public override List<AudioClipMetaData> Evaluate(UnityAudioPlayback playback)
+        {
+            // TODO: Support modulation / automation based on parameters
+            return value;
         }
 
         public AudioClipMetaData GetAudioClipToPlay(UnityAudioPlayback playback)
