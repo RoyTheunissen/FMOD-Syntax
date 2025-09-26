@@ -7,7 +7,7 @@ namespace RoyTheunissen.AudioSyntax
     /// Draws a Float property as if it's a normal float.
     /// </summary>
     [CustomPropertyDrawer(typeof(AudioEventConfigPropertyFloat))]
-    public class AudioEventConfigPropertyPropertyDrawer : PropertyDrawer
+    public class AudioEventConfigPropertyFloatPropertyDrawer : PropertyDrawer
     {
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {

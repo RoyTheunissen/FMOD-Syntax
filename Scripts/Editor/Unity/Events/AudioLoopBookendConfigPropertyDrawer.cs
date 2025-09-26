@@ -16,7 +16,7 @@ namespace RoyTheunissen.AudioSyntax
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializedProperty enabledProperty = property.FindPropertyRelative("enabled");
-            SerializedProperty audioClipProperty = property.FindPropertyRelative("audioClip");
+            SerializedProperty audioClipProperty = property.FindPropertyRelative("audioClips");
             SerializedProperty volumeFactorProperty = property.FindPropertyRelative("volumeFactor");
             
             Rect headerRect = position.GetControlFirstRect();

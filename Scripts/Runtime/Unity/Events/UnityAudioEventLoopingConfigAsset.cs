@@ -15,8 +15,9 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private AudioLoopBookendConfig startAudio;
         public AudioLoopBookendConfig StartAudio => startAudio;
         
-        [SerializeField] private AudioClipMetaData loopingAudioClip;
-        public AudioClipMetaData LoopingAudioClip => loopingAudioClip;
+        [Space]
+        [SerializeField] private AudioEventConfigPropertyAudioClips loopingAudioClips = new();
+        public AudioEventConfigPropertyAudioClips LoopingAudioClips => loopingAudioClips;
 
         [Space]
         [SerializeField] private AudioLoopBookendConfig endAudio;
@@ -41,10 +42,11 @@ namespace RoyTheunissen.AudioSyntax
         private bool hasEndAudioTimelineEvents;
         private List<AudioClipTimelineEvent> endAudioTimelineEvents;
         private float endAudioTime;
+        private AudioClipMetaData endAudioClip;
 
         protected override void OnStart()
         {
-            if (Config.LoopingAudioClip == null)
+            if (!Config.LoopingAudioClips.HasAnythingAssigned)
             {
                 Debug.LogError($"Audio loop config {Config} did not have a valid looping audio clip...");
                 return;
@@ -57,29 +59,32 @@ namespace RoyTheunissen.AudioSyntax
             
             if (Config.StartAudio.ShouldPlay)
             {
-                Source.PlayOneShot(Config.StartAudio.Clip, VolumeFactorOverride * Config.StartAudio.VolumeFactor);
+                AudioClipMetaData startAudioClip = Config.StartAudio.AudioClips.GetAudioClipToPlay(this);
+                Source.PlayOneShot(
+                    startAudioClip, VolumeFactorOverride * Config.StartAudio.VolumeFactor.Evaluate(this));
                 
                 // You're allowed to specify timeline events for the start audio clip too. 
-                if (Config.StartAudio.Clip?.TimelineEvents != null && Config.StartAudio.Clip?.TimelineEvents.Count > 0)
+                if (startAudioClip?.TimelineEvents != null && startAudioClip?.TimelineEvents.Count > 0)
                 {
                     hasStartAudioTimelineEvents = true;
                     if (startAudioTimelineEvents == null)
                         startAudioTimelineEvents = new List<AudioClipTimelineEvent>();
                     else
                         startAudioTimelineEvents.Clear();
-                    startAudioTimelineEvents.AddRange(Config.StartAudio.Clip?.TimelineEvents);
+                    startAudioTimelineEvents.AddRange(startAudioClip?.TimelineEvents);
                 }
             }
 
             // Can modify the volume when playing, through the config, and by manipulating the Playback instance.
             UpdateAudioSourceVolume();
-            Source.clip = Config.LoopingAudioClip;
+            AudioClipMetaData loopingAudioClip = Config.LoopingAudioClips.GetAudioClipToPlay(this);
+            Source.clip = loopingAudioClip;
             Source.loop = true;
             Source.Play();
 
             // Find the events associated with the clip that we decided to play, and add them to the list of events.
-            if (Config.LoopingAudioClip?.TimelineEvents != null)
-                timelineEventsToFire.AddRange(Config.LoopingAudioClip.TimelineEvents);
+            if (loopingAudioClip?.TimelineEvents != null)
+                timelineEventsToFire.AddRange(loopingAudioClip.TimelineEvents);
             
             // TODO: Also support events for the loop's Start and Stop audio.
         }
@@ -115,7 +120,7 @@ namespace RoyTheunissen.AudioSyntax
             // Update the time and fire timeline events for the looping audio clip.
             if (!waitForEndSoundToFinish)
             {
-                AudioClip loopingClip = Config.LoopingAudioClip.AudioClip;
+                AudioClip loopingClip = Source.clip;
                 float duration = loopingClip.length;
                 int sampleLength = loopingClip.samples;
                 int numberOfSamples = Source.timeSamples;
@@ -161,7 +166,7 @@ namespace RoyTheunissen.AudioSyntax
                 if (hasEndAudioTimelineEvents)
                     TryFiringRemainingEvents(endAudioTimelineEvents, endAudioTimePrevious, endAudioTime);
                 
-                if (endAudioTime.Greater(Config.EndAudio.Clip.AudioClip.length))
+                if (endAudioTime.Greater(endAudioClip.AudioClip.length))
                 {
                     waitForEndSoundToFinish = false;
                     MarkForCleanup();
@@ -184,17 +189,18 @@ namespace RoyTheunissen.AudioSyntax
                 waitForEndSoundToFinish = true;
                 
                 Source.Stop();
-                Source.PlayOneShot(Config.EndAudio.Clip, VolumeFactorOverride * Config.EndAudio.VolumeFactor);
+                endAudioClip = Config.EndAudio.AudioClips.GetAudioClipToPlay(this);
+                Source.PlayOneShot(endAudioClip, VolumeFactorOverride * Config.EndAudio.VolumeFactor.Evaluate(this));
                 
                 // You're allowed to specify timeline events for the end audio clip too. 
-                if (Config.EndAudio.Clip?.TimelineEvents != null && Config.EndAudio.Clip?.TimelineEvents.Count > 0)
+                if (endAudioClip?.TimelineEvents != null && endAudioClip?.TimelineEvents.Count > 0)
                 {
                     hasEndAudioTimelineEvents = true;
                     if (endAudioTimelineEvents == null)
                         endAudioTimelineEvents = new List<AudioClipTimelineEvent>();
                     else
                         endAudioTimelineEvents.Clear();
-                    endAudioTimelineEvents.AddRange(Config.EndAudio.Clip?.TimelineEvents);
+                    endAudioTimelineEvents.AddRange(endAudioClip?.TimelineEvents);
                 }
             }
             else

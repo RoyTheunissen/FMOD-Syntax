@@ -14,8 +14,8 @@ namespace RoyTheunissen.AudioSyntax
     public sealed class UnityAudioEventOneOffConfigAsset : UnityAudioEventConfigAsset<UnityAudioOneOffPlayback>
     {
         [Space]
-        [SerializeField] private List<AudioClipMetaData> audioClips = new List<AudioClipMetaData>();
-        public List<AudioClipMetaData> AudioClips => audioClips;
+        [SerializeField] private AudioEventConfigPropertyAudioClips audioClips = new();
+        public AudioEventConfigPropertyAudioClips AudioClips => audioClips;
 
         [SerializeField] private AudioEventConfigPropertyFloat pitch = new(1.0f, true);
         public AudioEventConfigPropertyFloat Pitch => pitch;
@@ -26,31 +26,6 @@ namespace RoyTheunissen.AudioSyntax
         
         [SerializeField] private float randomPitchOffset = 0.1f;
         public float RandomPitchOffset => randomPitchOffset;
-
-        [NonSerialized] private int lastRandomIndex;
-
-        public AudioClipMetaData GetRandomClip()
-        {
-            if (audioClips.Count == 0)
-                return null;
-
-            int randomIndex = Random.Range(0, audioClips.Count);
-            AudioClipMetaData randomClip = audioClips[randomIndex];
-            
-            // If we chose the same clip twice in a row, pick either the next or previous clip instead. This helps
-            // prevent repetition of rapidly fired sound effects like footsteps.
-            if (audioClips.Count > 1 && randomIndex == lastRandomIndex)
-            {
-                if (Random.Range(0, 100) < 50)
-                    randomIndex = (randomIndex + 1).Modulo(audioClips.Count);
-                else
-                    randomIndex = (randomIndex - 1).Modulo(audioClips.Count);
-            }
-            
-            lastRandomIndex = randomIndex;
-            
-            return randomClip;
-        }
     }
 
     /// <summary>
@@ -70,7 +45,7 @@ namespace RoyTheunissen.AudioSyntax
 
         protected override void OnStart()
         {
-            AudioClipMetaData clip = Config.GetRandomClip();
+            AudioClipMetaData clip = Config.AudioClips.GetAudioClipToPlay(this);
             if (clip == null || clip.AudioClip == null)
             {
                 Debug.LogError($"Audio config {Config} did not have a valid audio clip...");

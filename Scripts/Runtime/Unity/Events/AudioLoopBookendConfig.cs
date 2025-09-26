@@ -10,13 +10,13 @@ namespace RoyTheunissen.AudioSyntax
     {
         [SerializeField, HideInInspector] private bool enabled;
         
-        [SerializeField] private AudioClipMetaData audioClip;
-        public AudioClipMetaData Clip => audioClip;
+        [SerializeField] private AudioEventConfigPropertyAudioClips audioClips = new();
+        public AudioEventConfigPropertyAudioClips AudioClips => audioClips;
 
-        [SerializeField] private float volumeFactor = 1.0f;
-        public float VolumeFactor => volumeFactor;
+        [SerializeField] private AudioEventConfigPropertyFloat volumeFactor = new(1.0f, false);
+        public AudioEventConfigPropertyFloat VolumeFactor => volumeFactor;
 
-        public bool ShouldPlay => enabled && audioClip != null;
+        public bool ShouldPlay => enabled;
     }
 }
 #endif // UNITY_AUDIO_SYNTAX
