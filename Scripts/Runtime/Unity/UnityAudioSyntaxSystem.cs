@@ -144,7 +144,7 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
             return LoadAudioEventConfigResults.RequiresLazyLoading;
 #else
-            path = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolderRelativeToResources + path;
+            path = UnityAudioSyntaxSettings.Instance.UnityAudioEventConfigAssetRootFolderRelativeToResources + path;
             config = Resources.Load<ConfigType>(path);
             
             // Could do a null check here, but null checks are expensive and it's *supposed* to exist at this path

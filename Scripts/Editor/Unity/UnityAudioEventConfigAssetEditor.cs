@@ -41,13 +41,17 @@ namespace RoyTheunissen.AudioSyntax
                     break;
                     
                 case PathStatuses.CouldntDetermineRootFolder:
-                    EditorGUILayout.HelpBox("Could not determine what the root folder is for Unity Audio Events because no Unity Audio Syntax Settings could be found.", MessageType.Error);
+                    EditorGUILayout.HelpBox("Could not determine what the root folder is for Unity Audio Events " +
+                                            "because no Unity Audio Syntax Settings could be found.", MessageType.Error);
                     if (GUILayout.Button("Open Setup Wizard"))
                         SetupWizard.OpenSetupWizard();
                     break;
                     
                 case PathStatuses.NotInSpecifiedRootFolder:
-                    EditorGUILayout.HelpBox($"This audio event config asset is not a child of the root folder specified in the Audio Syntax Settings ({UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolder})", MessageType.Error);
+                    EditorGUILayout.HelpBox($"This audio event config asset is not a child of the root folder " +
+                                            $"specified in the Audio Syntax Settings " +
+                                            $"({UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder})",
+                        MessageType.Error);
                     if (GUILayout.Button("Open Unity Audio Syntax Settings"))
                         UnityAudioSyntaxSettings.OpenSettings();
                     break;
@@ -62,9 +66,11 @@ namespace RoyTheunissen.AudioSyntax
                     }
                     else
                     {
-                        EditorGUILayout.HelpBox($"The path does not appear to be up-to-date.\nCurrent path: '{pathProperty.stringValue}'\nExpected path: '{expectedPath}'", MessageType.Error);
+                        EditorGUILayout.HelpBox($"The path does not appear to be up-to-date.\nCurrent path: " +
+                                                $"'{pathProperty.stringValue}'\nExpected path: '{expectedPath}'",
+                            MessageType.Error);
                         if (GUILayout.Button("Update All Audio Event Config Paths"))
-                            UpdateAllAudioEventConfigPaths();
+                            UpdateAllAudioEventConfigAssetPaths();
                     }
                     break;
                     
@@ -94,7 +100,7 @@ namespace RoyTheunissen.AudioSyntax
             if (UnityAudioSyntaxSettings.Instance == null)
                 return PathStatuses.CouldntDetermineRootFolder;
             
-            string rootFolder = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolder;
+            string rootFolder = UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder;
             if (!rootFolder.EndsWith("/"))
                 rootFolder += "/";
             
@@ -110,7 +116,7 @@ namespace RoyTheunissen.AudioSyntax
             return PathStatuses.Correct;
         }
         
-        public static void UpdateAllAudioEventConfigPaths()
+        public static void UpdateAllAudioEventConfigAssetPaths()
         {
             if (UnityAudioSyntaxSettings.Instance == null)
             {
@@ -129,7 +135,7 @@ namespace RoyTheunissen.AudioSyntax
         private static PathStatuses UpdateAudioEventConfigPathInternal(
             UnityAudioEventConfigAssetBase config, bool logErrors)
         {
-            string rootFolder = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolder;
+            string rootFolder = UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder;
             
             PathStatuses pathStatus = CheckIfPathIsCorrect(config, out string expectedPath);
             switch (pathStatus)

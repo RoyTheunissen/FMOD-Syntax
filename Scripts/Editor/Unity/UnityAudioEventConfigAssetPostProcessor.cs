@@ -32,7 +32,7 @@ namespace RoyTheunissen.AudioSyntax
                 if (pathStatuses == UnityAudioEventConfigAssetEditor.PathStatuses.NotInSpecifiedRootFolder)
                 {
                     Debug.LogError($"You moved Unity Audio Event Config '{config.name}' outside of the specified " +
-                                   $"root folder '{UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolder}'. " +
+                                   $"root folder '{UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder}'. " +
                                    $"This Audio Event will no longer work correctly.", config);
                 }
             }

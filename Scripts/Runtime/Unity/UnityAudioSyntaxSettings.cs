@@ -27,37 +27,38 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private AudioMixerGroup defaultMixerGroup;
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
         
-        [Tooltip("Use this to specify the root folder in which all your Unity Audio Configs are located. " +
+        [Tooltip("Use this to specify the root folder in which all your Unity Audio Event Configs are located. " +
                  "This is used at editor time to figure out short and useful relative paths for events based on the " +
                  "folder structure. At runtime, this is used to figure out where a config is relative to the " +
                  "Resources folder so it can be loaded.")]
-        [SerializeField, HideInInspector] private string unityAudioConfigRootFolder;
-        public string UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
+        [SerializeField, HideInInspector] private string audioEventConfigAssetRootFolder;
+        public string AudioEventConfigAssetRootFolder => audioEventConfigAssetRootFolder;
         
         [SerializeField, HideInInspector] private AudioEventPathToAddress[] audioEventPathsToAddressablePaths;
         
-        [NonSerialized] private string cachedUnityAudioConfigRootFolderRelativeToResources;
-        [NonSerialized] private bool didCacheUnityAudioConfigRootFolderRelativeToResources;
-        public string UnityAudioConfigRootFolderRelativeToResources
+        [NonSerialized] private string cachedUnityAudioEventConfigAssetRootFolderRelativeToResources;
+        [NonSerialized] private bool didCacheUnityAudioEventConfigAssetRootFolderRelativeToResources;
+        public string UnityAudioEventConfigAssetRootFolderRelativeToResources
         {
             get
             {
-                if (!didCacheUnityAudioConfigRootFolderRelativeToResources || !Application.isPlaying)
+                if (!didCacheUnityAudioEventConfigAssetRootFolderRelativeToResources || !Application.isPlaying)
                 {
-                    didCacheUnityAudioConfigRootFolderRelativeToResources = true;
+                    didCacheUnityAudioEventConfigAssetRootFolderRelativeToResources = true;
                     
-                    bool didFindValidPath = FindPathRelativeToResources(UnityAudioConfigRootFolder, out string path);
+                    bool didFindValidPath = FindPathRelativeToResources(
+                        AudioEventConfigAssetRootFolder, out string path);
                     if (!didFindValidPath)
                     {
-                        Debug.LogError($"Tried to determine Unity Audio Config Root path relative to the " +
+                        Debug.LogError($"Tried to determine Unity Audio Event Config Asset Root path relative to the " +
                                        $"Resources folder, but it seems like the specified path '{path}' is not " +
                                        $"relative to the Resources folder at all. Please review your " +
                                        $"Unity Audio Syntax Settings file.", this);
                     }
 
-                    cachedUnityAudioConfigRootFolderRelativeToResources = path;
+                    cachedUnityAudioEventConfigAssetRootFolderRelativeToResources = path;
                 }
-                return cachedUnityAudioConfigRootFolderRelativeToResources;
+                return cachedUnityAudioEventConfigAssetRootFolderRelativeToResources;
             }
         }
         
@@ -90,7 +91,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             get
             {
-                if (!didCacheInstance)
+                if (!didCacheInstance || (Application.isEditor && cachedInstance == null))
                 {
 #if UNITY_EDITOR
                     string[] guids = AssetDatabase.FindAssets($"t:{nameof(UnityAudioSyntaxSettings)}");
@@ -109,11 +110,12 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         public void InitializeFromWizard(
-            AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup, string unityAudioConfigRootFolder)
+            AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup,
+            string audioEventConfigAssetRootFolder)
         {
             this.audioSourcePooledPrefab = audioSourcePooledPrefab;
             this.defaultMixerGroup = defaultMixerGroup;
-            this.unityAudioConfigRootFolder = unityAudioConfigRootFolder;
+            this.audioEventConfigAssetRootFolder = audioEventConfigAssetRootFolder;
         }
 
         private static bool FindPathRelativeToResources(string path, out string pathRelativeToResources)
@@ -188,7 +190,7 @@ namespace RoyTheunissen.AudioSyntax
 
             string basePath = Instance == null
                 ? string.Empty
-                : Instance.UnityAudioConfigRootFolder.ToUnityPath();
+                : Instance.AudioEventConfigAssetRootFolder.ToUnityPath();
             
             if (!string.IsNullOrEmpty(basePath))
             {

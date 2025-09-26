@@ -3,18 +3,23 @@ using UnityEditor;
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
-    /// Draws a button for re-generating FMOD code.
+    /// Draws the audio event config asset root folder with a nice folder picker (this can apparently not be done
+    /// with a property drawer).
+    ///
+    /// Also helps visualize which audio event paths map to which addresses.
     /// </summary>
     [CustomEditor(typeof(UnityAudioSyntaxSettings))]
     public class UnityAudioSyntaxSettingsEditor : Editor
     {
-        private SerializedProperty unityAudioConfigRootFolderProperty;
+        private SerializedProperty audioEventConfigAssetRootFolderProperty;
         private SerializedProperty audioEventPathToAddressablePathsProperty;
 
         private void OnEnable()
         {
-            unityAudioConfigRootFolderProperty = serializedObject.FindProperty("unityAudioConfigRootFolder");
-            audioEventPathToAddressablePathsProperty = serializedObject.FindProperty("audioEventPathsToAddressablePaths");
+            audioEventConfigAssetRootFolderProperty =
+                serializedObject.FindProperty("audioEventConfigAssetRootFolder");
+            audioEventPathToAddressablePathsProperty =
+                serializedObject.FindProperty("audioEventPathsToAddressablePaths");
         }
 
         public override void OnInspectorGUI()
@@ -22,7 +27,7 @@ namespace RoyTheunissen.AudioSyntax
             base.OnInspectorGUI();
 
             serializedObject.Update();
-            this.DrawFolderPathFieldLayout(unityAudioConfigRootFolderProperty);
+            this.DrawFolderPathFieldLayout(audioEventConfigAssetRootFolderProperty);
             
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
             EditorGUILayout.Space();
