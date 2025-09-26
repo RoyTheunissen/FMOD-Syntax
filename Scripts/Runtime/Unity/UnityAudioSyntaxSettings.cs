@@ -33,6 +33,8 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField, HideInInspector] private string unityAudioConfigRootFolder;
         public string UnityAudioConfigRootFolder => unityAudioConfigRootFolder;
         
+        [SerializeField, HideInInspector] private AudioEventPathToAddress[] audioEventPathsToAddressablePaths;
+        
         [NonSerialized] private string cachedUnityAudioConfigRootFolderRelativeToResources;
         [NonSerialized] private bool didCacheUnityAudioConfigRootFolderRelativeToResources;
         public string UnityAudioConfigRootFolderRelativeToResources

@@ -55,5 +55,11 @@ namespace RoyTheunissen.AudioSyntax
             
             return parent.isArray;
         }
+        
+        public static SerializedProperty AddArrayElement(this SerializedProperty serializedProperty)
+        {
+            serializedProperty.InsertArrayElementAtIndex(serializedProperty.arraySize);
+            return serializedProperty.GetArrayElementAtIndex(serializedProperty.arraySize - 1);
+        }
     }
 }
