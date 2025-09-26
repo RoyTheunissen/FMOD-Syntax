@@ -1,5 +1,9 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace RoyTheunissen.AudioSyntax
 {
@@ -16,7 +20,7 @@ namespace RoyTheunissen.AudioSyntax
     [Serializable]
     public abstract class AudioEventConfigProperty<ValueType>
     {
-        [SerializeField] private ValueType value;
+        [SerializeField] protected ValueType value;
 
         protected AudioEventConfigProperty(ValueType defaultValue)
         {
@@ -39,6 +43,62 @@ namespace RoyTheunissen.AudioSyntax
         public AudioEventConfigPropertyFloat(float defaultValue, bool isSigned) : base(defaultValue)
         {
             this.isSigned = isSigned;
+        }
+    }
+    
+    [Serializable]
+    public sealed class AudioEventConfigPropertyAudioClips : AudioEventConfigProperty<List<AudioClipMetaData>>
+    {
+        public bool HasAnythingAssigned
+        {
+            get
+            {
+                if (value == null)
+                    return false;
+                
+                for (int i = 0; i < value.Count; i++)
+                {
+                    if (value[i] != null)
+                        return true;
+                }
+                
+                return false;
+            }
+        }
+        
+        [NonSerialized] private int lastRandomIndex;
+        
+        public AudioEventConfigPropertyAudioClips() : base(new List<AudioClipMetaData>())
+        {
+        }
+        
+        public AudioEventConfigPropertyAudioClips(List<AudioClipMetaData> defaultValue) : base(defaultValue)
+        {
+        }
+
+        public AudioClipMetaData GetAudioClipToPlay(UnityAudioPlayback playback)
+        {
+            List<AudioClipMetaData> clipsToSelectFrom = Evaluate(playback);
+            
+            if (clipsToSelectFrom.Count == 0)
+                return null;
+
+            int randomIndex = Random.Range(0, clipsToSelectFrom.Count);
+            AudioClipMetaData randomClip = clipsToSelectFrom[randomIndex];
+            
+            // If we chose the same clip twice in a row, pick either the next or previous clip instead. This helps
+            // prevent repetition of rapidly fired sound effects like footsteps.
+            if (clipsToSelectFrom.Count > 1 && randomIndex == lastRandomIndex)
+            {
+                if (Random.Range(0, 100) < 50)
+                    randomIndex = (randomIndex + 1).Modulo(clipsToSelectFrom.Count);
+                else
+                    randomIndex = (randomIndex - 1).Modulo(clipsToSelectFrom.Count);
+            }
+            
+            lastRandomIndex = randomIndex;
+            
+            return randomClip;
         }
     }
 }

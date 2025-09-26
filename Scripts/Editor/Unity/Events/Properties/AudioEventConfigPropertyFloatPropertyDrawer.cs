@@ -9,6 +9,12 @@ namespace RoyTheunissen.AudioSyntax
     [CustomPropertyDrawer(typeof(AudioEventConfigPropertyFloat))]
     public class AudioEventConfigPropertyPropertyDrawer : PropertyDrawer
     {
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            SerializedProperty valueProperty = property.FindPropertyRelative("value");
+            return EditorGUI.GetPropertyHeight(valueProperty, label, true);
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             SerializedProperty isSignedProperty = property.FindPropertyRelative("isSigned");
