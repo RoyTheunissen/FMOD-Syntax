@@ -6,6 +6,11 @@ using UnityEngine;
 using UnityEngine.Audio;
 using Object = UnityEngine.Object;
 
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+#endif // UNITY_AUDIO_SYNTAX_ADDRESSABLES
+
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
@@ -133,7 +138,17 @@ namespace RoyTheunissen.AudioSyntax
             where ConfigType : UnityAudioEventConfigAssetBase
         {
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
-            return UnityAudioEventConfigAssetBase.TryGetLoadedConfig(path, out config);
+            bool wasLoaded = UnityAudioEventConfigAssetBase.TryGetLoadedConfig(path, out config);
+            if (!wasLoaded)
+            {
+                // Now is a good time to attempt lazy loading
+                TryLoadAudioEventConfigFromAddressables<ConfigType>(
+                    path, config =>
+                    {
+                        Debug.Log($"SUCCESS! Lazily loaded Audio Event '{config}' @ '{path}'.");
+                    });
+            }
+            return wasLoaded;
 #else
             path = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolderRelativeToResources + path;
             config = Resources.Load<ConfigType>(path);
@@ -146,6 +161,37 @@ namespace RoyTheunissen.AudioSyntax
             return true;
 #endif
         }
+
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+        public delegate void AudioEventConfigLoadedAsyncHandler<ConfigType>(ConfigType config)
+            where ConfigType : UnityAudioEventConfigAssetBase;
+        
+        public static AsyncOperationHandle<ConfigType> TryLoadAudioEventConfigFromAddressables<ConfigType>(
+            string path, AudioEventConfigLoadedAsyncHandler<ConfigType> callback)
+            where ConfigType : UnityAudioEventConfigAssetBase
+        {
+            bool didFindAddress =
+                UnityAudioSyntaxSettings.Instance.GetAddressForAudioEventPath(path, out string address);
+            if (!didFindAddress)
+            {
+                Debug.LogError($"Tried to lazy load event with path '{path}' but no corresponding address was " +
+                               $"found. Something may have gone wrong with caching the addresses. It's supposed " +
+                               $"to do this automatically whenever you build Addressables. Please re-build " +
+                               $"Addressables and check the UnityAudioSyntaxSettings asset to verify that the " +
+                               $"path you're looking for is in there.");
+                return default;
+            }
+            
+            Debug.Log($"Should try and lazy load Audio Event '{path}' @ '{address}'");
+            
+            AsyncOperationHandle<ConfigType> handle = Addressables.LoadAssetAsync<ConfigType>(address);
+            if (handle.IsDone)
+                callback?.Invoke(handle.Result);
+            else
+                handle.Completed += operationHandle => callback?.Invoke(operationHandle.Result);
+            return handle;
+        }
+#endif
         
         /// <summary>
         /// Do not call this yourself. Call AudioSyntaxSystem.RegisterActiveEventPlayback instead.

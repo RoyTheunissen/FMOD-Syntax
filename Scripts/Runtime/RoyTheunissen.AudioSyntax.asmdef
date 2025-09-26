@@ -3,7 +3,9 @@
     "rootNamespace": "RoyTheunissen.AudioSyntax",
     "references": [
         "FMODUnity",
-        "BrunoMikoski.ScriptableObjectCollection"
+        "BrunoMikoski.ScriptableObjectCollection",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

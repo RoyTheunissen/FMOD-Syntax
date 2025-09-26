@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -57,6 +58,29 @@ namespace RoyTheunissen.AudioSyntax
                     cachedUnityAudioConfigRootFolderRelativeToResources = path;
                 }
                 return cachedUnityAudioConfigRootFolderRelativeToResources;
+            }
+        }
+        
+        [NonSerialized] private readonly Dictionary<string, string> cachedAudioEventPathsToAddressablePathsDictionary
+            = new();
+        [NonSerialized] private bool didCacheAudioEventPathsToAddressablePathsDictionary;
+        private Dictionary<string, string> AudioEventPathsToAddressablePathsDictionary
+        {
+            get
+            {
+                if (!didCacheAudioEventPathsToAddressablePathsDictionary)
+                {
+                    didCacheAudioEventPathsToAddressablePathsDictionary = true;
+
+                    // Format the list as a dictionary for performance.
+                    for (int i = 0; i < audioEventPathsToAddressablePaths.Length; i++)
+                    {
+                        AudioEventPathToAddress audioEventPathToAddress = audioEventPathsToAddressablePaths[i];
+                        cachedAudioEventPathsToAddressablePathsDictionary.Add(
+                            audioEventPathToAddress.AudioEventPath, audioEventPathToAddress.Address);
+                    }
+                }
+                return cachedAudioEventPathsToAddressablePathsDictionary;
             }
         }
 
@@ -134,6 +158,11 @@ namespace RoyTheunissen.AudioSyntax
             pathRelativeToResources = path;
             
             return isValid;
+        }
+
+        public bool GetAddressForAudioEventPath(string audioEventPath, out string address)
+        {
+            return AudioEventPathsToAddressablePathsDictionary.TryGetValue(audioEventPath, out address);
         }
         
 #if UNITY_EDITOR && UNITY_AUDIO_SYNTAX
