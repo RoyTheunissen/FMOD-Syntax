@@ -17,6 +17,9 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private List<AudioClipMetaData> audioClips = new List<AudioClipMetaData>();
         public List<AudioClipMetaData> AudioClips => audioClips;
 
+        [SerializeField] private AudioEventConfigPropertyFloat pitch = new(1.0f, true);
+        public AudioEventConfigPropertyFloat Pitch => pitch;
+
         [Space]
         [SerializeField] private bool randomizePitch;
         public bool RandomizePitch => randomizePitch;
@@ -85,7 +88,7 @@ namespace RoyTheunissen.AudioSyntax
                 Source.pitch = 1.0f;
             
             // Can modify the volume specifically when invoking Play and also through the audio config.
-            Source.volume = VolumeFactorOverride * Config.VolumeFactor;
+            Source.volume = VolumeFactorOverride * Config.VolumeFactor.Evaluate(this);
             
             // Don't use PlayOneShot here but actually set the clip and call Play. This way you can still modify some
             // settings on the audio source immediately afterwards and have it apply correctly to the sound, like

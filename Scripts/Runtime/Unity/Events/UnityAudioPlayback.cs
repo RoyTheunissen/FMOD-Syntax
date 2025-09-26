@@ -388,7 +388,7 @@ namespace RoyTheunissen.AudioSyntax
         
         protected void UpdateAudioSourceVolume()
         {
-            Source.volume = VolumeFactorOverride * Config.VolumeFactor * Volume;
+            Source.volume = VolumeFactorOverride * Config.VolumeFactor.Evaluate(this) * Volume;
         }
         
         protected void TryFiringRemainingEvents(

@@ -31,8 +31,8 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private AudioMixerGroup mixerGroup;
         public AudioMixerGroup MixerGroup => mixerGroup;
     
-        [SerializeField] private float volumeFactor = 1.0f;
-        public float VolumeFactor => volumeFactor;
+        [SerializeField] private AudioEventConfigPropertyFloat volumeFactor = new(1.0f, false);
+        public AudioEventConfigPropertyFloat VolumeFactor => volumeFactor;
         
 #if SCRIPTABLE_OBJECT_COLLECTION && USE_COLLECTION_ITEM_PICKER_FOR_TAGS
         [SerializeField] private CollectionItemPicker<UnityAudioTag> tags = new();
