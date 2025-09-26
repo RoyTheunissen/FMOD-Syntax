@@ -7,6 +7,7 @@ using UnityEditor;
 using System.IO;
 using System.Linq;
 using UnityEditor.Build;
+using UnityEditorInternal;
 using UnityEngine.Audio;
 
 namespace RoyTheunissen.AudioSyntax
@@ -143,6 +144,8 @@ namespace RoyTheunissen.AudioSyntax
             
             if (string.IsNullOrEmpty(generatedScriptsFolderPath))
                 generatedScriptsFolderPath = GetInferredGeneratedScriptsFolder();
+
+            shouldGenerateAssemblyDefinition = !DidFindAssemblyDefinitionInInferredScriptsFolder();
             
             if (string.IsNullOrEmpty(settingsFolderPath))
                 settingsFolderPath = GetInferredGeneralSettingsFolder();
@@ -177,6 +180,16 @@ namespace RoyTheunissen.AudioSyntax
                 unityAudioEventConfigAssetRootFolder =
                     GetInferredUnityAudioEventConfigAssetBasePathFromProjectStructure();
             }
+        }
+
+        private bool DidFindAssemblyDefinitionInInferredScriptsFolder()
+        {
+            // Check if the specified scripts folder already has an assembly definition.
+            // If so, no need to generate one ourselves.
+            string path = generatedScriptsFolderPath.AddAssetsPrefix();
+            AssemblyDefinitionAsset assemblyDefinitionFound = AsmDefUtilities.GetAsmDefInFolderOrParent(path);
+            
+            return assemblyDefinitionFound != null;
         }
 
         private static bool ShouldAudioConfigsBeInsideResourcesFolder()

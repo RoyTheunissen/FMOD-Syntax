@@ -250,6 +250,11 @@ namespace RoyTheunissen.AudioSyntax
             return text.Substring(fromIndex, toIndex - fromIndex);
         }
         
+        public static bool HasParentDirectory(this string path)
+        {
+            return path.LastIndexOfAny(DirectorySeparators) != -1;
+        }
+        
         public static string GetParentDirectory(this string path)
         {
             int lastDirectorySeparator = path.LastIndexOfAny(DirectorySeparators);
