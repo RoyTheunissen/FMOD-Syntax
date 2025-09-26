@@ -40,7 +40,7 @@ namespace RoyTheunissen.AudioSyntax
         private AudioSyntaxSystems activeSystems;
         
         private string settingsFolderPath = string.Empty;
-        private string generatedScriptsFolderPath = "Generated/Scripts/Audio";
+        private string generatedScriptsFolderPath = string.Empty;
         
         private string namespaceForGeneratedCode;
         private bool shouldGenerateAssemblyDefinition = true;
@@ -140,6 +140,12 @@ namespace RoyTheunissen.AudioSyntax
             didDetectFMOD = AssetDatabase.AssetPathExists("Assets/Plugins/FMOD");
             if (didDetectFMOD)
                 activeSystems |= AudioSyntaxSystems.FMOD;
+            
+            if (string.IsNullOrEmpty(generatedScriptsFolderPath))
+                generatedScriptsFolderPath = GetInferredGeneratedScriptsFolder();
+            
+            if (string.IsNullOrEmpty(settingsFolderPath))
+                settingsFolderPath = GetInferredGeneralSettingsFolder();
 
             detectedAudioSyntaxConfig = TryFindConfig<AudioSyntaxSettings>(
                 out didDetectAudioSyntaxConfig, out detectedAudioSyntaxConfigPath);
@@ -162,6 +168,9 @@ namespace RoyTheunissen.AudioSyntax
             }
 
             isUnityAudioSyntaxSettingsFolderValid = true;
+            
+            if (string.IsNullOrEmpty(unityAudioEventConfigAssetRootFolder))
+                createUnitySyntaxSettingsAssetResourcesFolderPath = GetInferredResourcesFolder();
 
             if (string.IsNullOrEmpty(unityAudioEventConfigAssetRootFolder))
             {
@@ -178,13 +187,86 @@ namespace RoyTheunissen.AudioSyntax
             return true;
 #endif // !UNITY_AUDIO_SYNTAX_ADDRESSABLES
         }
+
+        private static string FolderNameResources = "Resources";
+        private static string FolderNameAudio = "Audio";
+
+        private static readonly string[] FolderNamesConfiguration =
+            { "Configs", "Configuration", "Configurations", "Data", "Database" };
+
+        private static readonly string[] FolderNamesAudioSyntax =
+        {
+            "AudioSyntax", "Audio Syntax", "Audio-Syntax",
+            "UnityAudioSyntax", "Unity Audio Syntax", "Unity-Audio-Syntax",
+            "FMODSyntax", "FMOD Syntax", "FMOD-Syntax",
+            "FMODAudioSyntax", "FMOD Audio Syntax", "FMOD-Audio-Syntax"
+        };
+
+        private static string GetInferredGeneralSettingsFolder()
+        {
+            // Attempt some intelligent inference about project structure.
+            string currentPath = Application.dataPath.ToUnityPath();
+
+            EnterProjectFolderIfExists(ref currentPath);
+            
+            EnterSubdirectoryIfExists(ref currentPath, FolderNamesConfiguration);
+            
+            EnterSubdirectoryIfExists(ref currentPath, FolderNameAudio);
+
+            EnterSubdirectoryIfExists(ref currentPath, FolderNamesAudioSyntax);
+            
+            return currentPath.GetAssetsFolderRelativePath();
+        }
+        
+        private static string GetInferredGeneratedScriptsFolder()
+        {
+            // Attempt some intelligent inference about project structure.
+            string currentPath = Application.dataPath.ToUnityPath();
+
+            EnterProjectFolderIfExists(ref currentPath);
+            
+            EnterSubdirectoryIfExists(ref currentPath, "Scripts");
+            
+            AddSubdirectory(ref currentPath, "Generated");
+            
+            return currentPath.GetAssetsFolderRelativePath();
+        }
+
+        private static string GetInferredResourcesFolder()
+        {
+            // Attempt some intelligent inference about project structure.
+            string currentPath = Application.dataPath.ToUnityPath();
+
+            EnterProjectFolderIfExists(ref currentPath);
+
+            EnterSubdirectoryIfExists(ref currentPath, FolderNameResources);
+            
+            return currentPath.GetAssetsFolderRelativePath();
+        }
         
         private static string GetInferredUnityAudioEventConfigAssetBasePathFromProjectStructure()
         {
-            // No base folder was defined. Let's TRY and have some intelligent filtering.
-
+            // Attempt some intelligent inference about project structure.
             string currentPath = Application.dataPath.ToUnityPath();
 
+            EnterProjectFolderIfExists(ref currentPath);
+
+            if (ShouldAudioConfigsBeInsideResourcesFolder())
+                EnterSubdirectoryIfExists(ref currentPath, FolderNameResources);
+            
+            EnterSubdirectoryIfExists(ref currentPath, FolderNamesConfiguration);
+            
+            EnterSubdirectoryIfExists(ref currentPath, FolderNameAudio);
+
+            EnterSubdirectoryIfExists(ref currentPath, FolderNamesAudioSyntax);
+            
+            EnterSubdirectoryIfExists(ref currentPath, "Event", "Events");
+
+            return currentPath.GetAssetsFolderRelativePath();
+        }
+        
+        private static void EnterProjectFolderIfExists(ref string currentPath)
+        {
             // Check if there's a subdirectory that starts with a _ or a [. This is something Unity projects often have
             // in order to ensure that the main project files are sorted to be at the top. If we see that, it's
             // reasonable to assume that it's the main project folder.
@@ -196,42 +278,31 @@ namespace RoyTheunissen.AudioSyntax
             });
             if (!string.IsNullOrEmpty(directoryWithSymbol))
                 currentPath = directoryWithSymbol;
+        }
 
-            void EnterSubdirectoryIfExists(params string[] names)
+        private static void EnterSubdirectoryIfExists(ref string currentPath, params string[] names)
+        {
+            string[] subDirectories = Directory.GetDirectories(currentPath);
+            for (int i = 0; i < subDirectories.Length; i++)
             {
-                string[] subDirectories = Directory.GetDirectories(currentPath);
-                for (int i = 0; i < subDirectories.Length; i++)
+                string folderName = Path.GetFileName(subDirectories[i].TrimEnd(Path.AltDirectorySeparatorChar));
+                for (int j = 0; j < names.Length; j++)
                 {
-                    string folderName = Path.GetFileName(subDirectories[i].TrimEnd(Path.AltDirectorySeparatorChar));
-                    for (int j = 0; j < names.Length; j++)
+                    if (string.Equals(folderName, names[j], StringComparison.OrdinalIgnoreCase))
                     {
-                        if (string.Equals(folderName, names[j], StringComparison.OrdinalIgnoreCase))
-                        {
-                            currentPath = subDirectories[i];
-                            return;
-                        }
+                        currentPath = subDirectories[i];
+                        return;
                     }
                 }
             }
-            
-            if (ShouldAudioConfigsBeInsideResourcesFolder())
-                EnterSubdirectoryIfExists("Resources");
-            
-            EnterSubdirectoryIfExists("Configs", "Configuration", "Configurations", "Data", "Database");
-            
-            EnterSubdirectoryIfExists("Audio");
+        }
+        
+        private static void AddSubdirectory(ref string currentPath, string name)
+        {
+            if (!currentPath.EndsWith("/"))
+                currentPath += "/";
 
-            EnterSubdirectoryIfExists(
-                "AudioSyntax", "Audio Syntax", "Audio-Syntax",
-                "UnityAudioSyntax", "Unity Audio Syntax", "Unity-Audio-Syntax",
-                "FMODSyntax", "FMOD Syntax", "FMOD-Syntax",
-                "FMODAudioSyntax", "FMOD Audio Syntax", "FMOD-Audio-Syntax"
-                );
-
-            string absolutePath = currentPath;
-            string assetsFolderPath = Application.dataPath.RemoveSuffix("/");
-            string relativePath = Path.GetRelativePath(assetsFolderPath, absolutePath).ToUnityPath();
-            return relativePath;
+            currentPath += name + "/";
         }
 
         private T TryFindConfig<T>(out bool didFindConfig, out string configPath)
