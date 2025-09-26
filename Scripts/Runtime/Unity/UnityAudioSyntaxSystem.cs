@@ -129,17 +129,21 @@ namespace RoyTheunissen.AudioSyntax
 #endif // DEBUG_AUDIO_SOURCE_POOLING
         }
 
-        public static ConfigType LoadAudioEventConfigAtRuntime<ConfigType>(string path)
+        public static bool TryLoadAudioEventConfigAtRuntime<ConfigType>(string path, out ConfigType config)
             where ConfigType : UnityAudioEventConfigAssetBase
         {
-            // TODO: Support loading this via Addressables.
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
-            Debug.Log($"Supposed to load Audio Event Config Asset '{path}' from addressables...");
-
-            return UnityAudioEventConfigAssetBase.GetLoadedConfig<ConfigType>(path);
+            return UnityAudioEventConfigAssetBase.TryGetLoadedConfig(path, out config);
 #else
             path = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolderRelativeToResources + path;
-            return Resources.Load<ConfigType>(path);
+            config = Resources.Load<ConfigType>(path);
+            // Could do a null check here, but null checks are expensive and it's *supposed* to exist at this path
+            // because everything in Resources is loaded up front. In the rare event that it could not load an audio
+            // config this way, it seems fine to me to throw an NRE so you can go and fix it (most likely a path
+            // caching issue, although we have various systems in place for making sure they're automatically updated)
+            // So long story short: not worth doing costly null checks EVERY TIME to catch a very rare problem that
+            // will already be noticeable via an exception anyway.
+            return true;
 #endif
         }
         

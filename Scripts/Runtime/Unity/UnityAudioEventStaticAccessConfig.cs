@@ -35,15 +35,12 @@ namespace RoyTheunissen.AudioSyntax
     {
         [NonSerialized] private ConfigType cachedConfig;
         [NonSerialized] private bool didCacheConfig;
+        [NonSerialized] private bool configExisted;
         protected ConfigType Config
         {
             get
             {
-                if (!didCacheConfig)
-                {
-                    didCacheConfig = true;
-                    cachedConfig = LoadConfig();
-                }
+                TryLoadConfig();
                 return cachedConfig;
             }
         }
@@ -55,6 +52,18 @@ namespace RoyTheunissen.AudioSyntax
 
         public PlaybackType Play(Transform source = null)
         {
+            TryLoadConfig();
+
+            if (!configExisted)
+            {
+                Debug.LogError($"Tried to play Unity Audio Event '{Path}' from code, but it was not loaded. " +
+                               $"Make sure it's referenced in the current scene or that it's loaded via Addressables.");
+                
+                // TODO: Support lazy loading?
+                
+                return default;
+            }
+            
             return UnityAudioPlayback.Play<PlaybackType>(Config, source);
         }
 
@@ -63,9 +72,13 @@ namespace RoyTheunissen.AudioSyntax
             return Play(source);
         }
 
-        private ConfigType LoadConfig()
+        private void TryLoadConfig()
         {
-            return UnityAudioSyntaxSystem.LoadAudioEventConfigAtRuntime<ConfigType>(Path);
+            if (didCacheConfig && configExisted)
+                return;
+            
+            didCacheConfig = true;
+            configExisted = UnityAudioSyntaxSystem.TryLoadAudioEventConfigAtRuntime(Path, out cachedConfig);
         }
     }
 }

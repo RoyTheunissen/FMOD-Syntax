@@ -68,15 +68,6 @@ namespace RoyTheunissen.AudioSyntax
             if (!isActuallyPlaying)
                 return;
             
-            bool alreadyExisted = pathToAudioEventConfig.ContainsKey(Path);
-            if (alreadyExisted)
-            {
-                Debug.LogError(
-                    $"Tried to register Audio Event Config '{Path}' as loaded but an Audio Event of that " +
-                    $"type was already loaded. Something went wrong in the loading flow. Either a path was " +
-                    $"duplicated or an asset was not unregistered properly. Will override the existing config.");
-            }
-
             pathToAudioEventConfig[Path] = this;
 #if DEBUG_AUDIO_EVENT_CONFIG_LOADING
             Debug.Log($"<color=green>LOADED AUDIO EVENT '{Path}'</color>");
@@ -95,11 +86,12 @@ namespace RoyTheunissen.AudioSyntax
 #endif // DEBUG_AUDIO_EVENT_CONFIG_LOADING
         }
 
-        public static ConfigType GetLoadedConfig<ConfigType>(string path)
+        public static bool TryGetLoadedConfig<ConfigType>(string path, out ConfigType config)
             where ConfigType : UnityAudioEventConfigAssetBase
         {
-            pathToAudioEventConfig.TryGetValue(path, out UnityAudioEventConfigAssetBase result);
-            return result as ConfigType;
+            bool success = pathToAudioEventConfig.TryGetValue(path, out UnityAudioEventConfigAssetBase result);
+            config = result as ConfigType;
+            return success;
         }
 
 #if UNITY_EDITOR
