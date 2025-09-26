@@ -137,15 +137,16 @@ namespace RoyTheunissen.AudioSyntax
         public static LoadAudioEventConfigResults TryLoadAudioEventConfigAtRuntime<ConfigType>(string path, out ConfigType config)
             where ConfigType : UnityAudioEventConfigAssetBase
         {
-#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
             bool wasLoaded = UnityAudioEventConfigAssetBase.TryGetLoadedConfig(path, out config);
             if (wasLoaded)
                 return LoadAudioEventConfigResults.Success;
             
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
             return LoadAudioEventConfigResults.RequiresLazyLoading;
 #else
             path = UnityAudioSyntaxSettings.Instance.UnityAudioConfigRootFolderRelativeToResources + path;
             config = Resources.Load<ConfigType>(path);
+            
             // Could do a null check here, but null checks are expensive and it's *supposed* to exist at this path
             // because everything in Resources is loaded up front. In the rare event that it could not load an audio
             // config this way, it seems fine to me to throw an NRE so you can go and fix it (most likely a path
