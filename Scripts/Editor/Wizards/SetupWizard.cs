@@ -253,6 +253,8 @@ namespace RoyTheunissen.AudioSyntax
             
             AddSubdirectory(ref currentPath, "Generated");
             
+            AddSubdirectory(ref currentPath, FolderNameAudio);
+            
             return currentPath.GetAssetsFolderRelativePath();
         }
 
