@@ -22,7 +22,8 @@
     <img alt="tiktok" src="tiktok_dark.png" width="20" height="20" />
 </picture></a>
 
-_Audio system that generates code to allow playing audio through strongly-typed syntax. Works with both FMOD and Unity's own native audio solution._
+_Audio system that generates code to allow playing audio through strongly-typed syntax.<br/>
+Works with both FMOD and Unity's own native audio solution._
 
 ## About the Project
 
