@@ -215,6 +215,8 @@ namespace RoyTheunissen.AudioSyntax
             "FMODAudioSyntax", "FMOD Audio Syntax", "FMOD-Audio-Syntax"
         };
 
+        private static readonly string[] FoldersExcludedFromBeingProjectName = { "_TerrainAutoUpgrade" };
+
         private static string GetInferredGeneralSettingsFolder()
         {
             // Attempt some intelligent inference about project structure.
@@ -287,6 +289,21 @@ namespace RoyTheunissen.AudioSyntax
             string directoryWithSymbol = rootSubDirectories.FirstOrDefault(sd =>
             {
                 string folderName = Path.GetFileName(sd.TrimEnd(Path.AltDirectorySeparatorChar));
+
+                // Make sure that this folder isn't one that is explicitly excluded.
+                bool isExcludedFolder = false;
+                for (int i = 0; i < FoldersExcludedFromBeingProjectName.Length; i++)
+                {
+                    if (string.Equals(
+                            FoldersExcludedFromBeingProjectName[i], folderName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        isExcludedFolder = true;
+                        break;
+                    }
+                }
+                if (isExcludedFolder)
+                    return false;
+                
                 return folderName.StartsWith("_") || folderName.StartsWith("[");
             });
             if (!string.IsNullOrEmpty(directoryWithSymbol))
