@@ -37,7 +37,7 @@ It would be much nicer if they were known at compile-time, then you could refere
 AudioEvents.PlayerJump.Play(transform);
 ```
 
-This would require a little bit of code generation, and that's where `Audio-Syntax` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching audio events with parameters in as little as one line of code.
+This would require a little bit of code generation, and that's where `Audio Syntax` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching audio events with parameters in as little as one line of code.
 
 ![Example](Documentation~/Generated%20Code%20Files.png)
 
@@ -106,7 +106,7 @@ Labeled parameters are sent and received as integers, but they are associated wi
 
 ![image](https://github.com/RoyTheunissen/FMOD-Syntax/assets/3997055/280da27d-abde-4faf-b260-0a2591ea4d29)
 
-For convenience, Audio-Syntax generates an enum for every event with a labeled parameter, so auto-complete conveniently suggests all valid values when you are invoking the event.
+For convenience, Audio Syntax generates an enum for every event with a labeled parameter, so auto-complete conveniently suggests all valid values when you are invoking the event.
 
 ```cs
 AudioEvents.Footstep.Play(transform, FootstepPlayback.SurfaceValues.Generic);
@@ -145,17 +145,17 @@ AudioEvents.Jump.Play(transform, SurfaceTypes.Generic);
 The above 'Labeled parameter enums' feature now also works for the [Scriptable Object Collection](https://github.com/brunomikoski/ScriptableObjectCollection). Simply add the `[FmodLabelType]` attribute to the Scriptable Object Collection Item the same way you would with an enum.
 
 > [!IMPORTANT]  
-> If you installed Audio-Syntax or ScriptableObjectCollection to the `Assets` folder instead of via the Package Manager / in the Packages folder, a `SCRIPTABLE_OBJECT_COLLECTION` scripting define symbol will not be defined automatically and you will have to manually add this to the project settings for this feature to work._
+> If you installed Audio Syntax or ScriptableObjectCollection to the `Assets` folder instead of via the Package Manager / in the Packages folder, a `SCRIPTABLE_OBJECT_COLLECTION` scripting define symbol will not be defined automatically and you will have to manually add this to the project settings for this feature to work._
 
 
 
 ### Moving/renaming Events
-Audio-Syntax has a two-tiered solution for allowing you to move/rename events and update your code accordingly:
+Audio Syntax has a two-tiered solution for allowing you to move/rename events and update your code accordingly:
 - **Alias Generation** - When an event is detected as having been moved or renamed, 'aliases' are generated under the old name, tagged with an `[Obsolete]` attribute that informs you what the event is currently called. This causes the game to throw a compile warning everywhere that the old incorrect syntax is used, and you can copy/paste the correct name from the warning. This lets you manually migrate your event code without compile errors and with reminders for what the new syntax is.
-- **Auto-Refactoring** - When an event is detected has having been moved or renamed, you are also presented with the option to Auto-Refactor. If chosen, Audio-Syntax will look through your .cs files, find any references to the old events and automatically refactor them to use the new event syntax.
+- **Auto-Refactoring** - When an event is detected has having been moved or renamed, you are also presented with the option to Auto-Refactor. If chosen, Audio Syntax will look through your .cs files, find any references to the old events and automatically refactor them to use the new event syntax.
 
 ### Syntax Formats
-Audio-Syntax provides three syntax formats for defining events:
+Audio Syntax provides three syntax formats for defining events:
 - **Flat**: All events are defined in `AudioEvents`. Simplest / shortest syntax, but event names have to be unique.<br />
   An event called `Player/Footstep` is invoked via `AudioEvents.Footstep.Play();`
 - **Flat (With Path Included In Name)**: Slightly longer names, but event names don't have to be unique. Requested by @AldeRoberge <br/>
@@ -167,7 +167,7 @@ The default syntax is `Flat`, and you are recommended to use that and give uniqu
 
 For example, you can use the following naming convention: `Object_Event`. That way you can have a footstep event for both a player and a monster without getting a name clash, and it doesn't matter if the event is in a folder called `Core/World1/Gameplay/Characters/Enemies/Monster/Monster_Footstep`, because including all those folders in the name is cumbersome.
 
-However, as you may be integrating Audio-Syntax into an existing project and may not have the ability to affect the naming convention of events much, we recognize that different projects have different structures and you are free to choose whatever syntax suits your project best.
+However, as you may be integrating Audio Syntax into an existing project and may not have the ability to affect the naming convention of events much, we recognize that different projects have different structures and you are free to choose whatever syntax suits your project best.
 
 Switching syntax formats supports all the same migration features as renaming or moving events.
 
