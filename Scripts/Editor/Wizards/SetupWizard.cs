@@ -53,7 +53,7 @@ namespace RoyTheunissen.AudioSyntax
         private AudioSource audioSourcePooledPrefab;
         private AudioMixerGroup defaultMixerGroup;
         private string unityAudioEventConfigAssetRootFolder = string.Empty;
-        private bool unityAudioClipFoldersMirrorConfigFolders;
+        private bool unityAudioClipFoldersMirrorEventFolders;
         private string unityAudioClipRootFolder = string.Empty;
 
         private bool CanInitialize
@@ -187,7 +187,7 @@ namespace RoyTheunissen.AudioSyntax
             if (string.IsNullOrEmpty(unityAudioClipRootFolder))
             {
                 unityAudioClipRootFolder = GetInferredUnityAudioClipRootFolderFromProjectStructure();
-                unityAudioClipFoldersMirrorConfigFolders = !string.IsNullOrEmpty(unityAudioClipRootFolder);
+                unityAudioClipFoldersMirrorEventFolders = !string.IsNullOrEmpty(unityAudioClipRootFolder);
             }
         }
 
@@ -580,14 +580,14 @@ namespace RoyTheunissen.AudioSyntax
                 EditorGUILayout.Space();
 
                 // If specified, audio clips are expected to mirror the config folder structure.
-                unityAudioClipFoldersMirrorConfigFolders = EditorGUILayout.Toggle(
-                    "Audio Clip Folders Mirror Config Folders", unityAudioClipFoldersMirrorConfigFolders);
-                if (unityAudioClipFoldersMirrorConfigFolders)
+                unityAudioClipFoldersMirrorEventFolders = EditorGUILayout.Toggle(
+                    "Audio Clip Folders Mirror Event Folders", unityAudioClipFoldersMirrorEventFolders);
+                if (unityAudioClipFoldersMirrorEventFolders)
                 {
                     unityAudioClipRootFolder = this.DrawFolderPathField(
                         unityAudioClipRootFolder, "Audio Clip Root Folder",
                         "Specifies in which root folder all the Audio Clips are located. When automatically creating " +
-                        "configs for audio clips via the Create menu, the config paths are determined based on the " +
+                        "events for audio clips via the Create menu, the event paths are determined based on the " +
                         "path of the audio clip relative to this specified root folder.");
                 }
             }
@@ -716,7 +716,7 @@ namespace RoyTheunissen.AudioSyntax
 
             settings.InitializeFromWizard(
                 audioSourcePooledPrefab, defaultMixerGroup, audioEventConfigRootPath,
-                unityAudioClipFoldersMirrorConfigFolders, unityAudioClipRootFolder);
+                unityAudioClipFoldersMirrorEventFolders, unityAudioClipRootFolder);
             
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();

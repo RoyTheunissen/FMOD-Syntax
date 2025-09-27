@@ -13,7 +13,7 @@ namespace RoyTheunissen.AudioSyntax
     {
         private SerializedProperty audioEventConfigAssetRootFolderProperty;
         
-        private SerializedProperty audioClipFoldersMirrorConfigFoldersProperty;
+        private SerializedProperty audioClipFoldersMirrorEventFoldersProperty;
         private SerializedProperty audioClipRootFolderProperty;
         
         private SerializedProperty audioEventPathToAddressablePathsProperty;
@@ -23,8 +23,8 @@ namespace RoyTheunissen.AudioSyntax
             audioEventConfigAssetRootFolderProperty =
                 serializedObject.FindProperty("audioEventConfigAssetRootFolder");
 
-            audioClipFoldersMirrorConfigFoldersProperty =
-                serializedObject.FindProperty("audioClipFoldersMirrorConfigFolders");
+            audioClipFoldersMirrorEventFoldersProperty =
+                serializedObject.FindProperty("audioClipFoldersMirrorEventFolders");
             audioClipRootFolderProperty = serializedObject.FindProperty("audioClipRootFolder");
             
             audioEventPathToAddressablePathsProperty =
@@ -38,8 +38,8 @@ namespace RoyTheunissen.AudioSyntax
             serializedObject.Update();
             this.DrawFolderPathFieldLayout(audioEventConfigAssetRootFolderProperty);
 
-            EditorGUILayout.PropertyField(audioClipFoldersMirrorConfigFoldersProperty);
-            if (audioClipFoldersMirrorConfigFoldersProperty.boolValue)
+            EditorGUILayout.PropertyField(audioClipFoldersMirrorEventFoldersProperty);
+            if (audioClipFoldersMirrorEventFoldersProperty.boolValue)
                 this.DrawFolderPathFieldLayout(audioClipRootFolderProperty);
             
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES

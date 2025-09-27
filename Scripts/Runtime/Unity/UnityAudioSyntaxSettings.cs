@@ -40,8 +40,8 @@ namespace RoyTheunissen.AudioSyntax
                  "Unity Audio Event Config Assets, it will infer the correct folder to create it in by taking the " +
                  "path relative to the audio clip root folder, and then mirroring that to the audio event config " +
                  "asset root folder.")]
-        [SerializeField, HideInInspector] private bool audioClipFoldersMirrorConfigFolders;
-        public bool AudioClipFoldersMirrorConfigFolders => audioClipFoldersMirrorConfigFolders;
+        [SerializeField, HideInInspector] private bool audioClipFoldersMirrorEventFolders;
+        public bool AudioClipFoldersMirrorEventFolders => audioClipFoldersMirrorEventFolders;
 
         [Tooltip("Specifies the root folder of the audio clips. When automatically creating configs for audio clips, " +
                  "the folder structure relative to this path is mirrored relative to the audio event config asset path.")]
@@ -132,7 +132,7 @@ namespace RoyTheunissen.AudioSyntax
             this.defaultMixerGroup = defaultMixerGroup;
             this.audioEventConfigAssetRootFolder = audioEventConfigAssetRootFolder;
 
-            this.audioClipFoldersMirrorConfigFolders = audioClipFoldersMirrorConfigFolders;
+            this.audioClipFoldersMirrorEventFolders = audioClipFoldersMirrorConfigFolders;
             this.audioClipRootFolder = audioClipRootFolder;
         }
 

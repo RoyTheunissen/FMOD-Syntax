@@ -99,7 +99,7 @@ namespace RoyTheunissen.AudioSyntax
             // and let the user move it to an appropriate subfolder.
             string directoryFinal = settings.AudioEventConfigAssetRootFolder
                 .ToUnityPath().AddSuffixIfMissing("/").AddAssetsPrefix();
-            if (settings.AudioClipFoldersMirrorConfigFolders)
+            if (settings.AudioClipFoldersMirrorEventFolders)
             {
                 string prefixToRemove = UnityAudioSyntaxSettings.Instance.AudioClipRootFolder
                     .ToUnityPath().AddSuffixIfMissing("/").AddAssetsPrefix();;
