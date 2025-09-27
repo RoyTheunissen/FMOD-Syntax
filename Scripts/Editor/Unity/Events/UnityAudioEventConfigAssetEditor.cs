@@ -22,10 +22,12 @@ namespace RoyTheunissen.AudioSyntax
         }
         
         private SerializedProperty pathProperty;
+        private SerializedProperty tagsProperty;
 
         private void OnEnable()
         {
             pathProperty = serializedObject.FindProperty("path");
+            tagsProperty = serializedObject.FindProperty("tags");
         }
 
         public override void OnInspectorGUI()
@@ -83,6 +85,10 @@ namespace RoyTheunissen.AudioSyntax
             EditorGUILayout.Space();
             
             DrawPropertiesExcluding(serializedObject, "m_Script");
+            
+            EditorGUILayout.Space();
+            
+            EditorGUILayout.PropertyField(tagsProperty);
             
             serializedObject.ApplyModifiedProperties();
         }

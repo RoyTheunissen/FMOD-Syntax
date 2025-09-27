@@ -35,12 +35,12 @@ namespace RoyTheunissen.AudioSyntax
         public AudioEventConfigPropertyFloat VolumeFactor => volumeFactor;
         
 #if SCRIPTABLE_OBJECT_COLLECTION && USE_COLLECTION_ITEM_PICKER_FOR_TAGS
-        [SerializeField] private CollectionItemPicker<UnityAudioTag> tags = new();
+        [SerializeField, HideInInspector] private CollectionItemPicker<UnityAudioTag> tags = new();
 #else
         #if SCRIPTABLE_OBJECT_COLLECTION
         [SOCItemEditorOptions(ShouldDrawGotoButton = false, ShouldDrawPreviewButton = false, LabelMode = LabelMode.NoLabel)]
         #endif // SCRIPTABLE_OBJECT_COLLECTION
-        [SerializeField] private List<UnityAudioTag> tags = new();
+        [SerializeField, HideInInspector] private List<UnityAudioTag> tags = new();
 #endif
         public IList<UnityAudioTag> Tags => tags;
 
