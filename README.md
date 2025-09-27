@@ -22,7 +22,7 @@
     <img alt="tiktok" src="tiktok_dark.png" width="20" height="20" />
 </picture></a>
 
-_Generates code to allow invoking audio events with a strongly-typed syntax._
+_Audio system that generates code to allow playing audio through strongly-typed syntax. Works with both FMOD and Unity's own native audio solution._
 
 ## About the Project
 
@@ -37,7 +37,7 @@ It would be much nicer if they were known at compile-time, then you could refere
 AudioEvents.PlayerJump.Play(transform);
 ```
 
-This would require a little bit of code generation, and that's where `Audio Syntax` comes in. With a simple setup wizard and one line of code in your audio service for culling expired events you can start dispatching audio events with parameters in as little as one line of code.
+This would require a little bit of code generation, and that's where `Audio Syntax` comes in. With a simple setup wizard and one line of code in your audio service to call an Update function you can start dispatching audio events (with parameters) in as little as one line of code.
 
 ![Example](Documentation~/Generated%20Code%20Files.png)
 
