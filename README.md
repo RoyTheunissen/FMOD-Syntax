@@ -145,7 +145,7 @@ AudioEvents.Jump.Play(transform, SurfaceTypes.Generic);
 The above 'Labeled parameter enums' feature now also works for the [Scriptable Object Collection](https://github.com/brunomikoski/ScriptableObjectCollection). Simply add the `[FmodLabelType]` attribute to the Scriptable Object Collection Item the same way you would with an enum.
 
 > [!IMPORTANT]  
-> If you installed Audio Syntax or ScriptableObjectCollection to the `Assets` folder instead of via the Package Manager / in the Packages folder, a `SCRIPTABLE_OBJECT_COLLECTION` scripting define symbol will not be defined automatically and you will have to manually add this to the project settings for this feature to work._
+> If you installed Audio Syntax or ScriptableObjectCollection to the `Assets` folder instead of via the Package Manager / in the Packages folder, a `SCRIPTABLE_OBJECT_COLLECTION` scripting define symbol will not be defined automatically and you will have to manually add this to the project settings for this feature to work.
 
 
 
