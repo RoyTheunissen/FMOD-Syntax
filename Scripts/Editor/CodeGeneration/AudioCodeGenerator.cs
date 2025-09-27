@@ -794,8 +794,10 @@ namespace RoyTheunissen.AudioSyntax
                 return fmodEventFieldGenerator;
 #endif // FMOD_AUDIO_SYNTAX
             
+#if UNITY_AUDIO_SYNTAX
             if (eventDefinition is UnityAudioEventDefinition)
                 return unityEventFieldGenerator;
+#endif // UNITY_AUDIO_SYNTAX
             
             Debug.LogError($"Tried to get audio event field code generator for audio event '{eventDefinition}' " +
                            $"which is of an unknown type.");
@@ -814,8 +816,10 @@ namespace RoyTheunissen.AudioSyntax
                 return snapshotTypeGenerator;
 #endif // FMOD_AUDIO_SYNTAX
             
+#if UNITY_AUDIO_SYNTAX
             if (eventDefinition is UnityAudioEventDefinition)
                 return unityEventTypeGenerator;
+#endif // UNITY_AUDIO_SYNTAX
             
             Debug.LogError($"Tried to get audio event type code generator for audio event '{eventDefinition}' " +
                            $"which is of an unknown type.");

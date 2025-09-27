@@ -34,6 +34,7 @@ namespace RoyTheunissen.AudioSyntax
             this.modeProperty = modeProperty;
         }
 
+#if UNITY_AUDIO_SYNTAX
         private string GetDropdownPathForUnityAudioEventConfig(
             UnityAudioEventConfigAssetBase config, bool multipleAudioSystemsActive)
         {
@@ -45,6 +46,7 @@ namespace RoyTheunissen.AudioSyntax
             
             return dropdownPath;
         }
+#endif // UNITY_AUDIO_SYNTAX
 
         protected override AdvancedDropdownItem BuildRoot()
         {
