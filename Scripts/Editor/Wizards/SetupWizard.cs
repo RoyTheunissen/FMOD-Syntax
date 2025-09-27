@@ -20,8 +20,9 @@ namespace RoyTheunissen.AudioSyntax
     {
         private const int Priority = 1;
         
-        private const float Width = 500;
-        private const float Height = 602;
+        private const float Width = 600;
+        private const float Height = 650;
+        private const float ExtraLabelWidth = 100;
 
         private const string ResourcesFolderSuffix = "Resources";
         
@@ -52,6 +53,8 @@ namespace RoyTheunissen.AudioSyntax
         private AudioSource audioSourcePooledPrefab;
         private AudioMixerGroup defaultMixerGroup;
         private string unityAudioEventConfigAssetRootFolder = string.Empty;
+        private bool unityAudioClipFoldersMirrorConfigFolders;
+        private string unityAudioClipRootFolder = string.Empty;
 
         private bool CanInitialize
         {
@@ -180,6 +183,12 @@ namespace RoyTheunissen.AudioSyntax
                 unityAudioEventConfigAssetRootFolder =
                     GetInferredUnityAudioEventConfigAssetBasePathFromProjectStructure();
             }
+
+            if (string.IsNullOrEmpty(unityAudioClipRootFolder))
+            {
+                unityAudioClipRootFolder = GetInferredUnityAudioClipRootFolderFromProjectStructure();
+                unityAudioClipFoldersMirrorConfigFolders = !string.IsNullOrEmpty(unityAudioClipRootFolder);
+            }
         }
 
         private bool DidFindAssemblyDefinitionInInferredScriptsFolder()
@@ -280,6 +289,18 @@ namespace RoyTheunissen.AudioSyntax
             return currentPath.GetAssetsFolderRelativePath();
         }
         
+        private static string GetInferredUnityAudioClipRootFolderFromProjectStructure()
+        {
+            // Attempt some intelligent inference about project structure.
+            string currentPath = Application.dataPath.ToUnityPath();
+
+            EnterProjectFolderIfExists(ref currentPath);
+            
+            EnterSubdirectoryIfExists(ref currentPath, FolderNameAudio);
+
+            return currentPath.GetAssetsFolderRelativePath();
+        }
+        
         private static void EnterProjectFolderIfExists(ref string currentPath)
         {
             // Check if there's a subdirectory that starts with a _ or a [. This is something Unity projects often have
@@ -307,7 +328,7 @@ namespace RoyTheunissen.AudioSyntax
                 return folderName.StartsWith("_") || folderName.StartsWith("[");
             });
             if (!string.IsNullOrEmpty(directoryWithSymbol))
-                currentPath = directoryWithSymbol;
+                currentPath = directoryWithSymbol.ToUnityPath();
         }
 
         private static void EnterSubdirectoryIfExists(ref string currentPath, params string[] names)
@@ -320,7 +341,7 @@ namespace RoyTheunissen.AudioSyntax
                 {
                     if (string.Equals(folderName, names[j], StringComparison.OrdinalIgnoreCase))
                     {
-                        currentPath = subDirectories[i];
+                        currentPath = subDirectories[i].ToUnityPath();
                         return;
                     }
                 }
@@ -329,10 +350,7 @@ namespace RoyTheunissen.AudioSyntax
         
         private static void AddSubdirectory(ref string currentPath, string name)
         {
-            if (!currentPath.EndsWith("/"))
-                currentPath += "/";
-
-            currentPath += name + "/";
+            currentPath = currentPath.AddSuffixIfMissing("/") + name + "/";
         }
 
         private T TryFindConfig<T>(out bool didFindConfig, out string configPath)
@@ -355,6 +373,10 @@ namespace RoyTheunissen.AudioSyntax
 
         private void OnGUI()
         {
+            // Make a bit more space for the labels because some of the texts are long.
+            float labelWidthOriginal = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth += ExtraLabelWidth;
+            
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.Space();
             EditorGUILayout.BeginVertical();
@@ -396,6 +418,8 @@ namespace RoyTheunissen.AudioSyntax
             EditorGUILayout.Space();
             
             EditorGUILayout.EndHorizontal();
+            
+            EditorGUIUtility.labelWidth = labelWidthOriginal;
         }
 
         private void DrawAudioSystemSelection()
@@ -541,7 +565,7 @@ namespace RoyTheunissen.AudioSyntax
                 if (ShouldAudioConfigsBeInsideResourcesFolder())
                     tooltip += "\n\tMust be inside a Resources folder.";
                 unityAudioEventConfigAssetRootFolder = this.DrawFolderPathField(
-                    unityAudioEventConfigAssetRootFolder, "Audio Event Config Asset Root Folder", tooltip);
+                    unityAudioEventConfigAssetRootFolder, "Event Config Root Folder", tooltip);
                 EndValidityChecks();
 
                 // Draw the current Unity audio event config asset root path.
@@ -549,6 +573,20 @@ namespace RoyTheunissen.AudioSyntax
                     string relativePath = GetUnityAudioEventConfigAssetRootFolderPath();
                     string absolutePath = relativePath.GetAbsolutePath();
                     EditorGUILayout.LabelField(absolutePath, EditorStyles.wordWrappedMiniLabel);
+                }
+                
+                EditorGUILayout.Space();
+
+                // If specified, audio clips are expected to mirror the config folder structure.
+                unityAudioClipFoldersMirrorConfigFolders = EditorGUILayout.Toggle(
+                    "Audio Clip Folders Mirror Config Folders", unityAudioClipFoldersMirrorConfigFolders);
+                if (unityAudioClipFoldersMirrorConfigFolders)
+                {
+                    unityAudioClipRootFolder = this.DrawFolderPathField(
+                        unityAudioClipRootFolder, "Audio Clip Root Folder",
+                        "Specifies in which root folder all the Audio Clips are located. When automatically creating " +
+                        "configs for audio clips via the Create menu, the config paths are determined based on the " +
+                        "path of the audio clip relative to this specified root folder.");
                 }
             }
             
@@ -673,8 +711,10 @@ namespace RoyTheunissen.AudioSyntax
             UnityAudioSyntaxSettings settings = CreateScriptableObject<UnityAudioSyntaxSettings>(path, fileName);
             
             string audioEventConfigRootPath = GetUnityAudioEventConfigAssetRootFolderPath();
-            
-            settings.InitializeFromWizard(audioSourcePooledPrefab, defaultMixerGroup, audioEventConfigRootPath);
+
+            settings.InitializeFromWizard(
+                audioSourcePooledPrefab, defaultMixerGroup, audioEventConfigRootPath,
+                unityAudioClipFoldersMirrorConfigFolders, unityAudioClipRootFolder);
             
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();

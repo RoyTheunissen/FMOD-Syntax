@@ -125,11 +125,15 @@ namespace RoyTheunissen.AudioSyntax
 
         public void InitializeFromWizard(
             AudioSource audioSourcePooledPrefab, AudioMixerGroup defaultMixerGroup,
-            string audioEventConfigAssetRootFolder)
+            string audioEventConfigAssetRootFolder,
+            bool audioClipFoldersMirrorConfigFolders, string audioClipRootFolder)
         {
             this.audioSourcePooledPrefab = audioSourcePooledPrefab;
             this.defaultMixerGroup = defaultMixerGroup;
             this.audioEventConfigAssetRootFolder = audioEventConfigAssetRootFolder;
+
+            this.audioClipFoldersMirrorConfigFolders = audioClipFoldersMirrorConfigFolders;
+            this.audioClipRootFolder = audioClipRootFolder;
         }
 
         private static bool FindPathRelativeToResources(string path, out string pathRelativeToResources)
