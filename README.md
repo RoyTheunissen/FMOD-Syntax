@@ -45,15 +45,29 @@ This would require a little bit of code generation, and that's where `Audio Synt
 This setup allows events and parameters to be renamed gracefully as you can do it via your IDE, update your banks accordingly and then re-generate the code. If events are renamed in the banks and you still reference those events by their old names, warnings will be thrown to give you a chance to refactor without immediately getting compile errors.
 
 Overall this system significantly speeds up your audio implementation workflow and makes it more robust, at the expense of a little bit of boilerplate code that you won't even have to maintain yourself.
-
+<br />
+<br />
+<br />
 This system was originally built for FMOD (`FMOD Syntax`) but a system is being developed to support a similar workflow using Unity's own native audio system ([Unity Audio Syntax](https://github.com/RoyTheunissen/FMOD-Syntax/wiki/Unity-Audio-Syntax)).
 
+You can use both of these systems simultaneously when you wish to transition from one system to the other.
+<br />
+<br />
 > [!WARNING]
 > Does your project use the original `FMOD-Syntax` package and are you looking to update to `Audio-Syntax`?
 >
 > This is fully supported and there is a Migration Wizard that will do this for you automatically.
 >
 > Please see [Migrating from the original FMOD-Syntax package to Audio-Syntax](#Migrating-from-the-original-FMOD-Syntax-package-to-Audio-Syntax) for more information.
+
+> [!WARNING]
+> Are you _not_ a user of the original `FMOD-Syntax` package and not intending to use FMOD for your project?
+>
+> Please add the `UNITY_AUDIO_SYNTAX` scripting define symbol in `Project Settings / Player / Script Compilation`. This lets Audio Syntax know that you _do not_ need FMOD-Syntax fallback code.
+>
+> For the sake of making the transition easier for existing FMOD-Syntax package users, by default FMOD-Syntax fallback code is defined so that code continues to compile, so that the Setup Wizard and Migration Wizard can run and help automate certain tasks, but these fallbacks reference FMOD which you will not have in your project.
+>
+> Specifying that you are using the Unity Audio Syntax system makes this fallback code go away. This is slightly inconvenient for new non-FMOD users, but will save a great deal of hassle for the original userbase, whose interests ought to be prioritized at this time of transition.
 
 ## Getting Started
 
@@ -194,7 +208,9 @@ If you use an older version of Unity and are running into trouble, feel free to 
 
 ## Migrating from the original FMOD-Syntax package to Audio-Syntax
 
-**TO DO**
+Please use the Setup Wizard located at `Audio Syntax > Setup Wizard` which will guide you through the process of upgrading to new versions of the package.
+
+**TO DO: Information on the specific changes should users wish to transition manually**
 
 ## Known Issues
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
