@@ -94,8 +94,8 @@ namespace RoyTheunissen.AudioSyntax
             get;
         }
 
-        private bool isLazyLoading;
-        public bool IsLazyLoading => isLazyLoading;
+        private bool isLoadingAsynchronously;
+        public bool IsLoadingAsynchronously => isLoadingAsynchronously;
 
         protected float time;
         protected float timePrevious;
@@ -123,13 +123,13 @@ namespace RoyTheunissen.AudioSyntax
             CompleteInitialization(audioEventConfig);
         }
 
-        private void InitializeAsLazyLoading(Transform origin, float volumeFactorOverride)
+        private void InitializeAsLoadingAsynchronously(Transform origin, float volumeFactorOverride)
         {
             InitializeInternal(origin, volumeFactorOverride);
             
-            // Just mark the playback as being in the process of using lazy loading to load the config.
+            // Just mark the playback as being in the process of using asynchronous loading to load the config.
             // When the config is loaded, the playback is notified and its initialization will be completed.
-            isLazyLoading = true;
+            isLoadingAsynchronously = true;
         }
         
         public void CompleteInitialization(UnityAudioEventConfigAssetBase config)
@@ -142,8 +142,8 @@ namespace RoyTheunissen.AudioSyntax
             else
                 source.outputAudioMixerGroup = config.MixerGroup;
 
-            if (isLazyLoading)
-                isLazyLoading = false;
+            if (isLoadingAsynchronously)
+                isLoadingAsynchronously = false;
 
             Start();
         }
@@ -286,7 +286,7 @@ namespace RoyTheunissen.AudioSyntax
             return playback;
         }
 
-        public static PlaybackType PlayWithLazyLoading<PlaybackType>(
+        public static PlaybackType PlayWithAsynchronousLoading<PlaybackType>(
             Transform origin, float volumeFactor = 1.0f)
             where PlaybackType : UnityAudioPlayback, new()
         {
@@ -294,7 +294,7 @@ namespace RoyTheunissen.AudioSyntax
             
             // Config is not available yet and will finish loading later. Initialize a playback instance as best we can,
             // its initialization will be completed once the config has finished loading.
-            playback.InitializeAsLazyLoading(origin, volumeFactor);
+            playback.InitializeAsLoadingAsynchronously(origin, volumeFactor);
 
             return playback;
         }

@@ -21,7 +21,7 @@ namespace RoyTheunissen.AudioSyntax
         public enum LoadAudioEventConfigResults
         {
             Success,
-            RequiresLazyLoading,
+            RequiresAsynchronousLoading,
         }
         
         private Pool<AudioSource> audioSourcesPool;
@@ -142,7 +142,7 @@ namespace RoyTheunissen.AudioSyntax
                 return LoadAudioEventConfigResults.Success;
             
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
-            return LoadAudioEventConfigResults.RequiresLazyLoading;
+            return LoadAudioEventConfigResults.RequiresAsynchronousLoading;
 #else
             path = UnityAudioSyntaxSettings.Instance.UnityAudioEventConfigAssetRootFolderRelativeToResources + path;
             config = Resources.Load<ConfigType>(path);

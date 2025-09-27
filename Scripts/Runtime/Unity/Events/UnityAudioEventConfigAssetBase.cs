@@ -53,7 +53,6 @@ namespace RoyTheunissen.AudioSyntax
 
         public abstract UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f);
 
-#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
         private static readonly Dictionary<string, UnityAudioEventConfigAssetBase> pathToAudioEventConfig = new();
         
         private void OnEnable()
@@ -61,7 +60,7 @@ namespace RoyTheunissen.AudioSyntax
             bool isActuallyPlaying = Application.isPlaying;
             
 #if UNITY_EDITOR
-            if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode)
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
                 isActuallyPlaying = true;
 #endif // UNITY_EDITOR
             
@@ -93,7 +92,7 @@ namespace RoyTheunissen.AudioSyntax
             config = result as ConfigType;
             return success;
         }
-
+        
 #if UNITY_EDITOR
         [InitializeOnLoadMethod]
         static void ClearLoadedConfigs()
@@ -114,9 +113,6 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 #endif // UNITY_EDITOR
-        
-        
-#endif // UNITY_AUDIO_SYNTAX_ADDRESSABLES
     }
     
     /// <summary>

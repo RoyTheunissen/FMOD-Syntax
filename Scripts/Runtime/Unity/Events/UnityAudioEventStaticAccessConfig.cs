@@ -37,7 +37,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             NotLoaded,
             Loaded,
-            RequiresLazyLoading,
+            RequiresAsynchronousLoading,
         }
         
         [NonSerialized] private ConfigType cachedConfig;
@@ -60,9 +60,10 @@ namespace RoyTheunissen.AudioSyntax
         {
             TryLoadConfig();
 
-            if (configStatus == ConfigStatuses.RequiresLazyLoading)
+            if (configStatus == ConfigStatuses.RequiresAsynchronousLoading)
             {
-                PlaybackType placeholder = UnityAudioPlayback.PlayWithLazyLoading<PlaybackType>(source);
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+                PlaybackType placeholder = UnityAudioPlayback.PlayWithAsynchronousLoading<PlaybackType>(source);
                 
                 Debug.LogWarning($"Tried to play audio event '{Path}' via code but it was not loaded. Will load " +
                                  $"it now, but you might notice a delay. Consider grouping the audio configs and " +
@@ -77,6 +78,10 @@ namespace RoyTheunissen.AudioSyntax
                 });
 
                 return placeholder;
+#else
+                Debug.LogWarning($"Config '{Path}' seemed to require asynchronous loading but the Addressables " +
+                                 $"package was not found. Something is wrong with the project setup.");
+#endif // !UNITY_AUDIO_SYNTAX_ADDRESSABLES
             }
             
             return UnityAudioPlayback.Play<PlaybackType>(Config, source);
@@ -100,8 +105,8 @@ namespace RoyTheunissen.AudioSyntax
                     configStatus = ConfigStatuses.Loaded;
                     break;
                 
-                case UnityAudioSyntaxSystem.LoadAudioEventConfigResults.RequiresLazyLoading:
-                    configStatus = ConfigStatuses.RequiresLazyLoading;
+                case UnityAudioSyntaxSystem.LoadAudioEventConfigResults.RequiresAsynchronousLoading:
+                    configStatus = ConfigStatuses.RequiresAsynchronousLoading;
                     break;
                 
                 default:
@@ -110,4 +115,4 @@ namespace RoyTheunissen.AudioSyntax
         }
     }
 }
-#endif // !UNITY_AUDIO_SYNTAX
+#endif // UNITY_AUDIO_SYNTAX
