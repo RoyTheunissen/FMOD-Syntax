@@ -75,7 +75,7 @@ namespace RoyTheunissen.AudioSyntax
             get
             {
 #if UNITY_EDITOR
-                if (!didCacheInstance)
+                if (!didCacheInstance || cachedInstance == null)
                 {
                     string[] guids = AssetDatabase.FindAssets($"t:{nameof(AudioSyntaxSettings)}");
                     if (guids.Length > 0)
