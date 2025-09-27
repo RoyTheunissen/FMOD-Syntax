@@ -48,6 +48,13 @@ Overall this system significantly speeds up your audio implementation workflow a
 
 This system was originally built for FMOD (`FMOD Syntax`) but a system is being developed to support a similar workflow using Unity's own native audio system ([Unity Audio Syntax](https://github.com/RoyTheunissen/FMOD-Syntax/wiki/Unity-Audio-Syntax)).
 
+> [!WARNING]
+> Does your project use the original `FMOD-Syntax` package and are you looking to update to `Audio-Syntax`?
+>
+> This is fully supported and there is a Migration Wizard that will do this for you automatically.
+>
+> Please see [Migrating from the original FMOD-Syntax package to Audio-Syntax](#Migrating-from-the-original-FMOD-Syntax-package-to-Audio-Syntax) for more information.
+
 ## Getting Started
 
 - Install the package to your Unity project
@@ -183,6 +190,11 @@ Switching syntax formats supports all the same migration features as renaming or
 This system was developed for Unity 2021 and upwards, it's recommended that you use it for these versions.
 
 If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
+
+
+## Migrating from the original FMOD-Syntax package to Audio-Syntax
+
+**TO DO**
 
 ## Known Issues
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
