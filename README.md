@@ -46,6 +46,8 @@ This setup allows events and parameters to be renamed gracefully as you can do i
 
 Overall this system significantly speeds up your audio implementation workflow and makes it more robust, at the expense of a little bit of boilerplate code that you won't even have to maintain yourself.
 
+This system was originally built for FMOD (`FMOD Syntax`) but a system is being developed to support a similar workflow using Unity's own native audio system ([Unity Audio Syntax](https://github.com/RoyTheunissen/FMOD-Syntax/wiki/Unity-Audio-Syntax)).
+
 ## Getting Started
 
 - Install the package to your Unity project
