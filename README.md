@@ -49,11 +49,10 @@ Overall this system significantly speeds up your audio implementation workflow a
 ## Getting Started
 
 - Install the package to your Unity project
-- The Setup Wizard will pop up and allow you to specify where and how to create the settings file & save generated code files
-- Configure the system as desired and press Initialize
-- Use `Audio Syntax > Generate Audio Code` or `CTRL+ALT+G` to generate the audio static access code
+- Open `Audio Syntax > Setup Wizard` and set the system up to your liking.
+- Use `Audio Syntax > Generate Audio Code` to generate the audio static access code.
 - Call `AudioSyntaxSystem.Update();` in an `Update` loop somewhere. I recommend putting this in your audio service.
-- You can now fire your audio events in a strongly typed way
+- You can now fire your audio events in a strongly typed way.
 
 ## How to use
 
