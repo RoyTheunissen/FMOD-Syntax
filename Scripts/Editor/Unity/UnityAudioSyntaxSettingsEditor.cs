@@ -12,12 +12,21 @@ namespace RoyTheunissen.AudioSyntax
     public class UnityAudioSyntaxSettingsEditor : Editor
     {
         private SerializedProperty audioEventConfigAssetRootFolderProperty;
+        
+        private SerializedProperty audioClipFoldersMirrorConfigFoldersProperty;
+        private SerializedProperty audioClipRootFolderProperty;
+        
         private SerializedProperty audioEventPathToAddressablePathsProperty;
 
         private void OnEnable()
         {
             audioEventConfigAssetRootFolderProperty =
                 serializedObject.FindProperty("audioEventConfigAssetRootFolder");
+
+            audioClipFoldersMirrorConfigFoldersProperty =
+                serializedObject.FindProperty("audioClipFoldersMirrorConfigFolders");
+            audioClipRootFolderProperty = serializedObject.FindProperty("audioClipRootFolder");
+            
             audioEventPathToAddressablePathsProperty =
                 serializedObject.FindProperty("audioEventPathsToAddressablePaths");
         }
@@ -28,6 +37,10 @@ namespace RoyTheunissen.AudioSyntax
 
             serializedObject.Update();
             this.DrawFolderPathFieldLayout(audioEventConfigAssetRootFolderProperty);
+
+            EditorGUILayout.PropertyField(audioClipFoldersMirrorConfigFoldersProperty);
+            if (audioClipFoldersMirrorConfigFoldersProperty.boolValue)
+                this.DrawFolderPathFieldLayout(audioClipRootFolderProperty);
             
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
             EditorGUILayout.Space();

@@ -14,5 +14,7 @@ namespace RoyTheunissen.AudioSyntax
         
         public const string CreateUnityAudioConfig = "Audio/";
         public const string CreateSocItem = "ScriptableObject Collection/Collections/" + ProjectName + "/";
+
+        public const int CreateMenuPriority = 100;
     }
 }

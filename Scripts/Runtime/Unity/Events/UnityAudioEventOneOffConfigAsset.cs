@@ -7,7 +7,8 @@ namespace RoyTheunissen.AudioSyntax
     /// <summary>
     /// Config asset for a simple one-off audio event as played back by Unity's native audio system.
     /// </summary>
-    [CreateAssetMenu(fileName = "OneOff", menuName = AudioSyntaxMenuPaths.CreateUnityAudioConfig + "Event (One-Off)")]
+    [CreateAssetMenu(fileName = "OneOff", menuName = AudioSyntaxMenuPaths.CreateUnityAudioConfig + "Event (One-Off)",
+        order = AudioSyntaxMenuPaths.CreateMenuPriority)]
     public sealed class UnityAudioEventOneOffConfigAsset : UnityAudioEventConfigAsset<UnityAudioOneOffPlayback>
     {
         [Space]

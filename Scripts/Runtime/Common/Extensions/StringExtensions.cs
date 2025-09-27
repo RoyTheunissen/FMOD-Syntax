@@ -146,6 +146,42 @@ namespace RoyTheunissen.AudioSyntax
 
             return result;
         }
+        
+        /// <summary>
+        /// Splits up a string like Footstep_02 into Footstep_ (root) and 02 (numberSuffix).
+        /// </summary>
+        public static void GetNumberSuffix(this string name, out string root, out string numberSuffix)
+        {
+            GetNumberSuffix(name, false, out root, out numberSuffix);
+        }
+
+        /// <summary>
+        /// Splits up a string like Footstep_02 into Footstep_ (root) and 02 (numberSuffix).
+        /// </summary>
+        public static void GetNumberSuffix(
+            this string name, bool includeSeparatorsInNumber, out string root, out string numberSuffix)
+        {
+            numberSuffix = string.Empty;
+
+            if (string.IsNullOrEmpty(name))
+            {
+                root = string.Empty;
+                return;
+            }
+
+            for (int i = name.Length - 1; i >= 0; i--)
+            {
+                if (char.IsNumber(name[i]) || includeSeparatorsInNumber && (name[i] == ' ' || name[i] == '_'))
+                {
+                    numberSuffix = name[i] + numberSuffix;
+                    continue;
+                }
+
+                break;
+            }
+
+            root = name.Substring(0, name.Length - numberSuffix.Length);
+        }
 
         public static string RemovePrefix(this string name, string prefix)
         {
@@ -167,6 +203,13 @@ namespace RoyTheunissen.AudioSyntax
                 return name;
 
             return name.Substring(0, name.Length - suffix.Length);
+        }
+        
+        public static string AddSuffixIfMissing(this string text, string suffix)
+        {
+            if (!text.EndsWith(suffix))
+                text += suffix;
+            return text;
         }
 
         /// <summary>

@@ -27,12 +27,26 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private AudioMixerGroup defaultMixerGroup;
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
         
+        [Space]
         [Tooltip("Use this to specify the root folder in which all your Unity Audio Event Configs are located. " +
                  "This is used at editor time to figure out short and useful relative paths for events based on the " +
                  "folder structure. At runtime, this is used to figure out where a config is relative to the " +
                  "Resources folder so it can be loaded.")]
         [SerializeField, HideInInspector] private string audioEventConfigAssetRootFolder;
         public string AudioEventConfigAssetRootFolder => audioEventConfigAssetRootFolder;
+        
+        [Space]
+        [Tooltip("If enabled, then when you select audio clips and use the context menu to create corresponding " +
+                 "Unity Audio Event Config Assets, it will infer the correct folder to create it in by taking the " +
+                 "path relative to the audio clip root folder, and then mirroring that to the audio event config " +
+                 "asset root folder.")]
+        [SerializeField, HideInInspector] private bool audioClipFoldersMirrorConfigFolders;
+        public bool AudioClipFoldersMirrorConfigFolders => audioClipFoldersMirrorConfigFolders;
+
+        [Tooltip("Specifies the root folder of the audio clips. When automatically creating configs for audio clips, " +
+                 "the folder structure relative to this path is mirrored relative to the audio event config asset path.")]
+        [SerializeField, HideInInspector] private string audioClipRootFolder;
+        public string AudioClipRootFolder => audioClipRootFolder;
         
         [SerializeField, HideInInspector] private AudioEventPathToAddress[] audioEventPathsToAddressablePaths;
         
