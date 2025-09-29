@@ -21,7 +21,7 @@ namespace RoyTheunissen.AudioSyntax
         private const int Priority = 1;
         
         private const float Width = 600;
-        private const float Height = 650;
+        private const float Height = 690; // This needs about 40 pixels padding to make room for a warning message.
         private const float ExtraLabelWidth = 100;
 
         private const string ResourcesFolderSuffix = "Resources";
