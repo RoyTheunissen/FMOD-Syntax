@@ -7,8 +7,12 @@ namespace RoyTheunissen.AudioSyntax
 {
     public static class AsmDefUtilities
     {
-        public static  AssemblyDefinitionAsset GetAsmDefInFolder(string path)
+        public static AssemblyDefinitionAsset GetAsmDefInFolder(string path)
         {
+            // Need to check if the folder exists or we get a nasty warning in the log.
+            if (!AssetDatabase.AssetPathExists(path))
+                return null;
+            
             string[] asmDefsGuids = AssetDatabase.FindAssets("t:asmdef", new[] { path });
             for (int i = 0; i < asmDefsGuids.Length; i++)
             {
