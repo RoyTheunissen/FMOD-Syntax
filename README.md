@@ -247,14 +247,14 @@ You can check out this repository as a submodule into your project's Assets fold
 The package is available on the [openupm registry](https://openupm.com). It's recommended to install it via [openupm-cli](https://github.com/openupm/openupm-cli).
 
 ```
-openupm add com.roytheunissen.fmod-syntax
+openupm add com.roytheunissen.audio-syntax
 ```
 
 ### Manifest
 You can also install via git URL by adding this entry in your **manifest.json** (make sure to end with a comma if you're adding this at the top)
 
 ```
-"com.roytheunissen.fmod-syntax": "https://github.com/RoyTheunissen/FMOD-Syntax.git"
+"com.roytheunissen.audio-syntax": "https://github.com/RoyTheunissen/FMOD-Syntax.git"
 ```
 
 ### Unity Package Manager
