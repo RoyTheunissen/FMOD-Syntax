@@ -517,10 +517,6 @@ namespace RoyTheunissen.AudioSyntax
         private void DrawUnityAudioSpecificSettings()
         {
             BeginSettingsBox("Unity Audio Syntax Settings File");
-            
-            // TODO: REMOVE, JUST FOR TESTING
-            // didDetectUnityAudioSyntaxConfig = true;
-            // detectedUnityAudioSyntaxConfig = (Application.dataPath + "/Joe Mama.asset").ToUnityPath();
 
             if (didDetectUnityAudioSyntaxConfig)
             {
