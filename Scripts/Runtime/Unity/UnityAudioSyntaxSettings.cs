@@ -32,7 +32,7 @@ namespace RoyTheunissen.AudioSyntax
                  "This is used at editor time to figure out short and useful relative paths for events based on the " +
                  "folder structure. At runtime, this is used to figure out where a config is relative to the " +
                  "Resources folder so it can be loaded.")]
-        [SerializeField, HideInInspector] private string audioEventConfigAssetRootFolder;
+        [SerializeField, HideInInspector] private string audioEventConfigAssetRootFolder = string.Empty;
         public string AudioEventConfigAssetRootFolder => audioEventConfigAssetRootFolder;
         
         [Space]
@@ -45,7 +45,7 @@ namespace RoyTheunissen.AudioSyntax
 
         [Tooltip("Specifies the root folder of the audio clips. When automatically creating configs for audio clips, " +
                  "the folder structure relative to this path is mirrored relative to the audio event config asset path.")]
-        [SerializeField, HideInInspector] private string audioClipRootFolder;
+        [SerializeField, HideInInspector] private string audioClipRootFolder = string.Empty;
         public string AudioClipRootFolder => audioClipRootFolder;
         
         [SerializeField, HideInInspector] private AudioEventPathToAddress[] audioEventPathsToAddressablePaths;

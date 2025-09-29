@@ -29,7 +29,7 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private AudioSyntaxSystems activeSystems;
         public AudioSyntaxSystems ActiveSystems => activeSystems;
 
-        [SerializeField] private string generatedScriptsFolderPath;
+        [SerializeField] private string generatedScriptsFolderPath = string.Empty;
         public string GeneratedScriptsFolderPath
         {
             get
@@ -44,7 +44,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        [SerializeField] private string namespaceForGeneratedCode;
+        [SerializeField] private string namespaceForGeneratedCode = string.Empty;
         public string NamespaceForGeneratedCode => namespaceForGeneratedCode;
         
         [SerializeField] private bool shouldGenerateAssemblyDefinition;
