@@ -175,7 +175,7 @@ namespace RoyTheunissen.AudioSyntax
 
             isUnityAudioSyntaxSettingsFolderValid = true;
             
-            if (string.IsNullOrEmpty(unityAudioEventConfigAssetRootFolder))
+            if (string.IsNullOrEmpty(createUnitySyntaxSettingsAssetResourcesFolderPath))
                 createUnitySyntaxSettingsAssetResourcesFolderPath = GetInferredResourcesFolder();
 
             if (string.IsNullOrEmpty(unityAudioEventConfigAssetRootFolder))
