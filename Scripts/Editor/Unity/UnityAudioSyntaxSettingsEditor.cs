@@ -36,6 +36,9 @@ namespace RoyTheunissen.AudioSyntax
             base.OnInspectorGUI();
 
             serializedObject.Update();
+            
+            EditorGUILayout.Space();
+            
             this.DrawFolderPathFieldLayout(audioEventConfigAssetRootFolderProperty);
 
             EditorGUILayout.PropertyField(audioClipFoldersMirrorEventFoldersProperty);

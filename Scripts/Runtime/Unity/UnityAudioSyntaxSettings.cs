@@ -27,7 +27,6 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private AudioMixerGroup defaultMixerGroup;
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
         
-        [Space]
         [Tooltip("Use this to specify the root folder in which all your Unity Audio Event Configs are located. " +
                  "This is used at editor time to figure out short and useful relative paths for events based on the " +
                  "folder structure. At runtime, this is used to figure out where a config is relative to the " +
