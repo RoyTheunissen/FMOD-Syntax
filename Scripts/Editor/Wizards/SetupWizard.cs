@@ -677,6 +677,8 @@ namespace RoyTheunissen.AudioSyntax
 
             UpdateConfigWithSupportedAudioSystems();
             
+            AssetDatabase.Refresh();
+            
             EnsureThatScriptingDefineSymbolsAreDefined(activeSystems);
 
             if (isMigrationProcedureRequired)
@@ -732,6 +734,9 @@ namespace RoyTheunissen.AudioSyntax
             UnityAudioSyntaxSettings settings = CreateScriptableObject<UnityAudioSyntaxSettings>(path, fileName);
             
             string audioEventConfigRootPath = GetUnityAudioEventConfigAssetRootFolderPath();
+
+            Directory.CreateDirectory(audioEventConfigRootPath.GetAbsolutePath());
+            Directory.CreateDirectory(unityAudioClipRootFolder.GetAbsolutePath());
 
             settings.InitializeFromWizard(
                 audioSourcePooledPrefab, defaultMixerGroup, audioEventConfigRootPath,
