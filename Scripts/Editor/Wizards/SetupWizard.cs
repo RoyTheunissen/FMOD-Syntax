@@ -176,6 +176,10 @@ namespace RoyTheunissen.AudioSyntax
             if (didDetectFMOD)
                 activeSystems |= AudioSyntaxSystems.FMOD;
             
+            // You want to use *something* so if you don't have FMOD in your project, you probably want to use Unity
+            if (!didDetectFMOD)
+                activeSystems |= AudioSyntaxSystems.UnityNativeAudio;
+            
             if (string.IsNullOrEmpty(settingsFolderPath))
                 settingsFolderPath = GetInferredGeneralSettingsFolder();
 
