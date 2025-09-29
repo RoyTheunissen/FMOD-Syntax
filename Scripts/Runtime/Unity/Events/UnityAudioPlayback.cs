@@ -219,7 +219,7 @@ namespace RoyTheunissen.AudioSyntax
 
         protected abstract void OnCleanup();
 
-        IAudioPlayback IAudioPlayback.AddTimelineEventHandler(
+        public IAudioPlayback AddTimelineEventHandler(
             AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
         {
             if (genericEventIdToHandlers == null)
@@ -235,7 +235,7 @@ namespace RoyTheunissen.AudioSyntax
             return this;
         }
         
-        IAudioPlayback IAudioPlayback.RemoveTimelineEventHandler(
+        public IAudioPlayback RemoveTimelineEventHandler(
             AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
         {
             string id = @event.Id;
