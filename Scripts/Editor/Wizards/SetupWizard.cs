@@ -21,13 +21,18 @@ namespace RoyTheunissen.AudioSyntax
         private const int Priority = 1;
         
         private const float Width = 600;
-        private const float Height = 690; // This needs about 40 pixels padding to make room for a warning message.
+        private const float Height = 710; // This needs about 40 pixels padding to make room for a warning message.
         private const float ExtraLabelWidth = 100;
 
         private const string ResourcesFolderSuffix = "Resources";
         
         private const string FmodScriptingDefineSymbol = "FMOD_AUDIO_SYNTAX";
         private const string UnityScriptingDefineSymbol = "UNITY_AUDIO_SYNTAX";
+
+        private static readonly GUIContent IsUsingAddressablessablesLabel = new("Use Addressables", "If you intend " +
+            "to use the Addressables package to load Audio Events that are being fired from code, check this box. " +
+            "If unchecked, Audio Events must be defined inside a Resources folder, " +
+            "otherwise they can be anywhere you'd like.");
 
         [NonSerialized] private bool didDetectFMOD;
         [NonSerialized] private bool didDetectAudioSyntaxConfig;
@@ -46,6 +51,8 @@ namespace RoyTheunissen.AudioSyntax
         
         private string namespaceForGeneratedCode;
         private bool shouldGenerateAssemblyDefinition = true;
+
+        private bool isUsingAddressables;
         
         private string createUnitySyntaxSettingsAssetResourcesFolderPath = string.Empty;
         private bool isUnityAudioSyntaxSettingsFolderValid;
@@ -137,6 +144,17 @@ namespace RoyTheunissen.AudioSyntax
             setupWizard.minSize = setupWizard.maxSize = new Vector2(Width, Height);
             setupWizard.namespaceForGeneratedCode =
                 $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.Audio";
+
+            setupWizard.OnOpened();
+        }
+
+        private void OnOpened()
+        {
+            // OnEnable also runs when code is recompiled. OnOpened only runs when a user explicitly opens the window.
+            
+            #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+            isUsingAddressables = true;
+            #endif // UNITY_AUDIO_SYNTAX_ADDRESSABLES
         }
 
         private void OnEnable()
@@ -201,13 +219,9 @@ namespace RoyTheunissen.AudioSyntax
             return assemblyDefinitionFound != null;
         }
 
-        private static bool ShouldAudioConfigsBeInsideResourcesFolder()
+        private bool ShouldAudioConfigsBeInsideResourcesFolder()
         {
-#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
-            return false;
-#else
-            return true;
-#endif // !UNITY_AUDIO_SYNTAX_ADDRESSABLES
+            return !isUsingAddressables;
         }
 
         private static string FolderNameResources = "Resources";
@@ -270,7 +284,7 @@ namespace RoyTheunissen.AudioSyntax
             return currentPath.GetAssetsFolderRelativePath();
         }
         
-        private static string GetInferredUnityAudioEventConfigAssetBasePathFromProjectStructure()
+        private string GetInferredUnityAudioEventConfigAssetBasePathFromProjectStructure()
         {
             // Attempt some intelligent inference about project structure.
             string currentPath = Application.dataPath.ToUnityPath();
@@ -556,6 +570,11 @@ namespace RoyTheunissen.AudioSyntax
                     "Default Mixer Group", defaultMixerGroup, typeof(AudioMixerGroup), false);
 
                 EditorGUILayout.Space();
+
+                isUsingAddressables = EditorGUILayout.Toggle(IsUsingAddressablessablesLabel, isUsingAddressables);
+                
+                EditorGUILayout.Space();
+                
                 string hintText = $"Where do you want to keep Unity Audio Event config assets?";
                 if (ShouldAudioConfigsBeInsideResourcesFolder())
                     hintText += "\nMust be inside a Resources folder.";
@@ -641,11 +660,9 @@ namespace RoyTheunissen.AudioSyntax
         
         private string GetUnityAudioEventConfigAssetRootFolderPath()
         {
-#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
-            return unityAudioEventConfigAssetRootFolder;
-#else
-            return GetResourcesFolderPath(unityAudioEventConfigAssetRootFolder);
-#endif
+            return isUsingAddressables
+                ? unityAudioEventConfigAssetRootFolder
+                : GetResourcesFolderPath(unityAudioEventConfigAssetRootFolder);
         }
 
         private void FinalizeSetup()
