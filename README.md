@@ -63,11 +63,13 @@ You can use both of these systems simultaneously when you wish to transition fro
 > [!WARNING]
 > Are you _not_ a user of the original `FMOD-Syntax` package and not intending to use FMOD for your project?
 >
-> Please add the `UNITY_AUDIO_SYNTAX` scripting define symbol in `Project Settings / Player / Script Compilation`. This lets Audio Syntax know that you _do not_ need FMOD-Syntax fallback code.
+> Please add the `UNITY_AUDIO_SYNTAX` scripting define symbol in `Project Settings / Player / Script Compilation`.
+> 
+> This lets Audio Syntax know that you _do not_ need FMOD-Syntax fallback code.
 >
 > For the sake of making the transition easier for existing FMOD-Syntax package users, by default FMOD-Syntax fallback code is defined so that code continues to compile, so that the Setup Wizard and Migration Wizard can run and help automate certain tasks, but these fallbacks reference FMOD which you will not have in your project.
 >
-> Specifying that you are using the Unity Audio Syntax system makes this fallback code go away. This is slightly inconvenient for new non-FMOD users, but will save a great deal of hassle for the original userbase, whose interests ought to be prioritized at this time of transition.
+> Specifying that you are using the Unity Audio Syntax system makes this fallback code go away. This is slightly inconvenient for new non-FMOD users, but will save a great deal of hassle for the original userbase, and it seems only fair to prioritize them over new users, at least for a while.
 
 ## Getting Started
 
