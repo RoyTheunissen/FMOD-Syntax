@@ -19,7 +19,9 @@ namespace RoyTheunissen.AudioSyntax
     /// package. I can recommend doing it this way though.
     /// </summary>
 #if !SCRIPTABLE_OBJECT_COLLECTION
-    [CreateAssetMenu(fileName = "AudioTimelineEventId", menuName = MenuPaths.CreateScriptableObject + "Audio Timeline Event ID")]
+    [UnityEngine.CreateAssetMenu(fileName = "AudioTimelineEventId",
+        menuName = AudioSyntaxMenuPaths.CreateUnityAudioConfig + "Timeline Event ID",
+        order = AudioSyntaxMenuPaths.CreateMenuPriorityMiscellaneous)]
 #endif // !SCRIPTABLE_OBJECT_COLLECTION
     public sealed class AudioTimelineEventId : ScriptableObject
 #if SCRIPTABLE_OBJECT_COLLECTION

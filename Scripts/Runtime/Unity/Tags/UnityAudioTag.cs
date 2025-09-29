@@ -18,7 +18,9 @@ namespace RoyTheunissen.AudioSyntax
     /// package. I can recommend doing it this way though.
     /// </summary>
 #if !SCRIPTABLE_OBJECT_COLLECTION
-    [UnityEngine.CreateAssetMenu(fileName = "UnityAudioTag", menuName = MenuPaths.CreateScriptableObject + "Unity Audio Tag")]
+    [UnityEngine.CreateAssetMenu(fileName = "UnityAudioTag",
+        menuName = AudioSyntaxMenuPaths.CreateUnityAudioConfig + "Tag",
+        order = AudioSyntaxMenuPaths.CreateMenuPriorityMiscellaneous)]
 #endif // !SCRIPTABLE_OBJECT_COLLECTION
     public partial class UnityAudioTag : ScriptableObjectCollectionItem
     {
