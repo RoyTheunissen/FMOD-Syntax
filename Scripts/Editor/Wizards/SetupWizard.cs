@@ -194,7 +194,7 @@ namespace RoyTheunissen.AudioSyntax
             isUnityAudioSyntaxSettingsFolderValid = true;
             
             if (string.IsNullOrEmpty(createUnitySyntaxSettingsAssetResourcesFolderPath))
-                createUnitySyntaxSettingsAssetResourcesFolderPath = GetInferredResourcesFolder();
+                createUnitySyntaxSettingsAssetResourcesFolderPath = GetInferredUnityAudioSyntaxSettingsResourcesFolder();
 
             if (string.IsNullOrEmpty(unityAudioEventConfigAssetRootFolder))
             {
@@ -272,7 +272,7 @@ namespace RoyTheunissen.AudioSyntax
             return currentPath.GetAssetsFolderRelativePath();
         }
 
-        private static string GetInferredResourcesFolder()
+        private static string GetInferredUnityAudioSyntaxSettingsResourcesFolder()
         {
             // Attempt some intelligent inference about project structure.
             string currentPath = Application.dataPath.ToUnityPath();
