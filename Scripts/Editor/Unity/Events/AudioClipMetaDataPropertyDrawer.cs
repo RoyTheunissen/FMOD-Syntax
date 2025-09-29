@@ -10,7 +10,12 @@ namespace RoyTheunissen.AudioSyntax
     {
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return EditorGUI.GetPropertyHeight(property, label, true);
+            if (!property.isExpanded)
+                return EditorGUI.GetPropertyHeight(property, label, true);
+            
+            SerializedProperty eventsProperty = property.FindPropertyRelative("timelineEvents");
+            return RectExtensions.GetCombinedHeight(
+                EditorGUI.GetPropertyHeight(eventsProperty, label, true), EditorGUIUtility.singleLineHeight);
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
