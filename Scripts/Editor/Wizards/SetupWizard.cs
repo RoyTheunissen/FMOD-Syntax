@@ -295,12 +295,13 @@ namespace RoyTheunissen.AudioSyntax
                 EnterSubdirectoryIfExists(ref currentPath, FolderNameResources);
             
             EnterSubdirectoryIfExists(ref currentPath, FolderNamesConfiguration);
-            
-            EnterSubdirectoryIfExists(ref currentPath, FolderNameAudio);
+
+            AddSubdirectory(ref currentPath, FolderNameAudio);
 
             EnterSubdirectoryIfExists(ref currentPath, FolderNamesAudioSyntax);
             
-            EnterSubdirectoryIfExists(ref currentPath, "Event", "Events");
+            if (!EnterSubdirectoryIfExists(ref currentPath, "Event", "Events"))
+                AddSubdirectory(ref currentPath, "Events");
 
             return currentPath.GetAssetsFolderRelativePath();
         }
@@ -347,8 +348,11 @@ namespace RoyTheunissen.AudioSyntax
                 currentPath = directoryWithSymbol.ToUnityPath();
         }
 
-        private static void EnterSubdirectoryIfExists(ref string currentPath, params string[] names)
+        private static bool EnterSubdirectoryIfExists(ref string currentPath, params string[] names)
         {
+            if (!Directory.Exists(currentPath))
+                return false;
+            
             string[] subDirectories = Directory.GetDirectories(currentPath);
             for (int i = 0; i < subDirectories.Length; i++)
             {
@@ -358,10 +362,12 @@ namespace RoyTheunissen.AudioSyntax
                     if (string.Equals(folderName, names[j], StringComparison.OrdinalIgnoreCase))
                     {
                         currentPath = subDirectories[i].ToUnityPath();
-                        return;
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
         
         private static void AddSubdirectory(ref string currentPath, string name)
