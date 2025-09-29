@@ -238,6 +238,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private static string FolderNameResources = "Resources";
         private static string FolderNameAudio = "Audio";
+        private const string FolderNameGenerated = "Generated";
 
         private static readonly string[] FolderNamesConfiguration =
             { "Configs", "Configuration", "Configurations", "Data", "Database" };
@@ -276,10 +277,14 @@ namespace RoyTheunissen.AudioSyntax
             EnterProjectFolderIfExists(ref currentPath);
             
             EnterSubdirectoryIfExists(ref currentPath, "Scripts");
-            
-            AddSubdirectory(ref currentPath, "Generated");
-            
-            AddSubdirectory(ref currentPath, FolderNameAudio);
+
+            if (EnterSubdirectoryIfExists(ref currentPath, FolderNameGenerated))
+                AddSubdirectory(ref currentPath, FolderNameAudio);
+            else
+            {
+                AddSubdirectory(ref currentPath, FolderNameAudio);
+                AddSubdirectory(ref currentPath, FolderNameGenerated);
+            }
             
             return currentPath.GetAssetsFolderRelativePath();
         }
