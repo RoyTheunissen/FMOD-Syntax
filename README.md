@@ -210,9 +210,7 @@ If you use an older version of Unity and are running into trouble, feel free to 
 
 ## Migrating from the original FMOD-Syntax package to Audio-Syntax
 
-Please use the Setup Wizard located at `Audio Syntax > Setup Wizard` which will guide you through the process of upgrading to new versions of the package.
-
-**TO DO: Information on the specific changes should users wish to transition manually**
+More info on that can be found [here](https://github.com/RoyTheunissen/FMOD-Syntax/wiki/FMOD-Syntax#migrating-from-the-original-fmod-syntax-package-to-audio-syntax).
 
 ## Known Issues
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
