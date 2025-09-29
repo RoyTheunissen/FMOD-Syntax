@@ -17,7 +17,7 @@ namespace RoyTheunissen.AudioSyntax
                                               "system-agnostic types.";
 
         public override string DocumentationURL =>
-            "https://github.com/RoyTheunissen/FMOD-Syntax?tab=readme-ov-file#migration-to-audio-syntax";
+            "https://github.com/RoyTheunissen/FMOD-Syntax/wiki/FMOD-Syntax#migrating-from-the-original-fmod-syntax-package-to-audio-syntax";
 
         protected override void RegisterRefactors(List<Refactor> refactors)
         {
