@@ -75,6 +75,7 @@ You can use both of these systems simultaneously when you wish to transition fro
 
 - Install the package to your Unity project
 - Open `Audio Syntax > Setup Wizard` and set the system up to your liking.
+- If your project uses Assembly Definitions, then add a reference to `RoyTheunissen.AudioSyntax` to your assembly definition.
 - Use `Audio Syntax > Generate Audio Code` to generate the audio static access code.
 - Call `AudioSyntaxSystem.Update();` in an `Update` loop somewhere. I recommend putting this in your audio service.
 - You can now fire your audio events in a strongly typed way.
