@@ -142,8 +142,6 @@ namespace RoyTheunissen.AudioSyntax
         {
             SetupWizard setupWizard = GetWindow<SetupWizard>(true, AudioSyntaxMenuPaths.ProjectName + " Setup Wizard");
             setupWizard.minSize = setupWizard.maxSize = new Vector2(Width, Height);
-            setupWizard.namespaceForGeneratedCode =
-                $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.Audio";
 
             setupWizard.OnOpened();
         }
@@ -152,9 +150,24 @@ namespace RoyTheunissen.AudioSyntax
         {
             // OnEnable also runs when code is recompiled. OnOpened only runs when a user explicitly opens the window.
             
-            #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
             isUsingAddressables = true;
-            #endif // UNITY_AUDIO_SYNTAX_ADDRESSABLES
+#endif // UNITY_AUDIO_SYNTAX_ADDRESSABLES
+            
+            generatedScriptsFolderPath = GetInferredGeneratedScriptsFolder();
+
+            shouldGenerateAssemblyDefinition =
+                !DidFindAssemblyDefinitionInInferredScriptsFolder(out AssemblyDefinitionAsset assemblyDefinition);
+
+            const string suffix = ".Audio";
+            namespaceForGeneratedCode =
+                $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}{suffix}";
+            if (assemblyDefinition != null)
+            {
+                string rootNamespace = assemblyDefinition.GetRootNamespace();
+                if (!string.IsNullOrEmpty(rootNamespace))
+                    namespaceForGeneratedCode = rootNamespace + suffix;
+            }
         }
 
         private void OnEnable()
@@ -162,11 +175,6 @@ namespace RoyTheunissen.AudioSyntax
             didDetectFMOD = AssetDatabase.AssetPathExists("Assets/Plugins/FMOD");
             if (didDetectFMOD)
                 activeSystems |= AudioSyntaxSystems.FMOD;
-            
-            if (string.IsNullOrEmpty(generatedScriptsFolderPath))
-                generatedScriptsFolderPath = GetInferredGeneratedScriptsFolder();
-
-            shouldGenerateAssemblyDefinition = !DidFindAssemblyDefinitionInInferredScriptsFolder();
             
             if (string.IsNullOrEmpty(settingsFolderPath))
                 settingsFolderPath = GetInferredGeneralSettingsFolder();
@@ -209,14 +217,14 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 
-        private bool DidFindAssemblyDefinitionInInferredScriptsFolder()
+        private bool DidFindAssemblyDefinitionInInferredScriptsFolder(out AssemblyDefinitionAsset assemblyDefinition)
         {
             // Check if the specified scripts folder already has an assembly definition.
             // If so, no need to generate one ourselves.
             string path = generatedScriptsFolderPath.AddAssetsPrefix();
-            AssemblyDefinitionAsset assemblyDefinitionFound = AsmDefUtilities.GetAsmDefInFolderOrParent(path);
+            assemblyDefinition = AsmDefUtilities.GetAsmDefInFolderOrParent(path);
             
-            return assemblyDefinitionFound != null;
+            return assemblyDefinition != null;
         }
 
         private bool ShouldAudioConfigsBeInsideResourcesFolder()
