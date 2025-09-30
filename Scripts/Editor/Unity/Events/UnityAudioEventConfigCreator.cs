@@ -12,13 +12,16 @@ namespace RoyTheunissen.AudioSyntax
     {
         private const string ConfigExtension = ".asset";
 
-        private const string CreateConfigsFromClipsMenuText =
-            "Assets/Create/" + AudioSyntaxMenuPaths.CreateUnityAudioConfig + "Events From Selected Clips";
+        private const string BasePath = "Assets/Create/" + AudioSyntaxMenuPaths.CreateUnityAudioConfig;
+        
+        private const string CreateConfigsFromClipsMenuText = BasePath + "Events From Selected Clips";
+
+        private const string CreateOneOffEventsMenuText = BasePath + "Event (One-Off)";
+        private const string CreateLoopingEventsMenuText = BasePath + "Event (Looping)";
         
         private const int Priority = AudioSyntaxMenuPaths.CreateMenuPriority + 100;
-        
-        [MenuItem(CreateConfigsFromClipsMenuText, false, Priority)]
-        public static void CreateAudioConfigsFromClips()
+
+        private static Dictionary<string, List<AudioClip>> GetAudioClipsByNameRoot()
         {
             Dictionary<string, List<AudioClip>> audioClipsByNameRoot = new();
             
@@ -46,39 +49,43 @@ namespace RoyTheunissen.AudioSyntax
                 audioClips.Add(audioClip);
             }
 
+            return audioClipsByNameRoot;
+        }
+        
+        [MenuItem(CreateOneOffEventsMenuText, false, AudioSyntaxMenuPaths.CreateMenuPriority)]
+        public static void CreateOneOffAudioEventConfigsFromSelection()
+        {
+            Dictionary<string, List<AudioClip>> audioClipsByNameRoot = GetAudioClipsByNameRoot();
+
+            if (audioClipsByNameRoot.Count == 0)
+            {
+                ScriptableObjectUtilities.CreateScriptableObjectAtCurrentFolder<UnityAudioEventOneOffConfigAsset>(
+                    "One-Off");
+                return;
+            }
+            
             foreach (KeyValuePair<string, List<AudioClip>> kvp in audioClipsByNameRoot)
             {
-                if (audioClipsByNameRoot.Count == 1 && kvp.Value.Count == 1)
-                {
-                    int option = EditorUtility.DisplayDialogComplex(
-                        "Audio Config Creation",
-                        "What kind of audio config do you want to create?", "One-Off", "Cancel", "Looping");
-                    if (option == 0)
-                        CreateAudioOneOffConfig(kvp.Key, kvp.Value);
-                    else if (option == 2)
-                        CreateAudioLoopingConfig(kvp.Key, kvp.Value[0]);
-                    return;
-                }
-                
                 CreateAudioOneOffConfig(kvp.Key, kvp.Value);
             }
         }
-
-        [MenuItem(CreateConfigsFromClipsMenuText, true, Priority)]
-        public static bool CreateAudioConfigsFromClipsValidate()
+        
+        [MenuItem(CreateLoopingEventsMenuText, false, AudioSyntaxMenuPaths.CreateMenuPriority + 1)]
+        public static void CreateLoopingAudioEventConfigsFromSelection()
         {
-            if (UnityAudioSyntaxSettings.Instance == null)
-                return false;
+            Dictionary<string, List<AudioClip>> audioClipsByNameRoot = GetAudioClipsByNameRoot();
             
-            for (int i = 0; i < Selection.objects.Length; i++)
+            if (audioClipsByNameRoot.Count == 0)
             {
-                if (!(Selection.objects[i] is AudioClip))
-                    continue;
-
-                return true;
+                ScriptableObjectUtilities.CreateScriptableObjectAtCurrentFolder<UnityAudioEventLoopingConfigAsset>(
+                    "Looping");
+                return;
             }
 
-            return false;
+            foreach (KeyValuePair<string, List<AudioClip>> kvp in audioClipsByNameRoot)
+            {
+                CreateAudioLoopingConfig(kvp.Key, kvp.Value);
+            }
         }
 
         private static string GetConfigPath(string audioClipPath)
@@ -188,23 +195,27 @@ namespace RoyTheunissen.AudioSyntax
             CreateAudioConfig<UnityAudioEventOneOffConfigAsset>(pathRoot,
                 (config, serializedObject) =>
                 {
+                    SerializedProperty audioClipsPropertyProperty = serializedObject.FindProperty("audioClips");
+                    
                     // Now make sure the selected clips are added if they weren't already there.
                     foreach (AudioClip audioClipToAdd in audioClipsToAdd)
                     {
-                        SerializedProperty audioClipsPropertyProperty = serializedObject.FindProperty("audioClips");
                         AddAudioClipToAudioClipsProperty(audioClipsPropertyProperty, audioClipToAdd);
                     }
                 });
         }
         
-        private static void CreateAudioLoopingConfig(string pathRoot, AudioClip audioClip)
+        private static void CreateAudioLoopingConfig(string pathRoot, List<AudioClip> audioClipsToAdd)
         {
             CreateAudioConfig<UnityAudioEventLoopingConfigAsset>(pathRoot,
                 (config, serializedObject) =>
                 {
                     SerializedProperty loopingAudioClipPropertyProperty =
                         serializedObject.FindProperty("loopingAudioClips");
-                    AddAudioClipToAudioClipsProperty(loopingAudioClipPropertyProperty, audioClip);
+                    foreach (AudioClip audioClipToAdd in audioClipsToAdd)
+                    {
+                        AddAudioClipToAudioClipsProperty(loopingAudioClipPropertyProperty, audioClipToAdd);
+                    }
                 });
         }
     }

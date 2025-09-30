@@ -732,7 +732,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private void CreateAudioSyntaxSettingsFile()
         {
-            AudioSyntaxSettings settings = CreateScriptableObject<AudioSyntaxSettings>(
+            AudioSyntaxSettings settings = ScriptableObjectUtilities.CreateScriptableObject<AudioSyntaxSettings>(
                 settingsFolderPath, nameof(AudioSyntaxSettings));
             
             settings.InitializeFromWizard(
@@ -748,7 +748,8 @@ namespace RoyTheunissen.AudioSyntax
             string path = GetUnitySyntaxSettingsAssetPath().RemoveSuffix(fileName);
 
             fileName = Path.GetFileNameWithoutExtension(fileName);
-            UnityAudioSyntaxSettings settings = CreateScriptableObject<UnityAudioSyntaxSettings>(path, fileName);
+            UnityAudioSyntaxSettings settings =
+                ScriptableObjectUtilities.CreateScriptableObject<UnityAudioSyntaxSettings>(path, fileName);
             
             string audioEventConfigRootPath = GetUnityAudioEventConfigAssetRootFolderPath();
 
@@ -761,31 +762,6 @@ namespace RoyTheunissen.AudioSyntax
             
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
-        }
-
-        private static void EnsureFolderExists(string path)
-        {
-            string absolutePath = Path.Combine(Application.dataPath, path);
-
-            if (Directory.Exists(absolutePath))
-                return;
-
-            Directory.CreateDirectory(absolutePath);
-            AssetDatabase.Refresh();
-        }
-        
-        private static Type CreateScriptableObject<Type>(string path, string name)
-            where Type : ScriptableObject
-        {
-            ScriptableObject scriptableObject = CreateInstance(typeof(Type));
-            scriptableObject.name = name;
-            
-            EnsureFolderExists(path);
-
-            path = Path.Combine(path, name + ".asset");
-            AssetDatabase.CreateAsset(scriptableObject, Path.Combine("Assets", path));
-            
-            return (Type)scriptableObject;
         }
         
         private static bool IsScriptingDefineSymbolDefined(string symbol)
