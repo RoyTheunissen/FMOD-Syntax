@@ -1,6 +1,7 @@
 #if UNITY_AUDIO_SYNTAX
 
 using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -85,8 +86,8 @@ namespace RoyTheunissen.AudioSyntax
             using (new EditorGUI.DisabledScope(true))
                 EditorGUILayout.PropertyField(pathProperty);
 
-            PathStatuses pathStatus = CheckIfPathIsCorrect(
-                target as UnityAudioEventConfigAssetBase, out string expectedPath);
+            UnityAudioEventConfigAssetBase config = target as UnityAudioEventConfigAssetBase;
+            PathStatuses pathStatus = CheckIfPathIsCorrect(config, out string expectedPath);
             switch (pathStatus)
             {
                 case PathStatuses.Correct:
@@ -104,6 +105,8 @@ namespace RoyTheunissen.AudioSyntax
                                             $"specified in the Audio Syntax Settings " +
                                             $"({UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder})",
                         MessageType.Error);
+                    if (GUILayout.Button("Move To Specified Root Folder"))
+                        MoveToEventRootFolder(config);
                     if (GUILayout.Button("Open Unity Audio Syntax Settings"))
                         UnityAudioSyntaxSettings.OpenSettings();
                     break;
@@ -140,7 +143,21 @@ namespace RoyTheunissen.AudioSyntax
             
             serializedObject.ApplyModifiedProperties();
         }
-        
+
+        private void MoveToEventRootFolder(UnityAudioEventConfigAssetBase config)
+        {
+            string eventRootFolder = UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder;
+            string originalPath = AssetDatabase.GetAssetPath(config);
+            string fileName = Path.GetFileName(originalPath);
+
+            string newPath = Path.Combine(eventRootFolder, fileName).ToUnityPath().AddAssetsPrefix();
+            
+            AssetDatabase.MoveAsset(originalPath, newPath);
+            AssetDatabase.Refresh();
+            
+            EditorGUIUtility.PingObject(config);
+        }
+
         public override bool HasPreviewGUI()
         {
             return true;
