@@ -95,40 +95,47 @@ namespace RoyTheunissen.AudioSyntax
             string fileName = Path.GetFileName(audioClipPath);
             
             // Separate the config path into directory and filename.
-            string directoryOriginal = audioClipPath.Substring(0, audioClipPath.Length - fileName.Length);
+            string directoryAudioClip = audioClipPath.Substring(0, audioClipPath.Length - fileName.Length);
             
             // Clean up the filename
             fileName = Path.GetFileNameWithoutExtension(fileName).ToHumanReadable().TrimEnd();
             
             UnityAudioSyntaxSettings settings = UnityAudioSyntaxSettings.Instance;
+
+            string audioEventRootFolder = UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder
+                .ToUnityPath().AddSuffixIfMissing("/").AddAssetsPrefix();
             
             // A good fallback is to just put it in the root of the event configs folder
             // and let the user move it to an appropriate subfolder.
-            string directoryFinal = settings.AudioEventConfigAssetRootFolder
-                .ToUnityPath().AddSuffixIfMissing("/").AddAssetsPrefix();
-            if (settings.AudioClipFoldersMirrorEventFolders)
+            string directoryFinal = audioEventRootFolder;
+            if (audioClipPath.StartsWith(audioEventRootFolder))
             {
-                string prefixToRemove = UnityAudioSyntaxSettings.Instance.AudioClipRootFolder
-                    .ToUnityPath().AddSuffixIfMissing("/").AddAssetsPrefix();;
-
-                if (directoryOriginal.StartsWith(prefixToRemove))
+                // If the audio clip itself was inside the audio event root folder, then the user seems to be doing some
+                // kind of project structure where there are audio clips and then audio event next to the
+                // audio clips. That's fine, let's make the audio event next to the audio clip then.
+                directoryFinal = directoryAudioClip;
+            }
+            else if (settings.AudioClipFoldersMirrorEventFolders)
+            {
+                string directoryToRemove = UnityAudioSyntaxSettings.Instance.AudioClipRootFolder
+                    .ToUnityPath().AddAssetsPrefix().AddSuffixIfMissing("/");
+                if (directoryAudioClip.StartsWith(directoryToRemove))
                 {
-                    string directoryRelativeToAudioClipRoot = directoryOriginal.RemovePrefix(prefixToRemove);
-                    directoryFinal = Path.Combine(
-                        settings.AudioEventConfigAssetRootFolder, directoryRelativeToAudioClipRoot).ToUnityPath();
+                    string directoryRelativeToAudioClipRoot = directoryAudioClip.RemovePrefix(directoryToRemove);
+                    directoryFinal = Path.Combine(audioEventRootFolder, directoryRelativeToAudioClipRoot).ToUnityPath();
                 }
             }
 
             // Recombine them to form the final config path.
-            string configPath = (Path.Combine(directoryFinal, fileName) + ConfigExtension)
-                .ToUnityPath().AddAssetsPrefix();
+            string configPath = (Path.Combine(directoryFinal, fileName) + ConfigExtension).ToUnityPath();
             return configPath;
         }
 
-        private static void CreateAudioConfig<ConfigType>(string pathRoot, Action<ConfigType, SerializedObject> callback)
+        private static void CreateAudioConfig<ConfigType>(
+            string audioClipPath, Action<ConfigType, SerializedObject> callback)
             where ConfigType : UnityAudioEventConfigAssetBase
         {
-            string pathConfig = GetConfigPath(pathRoot);
+            string pathConfig = GetConfigPath(audioClipPath);
 
             ConfigType config = AssetDatabase.LoadAssetAtPath<ConfigType>(pathConfig);
             bool didExist = config != null;

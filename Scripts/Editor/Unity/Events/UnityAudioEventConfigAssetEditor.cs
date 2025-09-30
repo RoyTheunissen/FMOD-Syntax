@@ -202,10 +202,9 @@ namespace RoyTheunissen.AudioSyntax
 
             if (UnityAudioSyntaxSettings.Instance == null)
                 return PathStatuses.CouldntDetermineRootFolder;
-            
-            string rootFolder = UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder;
-            if (!rootFolder.EndsWith("/"))
-                rootFolder += "/";
+
+            string rootFolder =
+                UnityAudioSyntaxSettings.Instance.AudioEventConfigAssetRootFolder.AddSuffixIfMissing("/");
             
             // Check if the asset is in the specified root folder.
             if (!expectedPath.StartsWith(rootFolder))
