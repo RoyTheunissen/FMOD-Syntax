@@ -186,20 +186,51 @@ namespace RoyTheunissen.AudioSyntax
         
 #if UNITY_EDITOR && UNITY_AUDIO_SYNTAX
         private const string OpenSettingsMenuPath = AudioSyntaxMenuPaths.Root + "Open Unity Settings File";
+        private const string OpenAudioClipRootFolderMenuPath = AudioSyntaxMenuPaths.Root + "Open Audio Clip Root Folder";
+        private const string OpenAudioEventRootFolderMenuPath = AudioSyntaxMenuPaths.Root + "Open Audio Event Root Folder";
+        private const int OpenSettingsPriority = 100;
+        private const int OpenFolderPriority = OpenSettingsPriority + 1;
+
+        private static void OpenInProjectWindow(UnityEngine.Object asset)
+        {
+            Selection.activeObject = asset;
+            EditorGUIUtility.PingObject(asset);
+        }
         
-        [MenuItem(OpenSettingsMenuPath, false)]
+        private static void OpenFolder(string path)
+        {
+            UnityEngine.Object folderAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(
+                path.AddAssetsPrefix().RemoveSuffix("/"));
+            OpenInProjectWindow(folderAsset);
+        }
+        
+        [MenuItem(OpenSettingsMenuPath, false, OpenSettingsPriority)]
         public static void OpenSettings()
         {
-            Selection.activeObject = Instance;
-            EditorGUIUtility.PingObject(Instance);
+            OpenInProjectWindow(Instance);
         }
         
-        [MenuItem(OpenSettingsMenuPath, true)]
-        public static bool OpenSettingsValidation()
+        [MenuItem(OpenSettingsMenuPath, true, OpenSettingsPriority)]
+        public static bool OpenSettingsValidation() => Instance != null;
+
+        [MenuItem(OpenAudioClipRootFolderMenuPath, false, OpenFolderPriority)]
+        public static void OpenAudioClipRootFolder()
         {
-            return Instance != null;
+            OpenFolder(Instance.AudioClipRootFolder);
         }
         
+        [MenuItem(OpenAudioClipRootFolderMenuPath, true, OpenFolderPriority)]
+        public static bool OpenAudioClipRootFolderValidation() => Instance != null;
+        
+        [MenuItem(OpenAudioEventRootFolderMenuPath, false, OpenFolderPriority)]
+        public static void OpenAudioEventRootFolder()
+        {
+            OpenFolder(Instance.AudioEventConfigAssetRootFolder);
+        }
+        
+        [MenuItem(OpenAudioEventRootFolderMenuPath, true, OpenFolderPriority)]
+        public static bool OpenAudioEventRootFolderValidation() => Instance != null;
+
         public static string GetFilteredPathForUnityAudioEventConfig(UnityAudioEventConfigAssetBase config)
         {
             string assetPath = AssetDatabase.GetAssetPath(config);

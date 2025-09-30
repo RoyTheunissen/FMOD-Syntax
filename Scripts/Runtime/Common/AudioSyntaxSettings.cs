@@ -109,16 +109,17 @@ namespace RoyTheunissen.AudioSyntax
         }
         
 #if UNITY_EDITOR
+        private const int OpenSettingsPriority = 100;
         private const string OpenSettingsMenuPath = AudioSyntaxMenuPaths.Root + "Open General Settings File";
         
-        [MenuItem(OpenSettingsMenuPath, false)]
+        [MenuItem(OpenSettingsMenuPath, false, OpenSettingsPriority)]
         public static void OpenSettings()
         {
             Selection.activeObject = Instance;
             EditorGUIUtility.PingObject(Instance);
         }
         
-        [MenuItem(OpenSettingsMenuPath, true)]
+        [MenuItem(OpenSettingsMenuPath, true, OpenSettingsPriority)]
         public static bool OpenSettingsValidation()
         {
             return Instance != null;
