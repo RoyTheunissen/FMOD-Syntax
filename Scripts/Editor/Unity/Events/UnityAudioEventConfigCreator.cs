@@ -60,7 +60,7 @@ namespace RoyTheunissen.AudioSyntax
             if (audioClipsByNameRoot.Count == 0)
             {
                 ScriptableObjectUtilities.CreateScriptableObjectAtCurrentFolder<UnityAudioEventOneOffConfigAsset>(
-                    "One-Off");
+                    "One-Off", true);
                 return;
             }
             
@@ -78,7 +78,7 @@ namespace RoyTheunissen.AudioSyntax
             if (audioClipsByNameRoot.Count == 0)
             {
                 ScriptableObjectUtilities.CreateScriptableObjectAtCurrentFolder<UnityAudioEventLoopingConfigAsset>(
-                    "Looping");
+                    "Looping", true);
                 return;
             }
 
@@ -151,6 +151,8 @@ namespace RoyTheunissen.AudioSyntax
 
             EditorUtility.SetDirty(config);
             AssetDatabase.SaveAssets();
+            
+            EditorGUIUtility.PingObject(config);
         }
 
         private static void AddAudioClipToAudioClipsProperty(SerializedProperty property, AudioClip audioClip)

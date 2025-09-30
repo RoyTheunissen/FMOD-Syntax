@@ -20,7 +20,7 @@ namespace RoyTheunissen.AudioSyntax
             AssetDatabase.Refresh();
         }
         
-        public static Type CreateScriptableObject<Type>(string path, string name)
+        public static Type CreateScriptableObject<Type>(string path, string name, bool selectAfterwards = false)
             where Type : ScriptableObject
         {
             ScriptableObject scriptableObject = ScriptableObject.CreateInstance(typeof(Type));
@@ -33,21 +33,24 @@ namespace RoyTheunissen.AudioSyntax
             path = AssetDatabase.GenerateUniqueAssetPath(path);
             
             AssetDatabase.CreateAsset(scriptableObject, path);
+
+            if (selectAfterwards)
+                Selection.activeObject = scriptableObject;
             
             return (Type)scriptableObject;
         }
 
-        public static Type CreateScriptableObjectAtCurrentFolder<Type>(string name)
+        public static Type CreateScriptableObjectAtCurrentFolder<Type>(string name, bool selectAfterwards = false)
             where Type : ScriptableObject
         {
             string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-            return CreateScriptableObject<Type>(path, name);
+            return CreateScriptableObject<Type>(path, name, selectAfterwards);
         }
 
-        public static Type CreateScriptableObjectAtCurrentFolder<Type>()
+        public static Type CreateScriptableObjectAtCurrentFolder<Type>(bool selectAfterwards = false)
             where Type : ScriptableObject
         {
-            return CreateScriptableObjectAtCurrentFolder<Type>(typeof(Type).Name);
+            return CreateScriptableObjectAtCurrentFolder<Type>(typeof(Type).Name, selectAfterwards);
         }
     }
 }
