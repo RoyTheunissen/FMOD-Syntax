@@ -98,15 +98,17 @@ namespace RoyTheunissen.AudioSyntax
             
             return result;
         }
+        
+        private static float RemainderSpacing => EditorGUIUtility.standardVerticalSpacing;
 
         public static Rect GetSubRectFromLeft(this Rect rect, float width)
         {
             return new Rect(rect.x, rect.y, width, rect.height);
         }
         
-        public static Rect GetSubRectFromLeft(this Rect rect, float width, out Rect remainder)
+        public static Rect GetSubRectFromLeft(this Rect rect, float width, out Rect remainder, bool applySpacing = false)
         {
-            remainder = rect.GetSubRectFromRight(rect.width - width);
+            remainder = rect.GetSubRectFromRight(rect.width - width - (applySpacing ? RemainderSpacing : 0));
             return rect.GetSubRectFromLeft(width);
         }
         
@@ -115,9 +117,9 @@ namespace RoyTheunissen.AudioSyntax
             return new Rect(rect.xMax - width, rect.y, width, rect.height);
         }
         
-        public static Rect GetSubRectFromRight(this Rect rect, float width, out Rect remainder)
+        public static Rect GetSubRectFromRight(this Rect rect, float width, out Rect remainder, bool applySpacing = false)
         {
-            remainder = rect.GetSubRectFromLeft(rect.width - width);
+            remainder = rect.GetSubRectFromLeft(rect.width - width - (applySpacing ? RemainderSpacing : 0));
             return rect.GetSubRectFromRight(width);
         }
         
@@ -162,6 +164,17 @@ namespace RoyTheunissen.AudioSyntax
                     combinedHeight += EditorGUIUtility.standardVerticalSpacing;
             }
             return combinedHeight;
+        }
+        
+        public static float GetHeightForLines(int lineCount, bool alwaysIncludingSpacingAtEnd = false)
+        {
+            if (lineCount == 0)
+                return 0;
+            
+            if (lineCount == 1 && !alwaysIncludingSpacingAtEnd)
+                return EditorGUIUtility.singleLineHeight;
+            
+            return (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * lineCount;
         }
     }
 }

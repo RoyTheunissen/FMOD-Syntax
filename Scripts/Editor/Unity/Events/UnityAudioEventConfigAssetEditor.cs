@@ -23,11 +23,59 @@ namespace RoyTheunissen.AudioSyntax
         
         private SerializedProperty pathProperty;
         private SerializedProperty tagsProperty;
+        
+        [NonSerialized] private static GUIContent cachedPlayIcon;
+        [NonSerialized] private static bool didCachePlayIcon;
+        protected GUIContent PlayIcon
+        {
+            get
+            {
+                if (!didCachePlayIcon)
+                {
+                    didCachePlayIcon = true;
+                    cachedPlayIcon = EditorGUIUtility.IconContent("PlayButton");
+                }
+                return cachedPlayIcon;
+            }
+        }
+        
+        [NonSerialized] private static GUIContent cachedStopIcon;
+        [NonSerialized] private static bool didCacheStopIcon;
+        protected GUIContent StopIcon
+        {
+            get
+            {
+                if (!didCacheStopIcon)
+                {
+                    didCacheStopIcon = true;
+                    cachedStopIcon = EditorGUIUtility.IconContent("StopButton");
+                }
+                return cachedStopIcon;
+            }
+        }
+        
+        protected virtual int PreviewRowCount => 1;
+        protected virtual float PreviewLabelWidth => 52;
 
-        private void OnEnable()
+        protected bool isPlayingLoop;
+
+        protected virtual void OnEnable()
         {
             pathProperty = serializedObject.FindProperty("path");
             tagsProperty = serializedObject.FindProperty("tags");
+        }
+
+        protected virtual void OnDisable()
+        {
+            StopAll();
+        }
+        
+        private void StopAll(bool dontStopLoop = false)
+        {
+            EditorAudioUtilities.StopAllClips();
+            
+            if (!dontStopLoop)
+                isPlayingLoop = false;
         }
 
         public override void OnInspectorGUI()
@@ -91,6 +139,36 @@ namespace RoyTheunissen.AudioSyntax
             EditorGUILayout.PropertyField(tagsProperty);
             
             serializedObject.ApplyModifiedProperties();
+        }
+        
+        public override bool HasPreviewGUI()
+        {
+            return true;
+        }
+
+        public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
+        {
+            // Draw background
+            if (Event.current.type == EventType.Repaint)
+                background.Draw(r, false, false, false, false);
+            
+            UnityAudioEventLoopingConfigAsset config = target as UnityAudioEventLoopingConfigAsset;
+
+            const float padding = 4;
+            r.position += Vector2.one * padding;
+            r.width -= padding * 2;
+            r.height -= padding * 2;
+
+            Rect row = r.GetControlFirstRect();
+            
+            float height = RectExtensions.GetHeightForLines(PreviewRowCount);
+            row.y = r.y + r.height / 2 - height / 2;
+
+            DrawPreviewInternal(r, row);
+        }
+
+        protected virtual void DrawPreviewInternal(Rect position, Rect row)
+        {
         }
 
         private static PathStatuses CheckIfPathIsCorrect(UnityAudioEventConfigAssetBase config, out string expectedPath)
@@ -185,6 +263,56 @@ namespace RoyTheunissen.AudioSyntax
         public static PathStatuses UpdateAudioEventConfigPath(UnityAudioEventConfigAssetBase config)
         {
             return UpdateAudioEventConfigPathInternal(config, false);
+        }
+
+        protected bool DrawAudioPlayButton(
+            ref Rect row, bool isEnabled, AudioEventConfigPropertyAudioClips clips, ref AudioClip lastPlayedAudioClip,
+            ref bool didPlay, string label, bool isPlaying, bool isLoop = false)
+        {
+            bool didPress;
+
+            using (new EditorGUI.DisabledScope(!isEnabled))
+            {
+                Rect remainder = row;
+                if (!string.IsNullOrEmpty(label))
+                {
+                    Rect labelRect = row.GetSubRectFromLeft(PreviewLabelWidth, out remainder, true);
+                    EditorGUI.LabelField(labelRect, label, EditorStyles.boldLabel);
+                }
+
+                GUIContent icon = isPlaying ? StopIcon : PlayIcon;
+                Rect buttonRect = remainder.GetSubRectFromLeft(32, out remainder, true);
+                didPress = GUI.Button(buttonRect, icon, EditorStyles.miniButton);
+
+                if (didPlay)
+                    EditorGUI.ObjectField(remainder, lastPlayedAudioClip, typeof(AudioClip), false);
+            }
+
+            if (didPress)
+            {
+                if (isLoop && isPlaying)
+                {
+                    StopAll();
+                }
+                else
+                {
+                    AudioClipMetaData audioClip = clips.GetAudioClipToPlay(null);
+                    didPlay = true;
+                    lastPlayedAudioClip = audioClip;
+                    if (audioClip.AudioClip != null)
+                    {
+                        StopAll();
+                        EditorAudioUtilities.PlayClip(audioClip, isLoop);
+                    }
+
+                    if (isLoop)
+                        isPlayingLoop = true;
+                }
+            }
+
+            row = row.GetControlNextRect();
+
+            return didPress;
         }
     }
 }
