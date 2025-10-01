@@ -160,7 +160,11 @@ namespace RoyTheunissen.AudioSyntax
 
         public override bool HasPreviewGUI()
         {
+#if UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
+            return false;
+#else
             return true;
+#endif // UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
         }
 
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)

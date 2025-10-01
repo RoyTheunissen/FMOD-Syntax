@@ -17,7 +17,8 @@ namespace RoyTheunissen.AudioSyntax
         
         public static void PlayClip(AudioClip clip, bool loop = false, int startSample = 0)
         {
-#if UNITY_2020_1_OR_NEWER
+#if !UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
+    #if UNITY_2020_1_OR_NEWER
             Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
      
             Type audioUtilClass = unityEditorAssembly.GetType(AudioUtilClassName);
@@ -33,14 +34,16 @@ namespace RoyTheunissen.AudioSyntax
                 null,
                 new object[] { clip, startSample, loop }
             );
-#else
+    #else
             Debug.LogError($"Playing audio clips in Unity versions before 2020 is not currently supported.");
-#endif
+    #endif
+#endif // !UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
         }
 
         public static void StopAllClips()
         {
-#if UNITY_2020_1_OR_NEWER
+#if !UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
+    #if UNITY_2020_1_OR_NEWER
             Assembly unityEditorAssembly = typeof(AudioImporter).Assembly;
 
             Type audioUtilClass = unityEditorAssembly.GetType(AudioUtilClassName);
@@ -56,9 +59,10 @@ namespace RoyTheunissen.AudioSyntax
                 null,
                 new object[] { }
             );
-#else
+    #else
             Debug.LogError($"Stopping audio clips in Unity versions before 2020 is not currently supported.");
-#endif
+    #endif
+#endif // !UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
         }
     }
 }
