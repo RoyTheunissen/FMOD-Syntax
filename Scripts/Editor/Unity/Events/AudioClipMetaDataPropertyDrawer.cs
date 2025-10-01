@@ -8,6 +8,9 @@ namespace RoyTheunissen.AudioSyntax
     [CustomPropertyDrawer(typeof(AudioClipMetaData))]
     public class AudioClipMetaDataPropertyDrawer : PropertyDrawer
     {
+        private static readonly Color ErrorColor = Color.red;
+        private static readonly Color ErrorTextColor = Color.Lerp(Color.white, ErrorColor, 0.15f);
+        
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
             if (!property.isExpanded)
@@ -42,7 +45,20 @@ namespace RoyTheunissen.AudioSyntax
 
             // Draw the audio clip in the header.
             Rect audioClipRect = foldoutRect;
+            
+            // Audio Clips are supposed to be assigned. If they aren't, make it very clear that something is wrong.
+            Color originalBackgroundColor = GUI.backgroundColor;
+            Color originalContentColor = GUI.contentColor;
+            if (audioClipProperty.objectReferenceValue == null)
+            {
+                GUI.backgroundColor = ErrorColor;
+                GUI.contentColor = ErrorTextColor;
+            }
+            
             EditorGUI.PropertyField(audioClipRect, audioClipProperty, label);
+
+            GUI.backgroundColor = originalBackgroundColor;
+            GUI.contentColor = originalContentColor;
             
             // Draw the events below, if the header is expanded.
             if (property.isExpanded)
