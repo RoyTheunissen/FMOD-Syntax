@@ -21,18 +21,23 @@ namespace RoyTheunissen.AudioSyntax
         private const int Priority = 1;
         
         private const float Width = 600;
-        private const float Height = 710; // This needs about 40 pixels padding to make room for a warning message.
+        private const float Height = 734; // This needs about 40 pixels padding to make room for a warning message.
         private const float ExtraLabelWidth = 100;
 
         private const string ResourcesFolderSuffix = "Resources";
         
         private const string FmodScriptingDefineSymbol = "FMOD_AUDIO_SYNTAX";
         private const string UnityScriptingDefineSymbol = "UNITY_AUDIO_SYNTAX";
+        private const string UseSocItemPickerForTagsScriptingDefineSymbol = "USE_COLLECTION_ITEM_PICKER_FOR_TAGS";
 
         private static readonly GUIContent IsUsingAddressablessablesLabel = new("Use Addressables", "If you intend " +
             "to use the Addressables package to load Audio Events that are being fired from code, check this box. " +
             "If unchecked, Audio Events must be defined inside a Resources folder, " +
             "otherwise they can be anywhere you'd like.");
+        private static readonly GUIContent UseSocItemPickerForTagsLabel = new("Use SOC Item Picker for Tags",
+            "It's been detected that your project uses the Scriptable Object Collection package. If you want, you " +
+            "can use the Item Picker utility for defining tags. This way you will get a nicer interface that's " +
+            "better suited to selecting one or more tags, rather than a normal list.");
 
         [NonSerialized] private bool didDetectFMOD;
         [NonSerialized] private bool didDetectAudioSyntaxConfig;
@@ -62,6 +67,8 @@ namespace RoyTheunissen.AudioSyntax
         private string unityAudioEventConfigAssetRootFolder = string.Empty;
         private bool unityAudioClipFoldersMirrorEventFolders;
         private string unityAudioClipRootFolder = string.Empty;
+
+        private static bool shouldUseSocItemPickerForTags;
 
         private bool CanInitialize
         {
@@ -219,6 +226,12 @@ namespace RoyTheunissen.AudioSyntax
                 unityAudioClipRootFolder = GetInferredUnityAudioClipRootFolderFromProjectStructure();
                 unityAudioClipFoldersMirrorEventFolders = !string.IsNullOrEmpty(unityAudioClipRootFolder);
             }
+            
+#if SCRIPTABLE_OBJECT_COLLECTION
+            shouldUseSocItemPickerForTags = true;
+#else
+            shouldUseSocItemPickerForTags = false; 
+#endif
         }
 
         private bool DidFindAssemblyDefinitionInInferredScriptsFolder(out AssemblyDefinitionAsset assemblyDefinition)
@@ -592,6 +605,11 @@ namespace RoyTheunissen.AudioSyntax
 
                 isUsingAddressables = EditorGUILayout.Toggle(IsUsingAddressablessablesLabel, isUsingAddressables);
                 
+#if SCRIPTABLE_OBJECT_COLLECTION
+                shouldUseSocItemPickerForTags = EditorGUILayout.Toggle(
+                    UseSocItemPickerForTagsLabel, shouldUseSocItemPickerForTags); 
+#endif
+                
                 EditorGUILayout.Space();
                 
                 string hintText = $"Where do you want to keep Unity Audio Event config assets?";
@@ -788,7 +806,9 @@ namespace RoyTheunissen.AudioSyntax
                 FmodScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.FMOD));
             bool isUnityCorrect = IsScriptingDefineSymbolCorrect(
                 UnityScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.UnityNativeAudio));
-            return isFmodCorrect || isUnityCorrect;
+            bool socPickerCorrect = IsScriptingDefineSymbolCorrect(
+                UseSocItemPickerForTagsScriptingDefineSymbol, shouldUseSocItemPickerForTags);
+            return isFmodCorrect && isUnityCorrect && socPickerCorrect;
         }
 
         private static bool AddScriptingDefineSymbol(string symbol)
@@ -835,6 +855,7 @@ namespace RoyTheunissen.AudioSyntax
         {
             SetScriptingDefineSymbol(FmodScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.FMOD));
             SetScriptingDefineSymbol(UnityScriptingDefineSymbol, systems.HasFlag(AudioSyntaxSystems.UnityNativeAudio));
+            SetScriptingDefineSymbol(UseSocItemPickerForTagsScriptingDefineSymbol, shouldUseSocItemPickerForTags);
         }
     }
 }
