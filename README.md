@@ -58,7 +58,7 @@ You can use both of these systems simultaneously when you wish to transition fro
 >
 > This is fully supported and there is a Migration Wizard that will do this for you automatically.
 >
-> Please see [Migrating from the original FMOD-Syntax package to Audio-Syntax](#Migrating-from-the-original-FMOD-Syntax-package-to-Audio-Syntax) for more information.
+> Please see [the wiki](https://github.com/RoyTheunissen/FMOD-Syntax/wiki/FMOD-Syntax#migrating-from-the-original-fmod-syntax-package-to-audio-syntax) for more information.
 
 > [!WARNING]
 > Are you _not_ a user of the original `FMOD-Syntax` package and not intending to use FMOD for your project?
@@ -208,10 +208,6 @@ This system was developed for Unity 2021 and upwards, it's recommended that you 
 
 If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
 
-
-## Migrating from the original FMOD-Syntax package to Audio-Syntax
-
-More info on that can be found [here](https://github.com/RoyTheunissen/FMOD-Syntax/wiki/FMOD-Syntax#migrating-from-the-original-fmod-syntax-package-to-audio-syntax).
 
 ## Known Issues
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
