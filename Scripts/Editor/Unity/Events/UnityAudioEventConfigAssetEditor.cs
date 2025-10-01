@@ -73,7 +73,7 @@ namespace RoyTheunissen.AudioSyntax
         
         private void StopAll(bool dontStopLoop = false)
         {
-            EditorAudioUtilities.StopAllClips();
+            AudioSyntaxSystem.StopAllActiveEventPlaybacks();
             
             if (!dontStopLoop)
                 isPlayingLoop = false;
@@ -163,7 +163,7 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
             return false;
 #else
-            return true;
+            return !Application.isPlaying;
 #endif // UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
         }
 
@@ -286,7 +286,7 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         protected bool DrawAudioPlayButton(
-            ref Rect row, bool isEnabled, AudioEventConfigPropertyAudioClips clips, ref AudioClip lastPlayedAudioClip,
+            ref Rect row, bool isEnabled, UnityAudioEventConfigAssetBase config, ref AudioClip lastPlayedAudioClip,
             ref bool didPlay, string label, bool isPlaying, bool isLoop = false)
         {
             bool didPress;
@@ -316,14 +316,10 @@ namespace RoyTheunissen.AudioSyntax
                 }
                 else
                 {
-                    AudioClipMetaData audioClip = clips.GetAudioClipToPlay(null);
                     didPlay = true;
-                    lastPlayedAudioClip = audioClip;
-                    if (audioClip.AudioClip != null)
-                    {
-                        StopAll();
-                        EditorAudioUtilities.PlayClip(audioClip, isLoop);
-                    }
+                    
+                    StopAll();
+                    config.PlayGeneric();
 
                     if (isLoop)
                         isPlayingLoop = true;

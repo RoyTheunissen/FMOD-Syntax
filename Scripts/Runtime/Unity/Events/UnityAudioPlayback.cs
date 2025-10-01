@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
@@ -103,6 +107,13 @@ namespace RoyTheunissen.AudioSyntax
         protected float normalizedProgress;
         public float NormalizedProgress => normalizedProgress;
         
+#if UNITY_EDITOR
+        private double lastEditorUpdateTime;
+#endif // UNITY_EDITOR
+        
+        private float deltaTime;
+        protected float DeltaTime => deltaTime;
+
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
 
         private void InitializeInternal(Transform origin, float volumeFactorOverride)
@@ -159,6 +170,10 @@ namespace RoyTheunissen.AudioSyntax
                 return;
             
             isPlaying = true;
+            
+#if UNITY_EDITOR
+            lastEditorUpdateTime = EditorApplication.timeSinceStartup;
+#endif
 
             OnStart();
         }
@@ -167,7 +182,17 @@ namespace RoyTheunissen.AudioSyntax
         
         public virtual void Update()
         {
+            deltaTime = Time.deltaTime;
             
+#if UNITY_EDITOR
+            // Keep track of Delta Time in a way that works in the editor.
+            // This is necessary for being able to play back audio previews.
+            if (!Application.isPlaying)
+            {
+                deltaTime = (float)(EditorApplication.timeSinceStartup - lastEditorUpdateTime);
+                lastEditorUpdateTime = EditorApplication.timeSinceStartup;
+            }
+#endif
         }
 
         /// <summary>

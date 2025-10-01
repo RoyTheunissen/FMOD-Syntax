@@ -63,7 +63,7 @@ namespace RoyTheunissen.AudioSyntax
             
             float duration = Source.clip.length;
             
-            time += Time.deltaTime;
+            time += DeltaTime;
             
             normalizedProgress = (time / duration).Saturate();
 

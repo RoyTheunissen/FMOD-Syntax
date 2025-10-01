@@ -6,6 +6,10 @@ using UnityEngine;
 using UnityEngine.Audio;
 using Object = UnityEngine.Object;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif // #if UNITY_EDITOR
+
 #if UNITY_AUDIO_SYNTAX_ADDRESSABLES
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -66,10 +70,36 @@ namespace RoyTheunissen.AudioSyntax
         }
         
 #if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
+        private const string EditorTimeAudioSourceName = "AUDIOSYNTAX_EDITOR_TIME_AUDIOSOURCE";
+        
+        [InitializeOnLoadMethod]
         private static void EditorInitializeOnload()
         {
             onEventPlaybackCallbackReceivers.Clear();
+            
+            EditorApplication.update -= OnEditorUpdate;
+            EditorApplication.update += OnEditorUpdate;
+
+            // Necessary otherwise it's easy for these to get lost and pile up.
+            ClearExistingEditorTimeAudioSources();
+        }
+
+        private static void ClearExistingEditorTimeAudioSources()
+        {
+            AudioSource[] allAudioSources = Resources.FindObjectsOfTypeAll<AudioSource>();
+            for (int i = 0; i < allAudioSources.Length; i++)
+            {
+                if (string.Equals(
+                        allAudioSources[i].name, EditorTimeAudioSourceName, StringComparison.OrdinalIgnoreCase))
+                {
+                    Object.DestroyImmediate(allAudioSources[i].gameObject);
+                }
+            }
+        }
+        
+        private static void OnEditorUpdate()
+        {
+            AudioSyntaxSystem.Update();
         }
 #endif // UNITY_EDITOR
         
@@ -84,16 +114,35 @@ namespace RoyTheunissen.AudioSyntax
 
             this.audioSourcePooledPrefab = UnityAudioSyntaxSettings.Instance.AudioSourcePooledPrefab;
             this.defaultMixerGroup = UnityAudioSyntaxSettings.Instance.DefaultMixerGroup;
-            
+
+            int defaultCapacity = 4;
+#if UNITY_EDITOR
+            defaultCapacity = 0;
+#endif
+
             audioSourcesPool = new Pool<AudioSource>(() =>
             {
-                AudioSource audioSource = Object.Instantiate(audioSourcePooledPrefab, AudioSourceContainer);
+                Transform container = Application.isPlaying ? AudioSourceContainer : null;
+                AudioSource audioSource = Object.Instantiate(audioSourcePooledPrefab, container);
 
 #if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
                 audioSource.name = "AudioSource - (Unused)";
 #endif
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    audioSource.gameObject.hideFlags |= HideFlags.DontSave | HideFlags.NotEditable;
+                    
+#if !UNITY_AUDIO_SYNTAX_DEBUG_EDITOR_TIME_PLAYBACK
+                    audioSource.gameObject.hideFlags |= HideFlags.HideInHierarchy;
+#endif // !UNITY_AUDIO_SYNTAX_DEBUG_EDITOR_TIME_PLAYBACK
+                    
+                    audioSource.name = EditorTimeAudioSourceName;
+                }
+#endif // UNITY_EDITOR
+                
                 return audioSource;
-            });
+            }, null, null, null, defaultCapacity);
         }
         
         public void Update()

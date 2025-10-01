@@ -21,7 +21,7 @@ namespace RoyTheunissen.AudioSyntax
             UnityAudioEventOneOffConfigAsset config = target as UnityAudioEventOneOffConfigAsset;
 
             DrawAudioPlayButton(
-                ref row, true, config.AudioClips, ref lastPreviewedAudioClip, ref didPlayAudioClip, "One-Off", false);
+                ref row, true, config, ref lastPreviewedAudioClip, ref didPlayAudioClip, "One-Off", false);
         }
     }
 }

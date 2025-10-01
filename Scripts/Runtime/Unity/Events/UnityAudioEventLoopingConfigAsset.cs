@@ -145,9 +145,9 @@ namespace RoyTheunissen.AudioSyntax
             if (Config.StartAudio.ShouldPlay)
             {
                 // NOTE: Can't use the super accurate Source.timeSamples approach because there is no dedicated
-                // Audio Source to get this value from. Just use Time.deltaTime, it's probably good enough.
+                // Audio Source to get this value from. Just use DeltaTime, it's probably good enough.
                 float startAudioTimePrevious = startAudioTime;
-                startAudioTime += Time.deltaTime;
+                startAudioTime += DeltaTime;
                 
                 if (hasStartAudioTimelineEvents)
                     TryFiringRemainingEvents(startAudioTimelineEvents, startAudioTimePrevious, startAudioTime);
@@ -158,9 +158,9 @@ namespace RoyTheunissen.AudioSyntax
             if (Config.EndAudio.ShouldPlay && waitForEndSoundToFinish)
             {
                 // NOTE: Can't use the super accurate Source.timeSamples approach because there is no dedicated
-                // Audio Source to get this value from. Just use Time.deltaTime, it's probably good enough.
+                // Audio Source to get this value from. Just use DeltaTime, it's probably good enough.
                 float endAudioTimePrevious = endAudioTime;
-                endAudioTime += Time.deltaTime;
+                endAudioTime += DeltaTime;
                 
                 if (hasEndAudioTimelineEvents)
                     TryFiringRemainingEvents(endAudioTimelineEvents, endAudioTimePrevious, endAudioTime);

@@ -23,7 +23,7 @@ namespace RoyTheunissen.AudioSyntax
         private bool didPlayEndAudioClip;
         private AudioClip lastPreviewedEndAudioClip;
 
-        protected override int PreviewRowCount => 3;
+        protected override int PreviewRowCount => 1;
         protected override float PreviewLabelWidth => 37;
 
         protected override void DrawPreviewInternal(Rect position, Rect row)
@@ -34,18 +34,8 @@ namespace RoyTheunissen.AudioSyntax
             
             DrawAudioPlayButton(
                 ref row,
-                config.StartAudio.ShouldPlay, config.StartAudio.AudioClips, ref lastPreviewedStartAudioClip,
-                ref didPlayStartAudioClip, "Start", false);
-
-            DrawAudioPlayButton(
-                ref row,
-                true, config.LoopingAudioClips, ref lastPreviewedLoopingAudioClip, ref didPlayLoopAudioClip, "Loop",
+                true, config, ref lastPreviewedLoopingAudioClip, ref didPlayLoopAudioClip, "Loop",
                 isPlayingLoop, true);
-
-            DrawAudioPlayButton(
-                ref row,
-                config.EndAudio.ShouldPlay, config.EndAudio.AudioClips, ref lastPreviewedEndAudioClip,
-                ref didPlayEndAudioClip, "End", false);
         }
     }
 }
