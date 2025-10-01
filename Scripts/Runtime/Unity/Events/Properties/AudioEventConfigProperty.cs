@@ -59,23 +59,6 @@ namespace RoyTheunissen.AudioSyntax
     [Serializable]
     public sealed class AudioEventConfigPropertyAudioClips : AudioEventConfigProperty<List<AudioClipMetaData>>
     {
-        public bool HasAnythingAssigned
-        {
-            get
-            {
-                if (value == null)
-                    return false;
-                
-                for (int i = 0; i < value.Count; i++)
-                {
-                    if (value[i] != null)
-                        return true;
-                }
-                
-                return false;
-            }
-        }
-        
         [NonSerialized] private int lastRandomIndex;
         
         public AudioEventConfigPropertyAudioClips() : base(new List<AudioClipMetaData>())

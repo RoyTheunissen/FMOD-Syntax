@@ -1,6 +1,7 @@
 #if UNITY_AUDIO_SYNTAX
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -11,8 +12,7 @@ namespace RoyTheunissen.AudioSyntax
     /// Custom editor for Unity audio events config assets. Mostly here to help ensure that paths are correctly because
     /// they are necessary for being able to load them via Addressables correctly.
     /// </summary>
-    [CustomEditor(typeof(UnityAudioEventConfigAssetBase), true)]
-    public class UnityAudioEventConfigAssetEditor : Editor
+    public abstract class UnityAudioEventConfigAssetEditor : Editor
     {
         public enum PathStatuses
         {
@@ -42,6 +42,10 @@ namespace RoyTheunissen.AudioSyntax
         
         [NonSerialized] private static GUIContent cachedStopIcon;
         [NonSerialized] private static bool didCacheStopIcon;
+        
+        [NonSerialized] private readonly List<KeyValuePair<string,object>> debugInformation = new();
+        [NonSerialized] private UnityAudioPlayback lastPlayedPreview;
+
         protected GUIContent StopIcon
         {
             get
@@ -54,11 +58,6 @@ namespace RoyTheunissen.AudioSyntax
                 return cachedStopIcon;
             }
         }
-        
-        protected virtual int PreviewRowCount => 1;
-        protected virtual float PreviewLabelWidth => 52;
-
-        protected bool isPlayingLoop;
 
         protected virtual void OnEnable()
         {
@@ -68,15 +67,14 @@ namespace RoyTheunissen.AudioSyntax
 
         protected virtual void OnDisable()
         {
-            StopAll();
+            StopAllPreviews();
         }
         
-        private void StopAll(bool dontStopLoop = false)
+        protected virtual void StopAllPreviews()
         {
-            AudioSyntaxSystem.StopAllActiveEventPlaybacks();
+            lastPlayedPreview = null;
             
-            if (!dontStopLoop)
-                isPlayingLoop = false;
+            AudioSyntaxSystem.StopAllActiveEventPlaybacks();
         }
 
         public override void OnInspectorGUI()
@@ -167,6 +165,41 @@ namespace RoyTheunissen.AudioSyntax
 #endif // UNITY_AUDIO_SYNTAX_DISABLE_PREVIEW
         }
 
+        protected virtual bool IsPlayingPreview => false;
+
+        public override void OnPreviewSettings()
+        {
+            base.OnPreviewSettings();
+            
+            GUIContent icon = IsPlayingPreview ? StopIcon : PlayIcon;
+            if (GUILayout.Button(icon, EditorStyles.toolbarButton))
+            {
+                if (!IsPlayingPreview)
+                {
+                    PlayPreview();
+                }
+                else
+                {
+                    lastPlayedPreview.Stop();
+                    
+                    debugInformation.Clear();
+                    lastPlayedPreview?.GetDebugInformation(debugInformation);
+
+                    StopAllPreviews();
+                }
+            }
+        }
+
+        protected virtual void PlayPreview()
+        {
+            UnityAudioEventConfigAssetBase config = target as UnityAudioEventConfigAssetBase;
+            
+            StopAllPreviews();
+
+            debugInformation.Clear();
+            lastPlayedPreview = config.PlayEditorPreview(debugInformation);
+        }
+
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
         {
             // Draw background
@@ -180,16 +213,41 @@ namespace RoyTheunissen.AudioSyntax
             r.width -= padding * 2;
             r.height -= padding * 2;
 
-            Rect row = r.GetControlFirstRect();
-            
-            float height = RectExtensions.GetHeightForLines(PreviewRowCount);
-            row.y = r.y + r.height / 2 - height / 2;
-
-            DrawPreviewInternal(r, row);
+            DrawPreviewInternal(r);
         }
 
-        protected virtual void DrawPreviewInternal(Rect position, Rect row)
+        private void DrawPreviewInternal(Rect position)
         {
+            position.yMin += 18;
+            GUILayout.BeginArea(position);
+
+            int index = 0;
+            foreach (KeyValuePair<string,object> labelValuePair in debugInformation)
+            {
+                string label = labelValuePair.Key;
+                object value = labelValuePair.Value;
+
+                if (value is string text && string.Equals(text, "HEADER", StringComparison.Ordinal))
+                {
+                    if (index > 0)
+                        EditorGUILayout.Space();
+                        
+                    EditorGUILayout.LabelField(label, EditorStyles.boldLabel);
+                    continue;
+                }
+                
+                if (value is AudioClip || value == null)
+                {
+                    AudioClip obj = value as AudioClip;
+                    EditorGUILayout.ObjectField(label, obj, typeof(AudioClip), false);
+                    continue;
+                }
+                
+                EditorGUILayout.LabelField(label, value.ToString(), EditorStyles.boldLabel);
+
+                index++;
+            }
+            GUILayout.EndArea();
         }
 
         private static PathStatuses CheckIfPathIsCorrect(UnityAudioEventConfigAssetBase config, out string expectedPath)
@@ -283,52 +341,6 @@ namespace RoyTheunissen.AudioSyntax
         public static PathStatuses UpdateAudioEventConfigPath(UnityAudioEventConfigAssetBase config)
         {
             return UpdateAudioEventConfigPathInternal(config, false);
-        }
-
-        protected bool DrawAudioPlayButton(
-            ref Rect row, bool isEnabled, UnityAudioEventConfigAssetBase config, ref AudioClip lastPlayedAudioClip,
-            ref bool didPlay, string label, bool isPlaying, bool isLoop = false)
-        {
-            bool didPress;
-
-            using (new EditorGUI.DisabledScope(!isEnabled))
-            {
-                Rect remainder = row;
-                if (!string.IsNullOrEmpty(label))
-                {
-                    Rect labelRect = row.GetSubRectFromLeft(PreviewLabelWidth, out remainder, true);
-                    EditorGUI.LabelField(labelRect, label, EditorStyles.boldLabel);
-                }
-
-                GUIContent icon = isPlaying ? StopIcon : PlayIcon;
-                Rect buttonRect = remainder.GetSubRectFromLeft(32, out remainder, true);
-                didPress = GUI.Button(buttonRect, icon, EditorStyles.miniButton);
-
-                if (didPlay)
-                    EditorGUI.ObjectField(remainder, lastPlayedAudioClip, typeof(AudioClip), false);
-            }
-
-            if (didPress)
-            {
-                if (isLoop && isPlaying)
-                {
-                    StopAll();
-                }
-                else
-                {
-                    didPlay = true;
-                    
-                    StopAll();
-                    config.PlayGeneric();
-
-                    if (isLoop)
-                        isPlayingLoop = true;
-                }
-            }
-
-            row = row.GetControlNextRect();
-
-            return didPress;
         }
     }
 }

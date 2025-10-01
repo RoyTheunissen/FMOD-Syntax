@@ -56,7 +56,7 @@ namespace RoyTheunissen.AudioSyntax
         public abstract float Volume { get; set; }
 
         private bool canBeCleanedUp;
-        public bool CanBeCleanedUp => canBeCleanedUp;
+        public bool CanBeCleanedUp => canBeCleanedUp || markedAsInvalid;
 
         public string Name => BaseEventConfig.name;
 
@@ -115,6 +115,8 @@ namespace RoyTheunissen.AudioSyntax
         protected float DeltaTime => deltaTime;
 
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
+
+        private bool markedAsInvalid;
 
         private void InitializeInternal(Transform origin, float volumeFactorOverride)
         {
@@ -215,6 +217,11 @@ namespace RoyTheunissen.AudioSyntax
         protected void MarkForCleanup()
         {
             canBeCleanedUp = true;
+        }
+        
+        protected void MarkAsInvalid()
+        {
+            markedAsInvalid = true;
         }
 
         /// <summary>
@@ -323,6 +330,56 @@ namespace RoyTheunissen.AudioSyntax
 
             return playback;
         }
+        
+        protected void ReportInvalidAudioClip(string name, bool markAsInvalid)
+        {
+            if (markAsInvalid)
+                MarkAsInvalid();
+            
+            Debug.LogError($"Audio Event config '<b>{BaseEventConfig.Path}</b>' did not have a valid {name} " +
+                           $"audio clip...", BaseEventConfig);
+        }
+
+#if UNITY_EDITOR
+        private List<KeyValuePair<string, object>> debugInformation;
+        
+        protected void AddDebugInformation(string label, object value)
+        {
+            debugInformation.Add(new KeyValuePair<string, object>(label, value));
+        }
+        
+        protected void AddDebugInformation(string label, LastPlayedAudioData lastPlayedAudioData)
+        {
+            AddDebugInformation(label, "HEADER");
+
+            const string LabelPrefix = "Last Played ";
+            const string LabelClip = LabelPrefix + "Clip";
+            const string LabelVolume = LabelPrefix + "Volume";
+            const string LabelPitch = LabelPrefix + "Pitch";
+            const string ValueInvalid = "-";
+
+            if (!lastPlayedAudioData.HasPlayed)
+            {
+                AddDebugInformation(LabelClip, ValueInvalid);
+                AddDebugInformation(LabelVolume, ValueInvalid);
+                AddDebugInformation(LabelPitch, ValueInvalid);
+                return;
+            }
+            
+            AddDebugInformation(LabelClip, lastPlayedAudioData.AudioClip);
+            AddDebugInformation(LabelVolume, lastPlayedAudioData.Volume);
+            AddDebugInformation(LabelPitch, lastPlayedAudioData.Pitch);
+        }
+
+        public void GetDebugInformation(List<KeyValuePair<string, object>> debugInformation)
+        {
+            this.debugInformation = debugInformation;
+            
+            GetDebugInformationInternal();
+        }
+
+        protected abstract void GetDebugInformationInternal();
+#endif // UNITY_EDITOR
     }
     
     public abstract class UnityAudioPlaybackGeneric<AudioConfigType, ThisType> : UnityAudioPlayback

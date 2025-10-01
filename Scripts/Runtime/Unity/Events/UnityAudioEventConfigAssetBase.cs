@@ -52,6 +52,15 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         public abstract UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f);
+        
+#if UNITY_EDITOR
+        public UnityAudioPlayback PlayEditorPreview(List<KeyValuePair<string, object>> debugInformation)
+        {
+            UnityAudioPlayback playback = PlayGeneric();
+            playback.GetDebugInformation(debugInformation);
+            return playback;
+        }
+#endif // UNITY_EDITOR
 
         private static readonly Dictionary<string, UnityAudioEventConfigAssetBase> pathToAudioEventConfig = new();
         

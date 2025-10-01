@@ -42,50 +42,75 @@ namespace RoyTheunissen.AudioSyntax
         private List<AudioClipTimelineEvent> endAudioTimelineEvents;
         private float endAudioTime;
         private AudioClipMetaData endAudioClip;
+        
+#if UNITY_EDITOR
+        private LastPlayedAudioData lastPlayedStartAudioData = LastPlayedAudioData.Default;
+        private LastPlayedAudioData lastPlayedLoopingAudioData = LastPlayedAudioData.Default;
+        private LastPlayedAudioData lastPlayedStopAudioData = LastPlayedAudioData.Default;
+#endif // UNITY_EDITOR
 
         protected override void OnStart()
         {
-            if (!Config.LoopingAudioClips.HasAnythingAssigned)
-            {
-                Debug.LogError($"Audio loop config {Config} did not have a valid looping audio clip...");
-                return;
-            }
-            
             waitForEndSoundToFinish = false;
 
             startAudioTime = 0.0f;
             endAudioTime = 0.0f;
             
             if (Config.StartAudio.ShouldPlay)
-            {
-                AudioClipMetaData startAudioClip = Config.StartAudio.AudioClips.GetAudioClipToPlay(this);
-                Source.PlayOneShot(
-                    startAudioClip, VolumeFactorOverride * Config.StartAudio.VolumeFactor.Evaluate(this));
-                
-                // You're allowed to specify timeline events for the start audio clip too. 
-                if (startAudioClip?.TimelineEvents != null && startAudioClip?.TimelineEvents.Count > 0)
-                {
-                    hasStartAudioTimelineEvents = true;
-                    if (startAudioTimelineEvents == null)
-                        startAudioTimelineEvents = new List<AudioClipTimelineEvent>();
-                    else
-                        startAudioTimelineEvents.Clear();
-                    startAudioTimelineEvents.AddRange(startAudioClip?.TimelineEvents);
-                }
-            }
+                PlayStartAudio();
 
             // Can modify the volume when playing, through the config, and by manipulating the Playback instance.
             UpdateAudioSourceVolume();
             AudioClipMetaData loopingAudioClip = Config.LoopingAudioClips.GetAudioClipToPlay(this);
+            
+            if (loopingAudioClip == null || loopingAudioClip.AudioClip == null)
+            {
+                MarkAsInvalid();
+                ReportInvalidAudioClip("Looping", true);
+                return;
+            }
+            
             Source.clip = loopingAudioClip;
             Source.loop = true;
             Source.Play();
+            
+#if UNITY_EDITOR
+            lastPlayedLoopingAudioData = new LastPlayedAudioData(Source);
+#endif // UNITY_EDITOR
 
             // Find the events associated with the clip that we decided to play, and add them to the list of events.
             if (loopingAudioClip?.TimelineEvents != null)
                 timelineEventsToFire.AddRange(loopingAudioClip.TimelineEvents);
-            
-            // TODO: Also support events for the loop's Start and Stop audio.
+        }
+
+        private void PlayStartAudio()
+        {
+            AudioClipMetaData startAudioClip = Config.StartAudio.AudioClips.GetAudioClipToPlay(this);
+            if (startAudioClip == null || startAudioClip.AudioClip == null)
+            {
+                ReportInvalidAudioClip("Start", false);
+                return;
+            }
+
+            float startAudioVolume = VolumeFactorOverride * Config.StartAudio.VolumeFactor.Evaluate(this);
+            // TODO: Support randomized pitch for start audio?
+            float startAudioPitch = 1.0f;
+            Source.PlayOneShot(startAudioClip, startAudioVolume);
+                
+#if UNITY_EDITOR
+            lastPlayedStartAudioData = new LastPlayedAudioData(startAudioClip, startAudioVolume, startAudioPitch);
+#endif // UNITY_EDITOR
+                
+            // You're allowed to specify timeline events for the start audio clip too. 
+            if (startAudioClip?.TimelineEvents != null && startAudioClip?.TimelineEvents.Count > 0)
+            {
+                hasStartAudioTimelineEvents = true;
+                if (startAudioTimelineEvents == null)
+                    startAudioTimelineEvents = new List<AudioClipTimelineEvent>();
+                else
+                    startAudioTimelineEvents.Clear();
+                startAudioTimelineEvents.AddRange(startAudioClip?.TimelineEvents);
+            }
         }
 
         public override void Update()
@@ -185,27 +210,47 @@ namespace RoyTheunissen.AudioSyntax
             // we return our Audio Source to the pool.
             if (Config.EndAudio.ShouldPlay)
             {
-                waitForEndSoundToFinish = true;
-                
-                Source.Stop();
-                endAudioClip = Config.EndAudio.AudioClips.GetAudioClipToPlay(this);
-                Source.PlayOneShot(endAudioClip, VolumeFactorOverride * Config.EndAudio.VolumeFactor.Evaluate(this));
-                
-                // You're allowed to specify timeline events for the end audio clip too. 
-                if (endAudioClip?.TimelineEvents != null && endAudioClip?.TimelineEvents.Count > 0)
-                {
-                    hasEndAudioTimelineEvents = true;
-                    if (endAudioTimelineEvents == null)
-                        endAudioTimelineEvents = new List<AudioClipTimelineEvent>();
-                    else
-                        endAudioTimelineEvents.Clear();
-                    endAudioTimelineEvents.AddRange(endAudioClip?.TimelineEvents);
-                }
+                PlayEndAudio();
             }
             else
             {
                 waitForEndSoundToFinish = false;
                 MarkForCleanup();
+            }
+        }
+
+        private void PlayEndAudio()
+        {
+            Source.Stop();
+            
+            endAudioClip = Config.EndAudio.AudioClips.GetAudioClipToPlay(this);
+            
+            if (endAudioClip == null || endAudioClip.AudioClip == null)
+            {
+                ReportInvalidAudioClip("End", false);
+                return;
+            }
+            
+            waitForEndSoundToFinish = true;
+            
+            float endAudioVolume = VolumeFactorOverride * Config.EndAudio.VolumeFactor.Evaluate(this);
+            // TODO: Support randomized pitch for end audio?
+            float endAudioPitch = 1.0f;
+            Source.PlayOneShot(endAudioClip, endAudioVolume);
+                
+#if UNITY_EDITOR
+            lastPlayedStopAudioData = new LastPlayedAudioData(endAudioClip, endAudioVolume, endAudioPitch);
+#endif // UNITY_EDITOR
+                
+            // You're allowed to specify timeline events for the end audio clip too. 
+            if (endAudioClip?.TimelineEvents != null && endAudioClip?.TimelineEvents.Count > 0)
+            {
+                hasEndAudioTimelineEvents = true;
+                if (endAudioTimelineEvents == null)
+                    endAudioTimelineEvents = new List<AudioClipTimelineEvent>();
+                else
+                    endAudioTimelineEvents.Clear();
+                endAudioTimelineEvents.AddRange(endAudioClip?.TimelineEvents);
             }
         }
 
@@ -217,6 +262,17 @@ namespace RoyTheunissen.AudioSyntax
         {
             return Config.name;
         }
+        
+#if UNITY_EDITOR
+        protected override void GetDebugInformationInternal()
+        {
+            AddDebugInformation("Start Audio", lastPlayedStartAudioData);
+            
+            AddDebugInformation("Looping Audio", lastPlayedLoopingAudioData);
+            
+            AddDebugInformation("End Audio", lastPlayedStopAudioData);
+        }
+#endif // UNITY_EDITOR
     }
 }
 

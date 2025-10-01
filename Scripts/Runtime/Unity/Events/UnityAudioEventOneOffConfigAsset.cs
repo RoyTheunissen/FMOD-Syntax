@@ -1,5 +1,6 @@
 #if UNITY_AUDIO_SYNTAX
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RoyTheunissen.AudioSyntax
@@ -31,13 +32,17 @@ namespace RoyTheunissen.AudioSyntax
         protected override bool ShouldFireEventsOnlyOnce => true;
 
         public override bool IsOneshot => true;
+        
+#if UNITY_EDITOR
+        private LastPlayedAudioData lastPlayedOneOffAudioData;
+#endif // UNITY_EDITOR
 
         protected override void OnStart()
         {
             AudioClipMetaData clip = Config.AudioClips.GetAudioClipToPlay(this);
             if (clip == null || clip.AudioClip == null)
             {
-                Debug.LogError($"Audio config {Config} did not have a valid audio clip...");
+                ReportInvalidAudioClip("One-Off", true);
                 return;
             }
             Source.clip = clip;
@@ -55,6 +60,10 @@ namespace RoyTheunissen.AudioSyntax
             // settings on the audio source immediately afterwards and have it apply correctly to the sound, like
             // reverb and roll-off settings.
             Source.Play();
+            
+#if UNITY_EDITOR
+            lastPlayedOneOffAudioData = new LastPlayedAudioData(Source);
+#endif // UNITY_EDITOR
         }
 
         public override void Update()
@@ -98,6 +107,13 @@ namespace RoyTheunissen.AudioSyntax
         {
             return Config.name + $" ({Source.clip.name})";
         }
+        
+#if UNITY_EDITOR
+        protected override void GetDebugInformationInternal()
+        {
+            AddDebugInformation("One-Off Audio", lastPlayedOneOffAudioData);
+        }
+#endif // UNITY_EDITOR
     }
 }
 

@@ -23,19 +23,21 @@ namespace RoyTheunissen.AudioSyntax
         private bool didPlayEndAudioClip;
         private AudioClip lastPreviewedEndAudioClip;
 
-        protected override int PreviewRowCount => 1;
-        protected override float PreviewLabelWidth => 37;
+        private bool isPreviewingLoop;
+        protected override bool IsPlayingPreview => isPreviewingLoop;
 
-        protected override void DrawPreviewInternal(Rect position, Rect row)
+        protected override void PlayPreview()
         {
-            base.DrawPreviewInternal(position, row);
+            base.PlayPreview();
 
-            UnityAudioEventLoopingConfigAsset config = target as UnityAudioEventLoopingConfigAsset;
-            
-            DrawAudioPlayButton(
-                ref row,
-                true, config, ref lastPreviewedLoopingAudioClip, ref didPlayLoopAudioClip, "Loop",
-                isPlayingLoop, true);
+            isPreviewingLoop = true;
+        }
+
+        protected override void StopAllPreviews()
+        {
+            base.StopAllPreviews();
+
+            isPreviewingLoop = false;
         }
     }
 }
