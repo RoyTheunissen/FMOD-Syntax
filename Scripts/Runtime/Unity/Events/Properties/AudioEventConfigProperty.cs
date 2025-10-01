@@ -37,7 +37,7 @@ namespace RoyTheunissen.AudioSyntax
         
         [SerializeField, HideInInspector] private bool applyRandomOffset;
 
-        [SerializeField] private float randomOffset = 0.1f;
+        [SerializeField] private float randomOffset = 0.25f;
         
         public AudioEventConfigPropertyFloat(float defaultValue, bool isSigned) : base(defaultValue)
         {
