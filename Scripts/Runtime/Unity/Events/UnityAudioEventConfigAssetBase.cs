@@ -51,12 +51,25 @@ namespace RoyTheunissen.AudioSyntax
             return PlayGeneric(source);
         }
 
-        public abstract UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f);
+        public UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f)
+        {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning($"Tried to play Unity Audio Event '{Path}' outside of Play mode. Ignoring.");
+                return null;
+            }
+#endif // UNITY_EDITOR
+            
+            return PlayGenericInternal(source, volumeFactor);
+        }
+
+        protected abstract UnityAudioPlayback PlayGenericInternal(Transform source = null, float volumeFactor = 1.0f);
         
 #if UNITY_EDITOR
         public UnityAudioPlayback PlayEditorPreview(List<KeyValuePair<string, object>> debugInformation)
         {
-            UnityAudioPlayback playback = PlayGeneric();
+            UnityAudioPlayback playback = PlayGenericInternal();
             playback.GetDebugInformation(debugInformation);
             return playback;
         }
@@ -142,7 +155,7 @@ namespace RoyTheunissen.AudioSyntax
             return UnityAudioPlayback.Play<PlaybackType>(this, origin, volumeFactor);
         }
 
-        public override UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f)
+        protected override UnityAudioPlayback PlayGenericInternal(Transform source = null, float volumeFactor = 1.0f)
         {
             return Play(source, volumeFactor);
         }
