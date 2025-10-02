@@ -25,8 +25,8 @@ namespace RoyTheunissen.AudioSyntax
         [SerializeField] private Modes mode = Modes.Unity;
 #endif
 #pragma warning restore CS0414 // Field is assigned but its value is never used
-        
-        private Modes Mode => mode;
+
+        public Modes Mode => mode;
 
         [SerializeField] private UnityAudioEventConfigAssetBase unityAudioEventConfig;
         public UnityAudioEventConfigAssetBase UnityAudioEventConfig => unityAudioEventConfig;
