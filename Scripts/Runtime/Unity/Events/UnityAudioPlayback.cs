@@ -21,8 +21,8 @@ namespace RoyTheunissen.AudioSyntax
             Linear,
             SmoothDamp,
         }
-        
-        protected UnityAudioEventConfigAssetBase BaseEventConfig;
+
+        public UnityAudioEventConfigAssetBase BaseEventConfig;
         
         private IList<UnityAudioTag> Tags => BaseEventConfig.Tags;
 
@@ -59,11 +59,6 @@ namespace RoyTheunissen.AudioSyntax
         public bool CanBeCleanedUp => canBeCleanedUp || markedAsInvalid;
 
         public string Name => BaseEventConfig.name;
-
-        public abstract bool IsFadingOut
-        {
-            get;
-        }
 
         [NonSerialized] private bool didCacheSearchKeywords;
         [NonSerialized] private string searchKeywords;
@@ -117,6 +112,13 @@ namespace RoyTheunissen.AudioSyntax
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> genericEventIdToHandlers;
 
         private bool markedAsInvalid;
+        
+        private bool isTweeningVolume;
+        private FadeVolumeTypes volumeTweenType;
+        private float volumeTweenTarget;
+        private float volumeTweenDuration;
+        private float volumeTweenVelocity;
+        private bool isFadingOut;
 
         private void InitializeInternal(Transform origin, float volumeFactorOverride)
         {
@@ -195,6 +197,40 @@ namespace RoyTheunissen.AudioSyntax
                 lastEditorUpdateTime = EditorApplication.timeSinceStartup;
             }
 #endif
+
+            UpdateVolumeTween();
+        }
+        
+        private void UpdateVolumeTween()
+        {
+            // Tween towards a specified value.
+            if (isTweeningVolume)
+            {
+                // We support doing that linearly or with smooth damping.
+                switch (volumeTweenType)
+                {
+                    case FadeVolumeTypes.Linear:
+                        Volume = Mathf.MoveTowards(Volume, volumeTweenTarget, Time.deltaTime / volumeTweenDuration);
+                        break;
+                    
+                    case FadeVolumeTypes.SmoothDamp:
+                        Volume = Mathf.SmoothDamp(Volume, volumeTweenTarget, ref volumeTweenVelocity, volumeTweenDuration);
+                        break;
+                    
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                // If we've reached our target then we may want to stop the event completely, if requested.
+                if (Mathf.Approximately(Volume, volumeTweenTarget))
+                {
+                    Volume = volumeTweenTarget;
+                    isTweeningVolume = false;
+                    
+                    if (isFadingOut && Volume.Approximately(0.0f))
+                        Stop();
+                }
+            }
         }
 
         /// <summary>
@@ -339,6 +375,45 @@ namespace RoyTheunissen.AudioSyntax
             Debug.LogError($"Audio Event config '<b>{BaseEventConfig.Path}</b>' did not have a valid {name} " +
                            $"audio clip...", BaseEventConfig);
         }
+        
+        public void SetFadeVolumeTypeGeneric(FadeVolumeTypes fadeVolumeType)
+        {
+            volumeTweenType = fadeVolumeType;
+        }
+
+        private void FadeVolumeToInternalGeneric(float value, float duration)
+        {
+            if (Volume.Approximately(value))
+                return;
+            
+            isTweeningVolume = true;
+            volumeTweenDuration = duration;
+            volumeTweenTarget = value;
+        }
+        
+        public void FadeVolumeToGeneric(float value, float duration)
+        {
+            isFadingOut = false;
+            
+            FadeVolumeToInternalGeneric(value, duration);
+        }
+        
+        public void FadeInGeneric(float duration, bool startAtZeroVolume = true)
+        {
+            isFadingOut = false;
+            
+            if (startAtZeroVolume)
+                Volume = 0.0f;
+            
+            FadeVolumeToInternalGeneric(1.0f, duration);
+        }
+        
+        public void FadeOutGeneric(float duration, bool stopWhenFullyFadedOut = true)
+        {
+            isFadingOut = stopWhenFullyFadedOut;
+            
+            FadeVolumeToInternalGeneric(0.0f, duration);
+        }
 
 #if UNITY_EDITOR
         private List<KeyValuePair<string, object>> debugInformation;
@@ -408,14 +483,6 @@ namespace RoyTheunissen.AudioSyntax
             set => Source.pitch = value;
         }
 
-        private bool isTweeningVolume;
-        private FadeVolumeTypes volumeTweenType;
-        private float volumeTweenTarget;
-        private float volumeTweenDuration;
-        private float volumeTweenVelocity;
-        private bool isFadingOut;
-        public override bool IsFadingOut => isFadingOut;
-
         protected abstract bool ShouldFireEventsOnlyOnce { get; }
         
         protected readonly List<AudioClipTimelineEvent> timelineEventsToFire = new(0);
@@ -426,46 +493,13 @@ namespace RoyTheunissen.AudioSyntax
         public override void Update()
         {
             base.Update();
-
-            UpdateVolumeTween();
+            
             UpdateAudioSourceVolume();
         }
 
         protected override void OnCleanupInternal()
         {
             timelineEventIdToHandlers?.Clear();
-        }
-
-        private void UpdateVolumeTween()
-        {
-            // Tween towards a specified value.
-            if (isTweeningVolume)
-            {
-                // We support doing that linearly or with smooth damping.
-                switch (volumeTweenType)
-                {
-                    case FadeVolumeTypes.Linear:
-                        Volume = Mathf.MoveTowards(Volume, volumeTweenTarget, Time.deltaTime / volumeTweenDuration);
-                        break;
-                    
-                    case FadeVolumeTypes.SmoothDamp:
-                        Volume = Mathf.SmoothDamp(Volume, volumeTweenTarget, ref volumeTweenVelocity, volumeTweenDuration);
-                        break;
-                    
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                // If we've reached our target then we may want to stop the event completely, if requested.
-                if (Mathf.Approximately(Volume, volumeTweenTarget))
-                {
-                    Volume = volumeTweenTarget;
-                    isTweeningVolume = false;
-                    
-                    if (isFadingOut && Volume.Approximately(0.0f))
-                        Stop();
-                }
-            }
         }
         
         protected void UpdateAudioSourceVolume()
@@ -623,44 +657,26 @@ namespace RoyTheunissen.AudioSyntax
 
         public ThisType SetFadeVolumeType(FadeVolumeTypes fadeVolumeType)
         {
-            volumeTweenType = fadeVolumeType;
-            return this as ThisType;
-        }
-
-        private ThisType FadeVolumeToInternal(float value, float duration)
-        {
-            if (Volume.Approximately(value))
-                return this as ThisType;
-            
-            isTweeningVolume = true;
-            volumeTweenDuration = duration;
-            volumeTweenTarget = value;
-            
+            SetFadeVolumeTypeGeneric(fadeVolumeType);
             return this as ThisType;
         }
         
         public ThisType FadeVolumeTo(float value, float duration)
         {
-            isFadingOut = false;
-            
-            return FadeVolumeToInternal(value, duration);
+            FadeVolumeToGeneric(value, duration);
+            return this as ThisType;
         }
         
         public ThisType FadeIn(float duration, bool startAtZeroVolume = true)
         {
-            isFadingOut = false;
-            
-            if (startAtZeroVolume)
-                Volume = 0.0f;
-            
-            return FadeVolumeToInternal(1.0f, duration);
+            FadeInGeneric(duration, startAtZeroVolume);
+            return this as ThisType;
         }
         
         public ThisType FadeOut(float duration, bool stopWhenFullyFadedOut = true)
         {
-            isFadingOut = stopWhenFullyFadedOut;
-            
-            return FadeVolumeToInternal(0.0f, duration);
+            FadeOutGeneric(duration, stopWhenFullyFadedOut);
+            return this as ThisType;
         }
     }
 }
