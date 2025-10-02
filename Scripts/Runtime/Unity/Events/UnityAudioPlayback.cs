@@ -204,33 +204,38 @@ namespace RoyTheunissen.AudioSyntax
         private void UpdateVolumeTween()
         {
             // Tween towards a specified value.
-            if (isTweeningVolume)
+            if (!isTweeningVolume)
+                return;
+            
+            // We support doing that linearly or with smooth damping.
+            switch (volumeTweenType)
             {
-                // We support doing that linearly or with smooth damping.
-                switch (volumeTweenType)
-                {
-                    case FadeVolumeTypes.Linear:
-                        Volume = Mathf.MoveTowards(Volume, volumeTweenTarget, Time.deltaTime / volumeTweenDuration);
-                        break;
+                case FadeVolumeTypes.Linear:
+                    Volume = Mathf.MoveTowards(Volume, volumeTweenTarget, Time.deltaTime / volumeTweenDuration);
+                    break;
                     
-                    case FadeVolumeTypes.SmoothDamp:
-                        Volume = Mathf.SmoothDamp(Volume, volumeTweenTarget, ref volumeTweenVelocity, volumeTweenDuration);
-                        break;
+                case FadeVolumeTypes.SmoothDamp:
+                    Volume = Mathf.SmoothDamp(Volume, volumeTweenTarget, ref volumeTweenVelocity, volumeTweenDuration);
+                    break;
                     
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                // If we've reached our target then we may want to stop the event completely, if requested.
-                if (Mathf.Approximately(Volume, volumeTweenTarget))
-                {
-                    Volume = volumeTweenTarget;
-                    isTweeningVolume = false;
-                    
-                    if (isFadingOut && Volume.Approximately(0.0f))
-                        Stop();
-                }
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
+            // If we've reached our target then we may want to stop the event completely, if requested.
+            if (Mathf.Approximately(Volume, volumeTweenTarget))
+            {
+                Volume = volumeTweenTarget;
+                isTweeningVolume = false;
+
+                if (isFadingOut && Volume.Approximately(0.0f))
+                    FullyFadedOut();
+            }
+        }
+
+        private void FullyFadedOut()
+        {
+            Stop();
         }
 
         /// <summary>
@@ -411,6 +416,12 @@ namespace RoyTheunissen.AudioSyntax
         public void FadeOutGeneric(float duration, bool stopWhenFullyFadedOut = true)
         {
             isFadingOut = stopWhenFullyFadedOut;
+
+            if (stopWhenFullyFadedOut && Volume.Approximately(0.0f) && !CanBeCleanedUp)
+            {
+                FullyFadedOut();
+                return;
+            }
             
             FadeVolumeToInternalGeneric(0.0f, duration);
         }
