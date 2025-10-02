@@ -66,7 +66,7 @@ namespace RoyTheunissen.AudioSyntax
             // Also every 'folder' along the way will be treated like a sort of 'tag'
             SearchKeywords = path.Substring(path.IndexOf("/", StringComparison.Ordinal) + 1).Replace('/', ',');
             
-            Name = Path.GetFileName(path);
+            Name = System.IO.Path.GetFileName(path);
 
             EventDescription = eventDescription;
             eventDescription.createInstance(out EventInstance newInstance);
