@@ -17,6 +17,8 @@ namespace RoyTheunissen.AudioSyntax
         [UnityEditor.InitializeOnLoadMethod]
         private static void EditorInitializeOnload()
         {
+            StopAllActivePlaybacks();
+            
             activeEventPlaybacks.Clear();
             onEventPlaybackCallbackReceivers.Clear();
         }
