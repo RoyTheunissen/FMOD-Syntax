@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif // UNITY_EDITOR
+
 namespace RoyTheunissen.AudioSyntax
 {
     /// <summary>
@@ -14,13 +18,18 @@ namespace RoyTheunissen.AudioSyntax
         private static readonly List<IOnAudioPlaybackRegistration> onEventPlaybackCallbackReceivers = new();
 
 #if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
+        [InitializeOnLoadMethod]
         private static void EditorInitializeOnload()
         {
-            StopAllActivePlaybacks();
-            
-            activeEventPlaybacks.Clear();
-            onEventPlaybackCallbackReceivers.Clear();
+            ClearAllPlaybacks();
+
+            EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
+            EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
+        }
+
+        private static void HandlePlayModeStateChanged(PlayModeStateChange obj)
+        {
+            ClearAllPlaybacks();
         }
 #endif // UNITY_EDITOR
 
@@ -31,6 +40,18 @@ namespace RoyTheunissen.AudioSyntax
 #if FMOD_AUDIO_SYNTAX
             FmodSyntaxSystem.StopAllActiveSnapshotPlaybacks();
 #endif // FMOD_AUDIO_SYNTAX
+        }
+
+        public static void ClearAllPlaybacks()
+        {
+            StopAllActivePlaybacks();
+            
+            activeEventPlaybacks.Clear();
+            onEventPlaybackCallbackReceivers.Clear();
+            
+#if UNITY_AUDIO_SYNTAX
+            UnityAudioSyntaxSystem.ClearAllPlaybacks();
+#endif // UNITY_AUDIO_SYNTAX
         }
         
         public static void RegisterActiveEventPlayback(IAudioPlayback playback)

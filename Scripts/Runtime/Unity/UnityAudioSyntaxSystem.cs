@@ -82,6 +82,8 @@ namespace RoyTheunissen.AudioSyntax
 
             // Necessary otherwise it's easy for these to get lost and pile up.
             ClearExistingEditorTimeAudioSources();
+            
+            AudioSyntaxSystem.StopAllActivePlaybacks();
         }
 
         private static void ClearExistingEditorTimeAudioSources()
@@ -264,7 +266,7 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
         
-        public static void ClearPlaybacks()
+        public static void ClearAllPlaybacks()
         {
             for (int i = activePlaybacks.Count - 1; i >= 0; i--)
             {
