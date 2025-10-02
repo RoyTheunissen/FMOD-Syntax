@@ -178,6 +178,30 @@ namespace RoyTheunissen.AudioSyntax
             }
         }
 #endif // FMOD_AUDIO_SYNTAX
+        
+        public bool IsPlaybackOfThisType(IAudioPlayback audioPlayback)
+        {
+            switch (Mode)
+            {
+                case Modes.Unity:
+#if UNITY_AUDIO_SYNTAX
+                    if (audioPlayback is UnityAudioPlayback unityAudioPlayback)
+                        return unityAudioPlayback.BaseEventConfig == UnityAudioEventConfig;
+#endif // UNITY_AUDIO_SYNTAX
+                    
+                    return false;
+                
+                case Modes.FMOD:
+#if FMOD_AUDIO_SYNTAX
+                    if (audioPlayback is FmodAudioPlayback fmodAudioPlayback)
+                        return string.Equals(fmodAudioPlayback.Path, fmodEventGuid, StringComparison.OrdinalIgnoreCase);
+#endif // FMOD_AUDIO_SYNTAX
+                    
+                    return false;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
 
         public override string ToString()
         {
