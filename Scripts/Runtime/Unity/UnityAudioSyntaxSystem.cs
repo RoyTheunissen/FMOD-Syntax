@@ -101,7 +101,8 @@ namespace RoyTheunissen.AudioSyntax
         
         private static void OnEditorUpdate()
         {
-            AudioSyntaxSystem.Update();
+            if (!Application.isPlaying)
+                AudioSyntaxSystem.Update();
         }
 #endif // UNITY_EDITOR
         
