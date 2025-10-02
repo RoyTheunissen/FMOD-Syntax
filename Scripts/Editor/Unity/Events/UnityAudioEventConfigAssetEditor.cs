@@ -193,8 +193,6 @@ namespace RoyTheunissen.AudioSyntax
         protected virtual void PlayPreview()
         {
             UnityAudioEventConfigAssetBase config = target as UnityAudioEventConfigAssetBase;
-            
-            StopAllPreviews();
 
             debugInformation.Clear();
             lastPlayedPreview = config.PlayEditorPreview(debugInformation);
