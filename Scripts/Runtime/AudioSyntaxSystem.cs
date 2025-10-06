@@ -29,8 +29,11 @@ namespace RoyTheunissen.AudioSyntax
 
         private static void HandlePlayModeStateChanged(PlayModeStateChange change)
         {
-            if (change == PlayModeStateChange.ExitingEditMode || change == PlayModeStateChange.ExitingPlayMode)
+            if (change is PlayModeStateChange.ExitingEditMode or PlayModeStateChange.ExitingPlayMode
+                or PlayModeStateChange.EnteredEditMode)
+            {
                 ClearAllPlaybacks();
+            }
         }
 #endif // UNITY_EDITOR
 
