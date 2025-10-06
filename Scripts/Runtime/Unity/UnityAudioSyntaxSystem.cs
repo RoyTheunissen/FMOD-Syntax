@@ -97,6 +97,7 @@ namespace RoyTheunissen.AudioSyntax
                     Object.DestroyImmediate(allAudioSources[i].gameObject);
                 }
             }
+            Instance.audioSourcesPool.Cleanup();
         }
         
         private static void OnEditorUpdate()
