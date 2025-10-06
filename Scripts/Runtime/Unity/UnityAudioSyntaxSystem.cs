@@ -159,6 +159,12 @@ namespace RoyTheunissen.AudioSyntax
         
         public AudioSource GetAudioSourceForPlayback()
         {
+#if UNITY_EDITOR
+            // Apparently this extra check is needed because preview audio sources can get lost sometimes, it seems.
+            if (!Application.isPlaying)
+                CullDestroyedAudioSources();
+#endif // UNITY_EDITOR
+            
             AudioSource audioSource = audioSourcesPool.Get();
             
             // Reset these to the default Unity values, just in case...
@@ -175,7 +181,16 @@ namespace RoyTheunissen.AudioSyntax
 
             return audioSource;
         }
-        
+
+        private void CullDestroyedAudioSources()
+        {
+            for (int i = audioSourcesPool.AllObjects.Count - 1; i >= 0; i--)
+            {
+                if (audioSourcesPool.AllObjects[i] == null)
+                    audioSourcesPool.RemoveFromPool(audioSourcesPool.AllObjects[i]);
+            }
+        }
+
         public void ReturnAudioSourceForPlayback(AudioSource audioSource)
         {
             audioSourcesPool.Return(audioSource);

@@ -57,6 +57,13 @@ namespace RoyTheunissen.AudioSyntax
             availableObjects.Clear();
         }
 
+        public void RemoveFromPool(ObjectType pooledObject)
+        {
+            allObjects.Remove(pooledObject);
+            usedObjects.Remove(pooledObject);
+            availableObjects.Remove(pooledObject);
+        }
+
         private void DestroyPoolObject(ObjectType pooledObject)
         {
             objectDestroyer?.Invoke(pooledObject);
