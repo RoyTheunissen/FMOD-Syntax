@@ -74,7 +74,8 @@ namespace RoyTheunissen.AudioSyntax
         {
             lastPlayedPreview = null;
             
-            AudioSyntaxSystem.StopAllActiveEventPlaybacks();
+            if (!Application.isPlaying)
+                AudioSyntaxSystem.StopAllActiveEventPlaybacks();
         }
 
         public override void OnInspectorGUI()
