@@ -54,6 +54,11 @@ namespace RoyTheunissen.AudioSyntax
         {
             return FmodSyntaxUtilities.GetFilteredPath(Path, stripSpecialCharacters);
         }
+        
+        public override string ToString()
+        {
+            return $"{GetType().Name}({Path})";
+        }
     }
 
 #if FMOD_AUDIO_SYNTAX
