@@ -31,6 +31,8 @@ namespace RoyTheunissen.AudioSyntax
 
         void Stop();
         
+        void Restart();
+        
         public delegate void AudioClipGenericEventHandler(IAudioPlayback audioPlayback, string eventId);
 
         IAudioPlayback AddTimelineEventHandler(AudioTimelineEventId @event, AudioClipGenericEventHandler handler);
