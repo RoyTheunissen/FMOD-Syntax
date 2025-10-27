@@ -26,7 +26,13 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         public abstract PlaybackType Play(Transform source = null);
-        public abstract PlaybackType Play(Vector3 position);
+
+        public virtual PlaybackType Play(Vector3 position)
+        {
+            Debug.LogError($"You tried to play back FMOD audio '{Path}' from a static position, but you first need " +
+                           $"to re-generate your audio code before this feature works.");
+            return default;
+        }
 
         IAudioPlayback IAudioConfig.Play(Transform source)
         {
