@@ -56,15 +56,32 @@ namespace RoyTheunissen.AudioSyntax
         {
         }
 
-        public PlaybackType Play(Transform source = null)
-        {
-            TryLoadConfig();
 
-            if (configStatus == ConfigStatuses.RequiresAsynchronousLoading)
+        private bool TryPlayAsynchronouslyIfNecessary(
+            SpatializationTypes spatializationType, Transform source, Vector3 position, out PlaybackType playback)
+        {
+            if (configStatus != ConfigStatuses.RequiresAsynchronousLoading)
             {
-#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
-                PlaybackType placeholder = UnityAudioPlayback.PlayWithAsynchronousLoading<PlaybackType>(source);
+                playback = default;
+                return false;
+            }
                 
+#if UNITY_AUDIO_SYNTAX_ADDRESSABLES
+                PlaybackType placeholder;
+
+                switch (spatializationType)
+                {
+                    case SpatializationTypes.Global:
+                    case SpatializationTypes.Transform:
+                        placeholder = UnityAudioPlayback.PlayWithAsynchronousLoading<PlaybackType>(source);
+                        break;
+                    case SpatializationTypes.StaticPosition:
+                        placeholder = UnityAudioPlayback.PlayWithAsynchronousLoading<PlaybackType>(position);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(spatializationType), spatializationType, null);
+                }
+
                 Debug.LogWarning($"Tried to play audio event '{Path}' via code but it was not loaded. Will load " +
                                  $"it now, but you might notice a delay. Consider grouping the audio configs and " +
                                  $"loading the entire group upfront before you need them.");
@@ -77,19 +94,51 @@ namespace RoyTheunissen.AudioSyntax
                     configStatus = ConfigStatuses.Loaded;
                 });
 
-                return placeholder;
+                playback = placeholder;
+                return true;
 #else
-                Debug.LogWarning($"Config '{Path}' seemed to require asynchronous loading but the Addressables " +
-                                 $"package was not found. Something is wrong with the project setup.");
+            Debug.LogWarning($"Config '{Path}' seemed to require asynchronous loading but the Addressables " +
+                             $"package was not found. Something is wrong with the project setup.");
+            playback = default;
+            return false;
 #endif // !UNITY_AUDIO_SYNTAX_ADDRESSABLES
+        }
+
+        public PlaybackType Play(Transform source = null)
+        {
+            TryLoadConfig();
+
+            if (TryPlayAsynchronouslyIfNecessary(
+                    source == null ? SpatializationTypes.Global : SpatializationTypes.Transform, source, Vector3.zero,
+                    out PlaybackType playback))
+            {
+                return playback;
             }
-            
+
             return UnityAudioPlayback.Play<PlaybackType>(Config, source);
+        }
+
+        public PlaybackType Play(Vector3 position)
+        {
+            TryLoadConfig();
+
+            if (TryPlayAsynchronouslyIfNecessary(
+                    SpatializationTypes.StaticPosition, null, position, out PlaybackType playback))
+            {
+                return playback;
+            }
+
+            return UnityAudioPlayback.Play<PlaybackType>(Config, position);
         }
 
         IAudioPlayback IAudioConfig.Play(Transform source)
         {
             return Play(source);
+        }
+
+        IAudioPlayback IAudioConfig.Play(Vector3 position)
+        {
+            return Play(position);
         }
 
         private void TryLoadConfig()

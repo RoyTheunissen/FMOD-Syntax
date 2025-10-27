@@ -106,6 +106,11 @@ namespace RoyTheunissen.AudioSyntax
         {
             return UnityAudioEventConfig.PlayGeneric(source, volumeFactor);
         }
+        
+        public UnityAudioPlayback PlayUnity(Vector3 position, float volumeFactor = 1.0f)
+        {
+            return UnityAudioEventConfig.PlayGeneric(position, volumeFactor);
+        }
 #endif // UNITY_AUDIO_SYNTAX
         
         public IAudioPlayback Play(Transform source = null)

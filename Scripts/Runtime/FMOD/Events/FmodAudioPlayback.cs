@@ -19,13 +19,6 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public abstract class FmodAudioPlayback : FmodPlayablePlaybackBase, IFmodAudioPlayback
     {
-        private enum SpatializationTypes
-        {
-            Global,
-            Transform,
-            StaticPosition,
-        }
-        
         private bool isOneshot = false;
         public bool IsOneshot
         {

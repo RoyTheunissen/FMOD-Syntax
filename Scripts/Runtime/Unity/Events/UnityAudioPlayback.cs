@@ -37,9 +37,6 @@ namespace RoyTheunissen.AudioSyntax
 
         private bool didCleanUp;
         public bool DidCleanUp => didCleanUp;
-        
-        private bool isLocal;
-        public bool IsLocal => isLocal;
 
         private Transform cachedOrigin;
         public Transform Origin
@@ -48,8 +45,20 @@ namespace RoyTheunissen.AudioSyntax
             set
             {
                 cachedOrigin = value;
-                isLocal = value != null;
-                UpdateSpatialBlend();
+                SpatializationType = value == null ? SpatializationTypes.Global : SpatializationTypes.Transform;
+                UpdateSpatialization();
+            }
+        }
+
+        private Vector3 cachedStaticPosition;
+        public Vector3 StaticPosition
+        {
+            get => cachedStaticPosition;
+            set
+            {
+                cachedStaticPosition = value;
+                SpatializationType = SpatializationTypes.StaticPosition;
+                UpdateSpatialization();
             }
         }
 
@@ -122,14 +131,35 @@ namespace RoyTheunissen.AudioSyntax
         
         private bool hasRegisteredPlayback;
 
+        private SpatializationTypes cachedSpatializationType;
+        public SpatializationTypes SpatializationType
+        {
+            get => cachedSpatializationType;
+            private set
+            {
+                cachedSpatializationType = value;
+                UpdateSpatialBlend();
+            }
+        }
+
         private void InitializeInternal(Transform origin, float volumeFactorOverride)
         {
             this.volumeFactorOverride = volumeFactorOverride;
             
             source = UnityAudioSyntaxSystem.Instance.GetAudioSourceForPlayback();
             
-            // Need to do this after a source is assigned because this also updates the source's spatial blend.
+            // Need to do this after a source is assigned because this also updates the spatialization.
             Origin = origin;
+        }
+        
+        private void InitializeInternal(Vector3 position, float volumeFactorOverride)
+        {
+            this.volumeFactorOverride = volumeFactorOverride;
+            
+            source = UnityAudioSyntaxSystem.Instance.GetAudioSourceForPlayback();
+            
+            // Need to do this after a source is assigned because this also updates the spatialization.
+            StaticPosition = position;
         }
 
         private void Initialize(UnityAudioEventConfigAssetBase audioEventConfig,
@@ -139,10 +169,27 @@ namespace RoyTheunissen.AudioSyntax
             
             CompleteInitialization(audioEventConfig);
         }
+        
+        private void Initialize(UnityAudioEventConfigAssetBase audioEventConfig,
+            Vector3 position, float volumeFactorOverride)
+        {
+            InitializeInternal(position, volumeFactorOverride);
+            
+            CompleteInitialization(audioEventConfig);
+        }
 
         private void InitializeAsLoadingAsynchronously(Transform origin, float volumeFactorOverride)
         {
             InitializeInternal(origin, volumeFactorOverride);
+            
+            // Just mark the playback as being in the process of using asynchronous loading to load the config.
+            // When the config is loaded, the playback is notified and its initialization will be completed.
+            isLoadingAsynchronously = true;
+        }
+        
+        private void InitializeAsLoadingAsynchronously(Vector3 position, float volumeFactorOverride)
+        {
+            InitializeInternal(position, volumeFactorOverride);
             
             // Just mark the playback as being in the process of using asynchronous loading to load the config.
             // When the config is loaded, the playback is notified and its initialization will be completed.
@@ -167,7 +214,7 @@ namespace RoyTheunissen.AudioSyntax
 
         private void UpdateSpatialBlend()
         {
-            Source.spatialBlend = isLocal ? 1 : 0;
+            Source.spatialBlend = SpatializationType == SpatializationTypes.Global ? 0 : 1;
         }
 
         private void Start()
@@ -180,9 +227,6 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_EDITOR
             lastEditorUpdateTime = EditorApplication.timeSinceStartup;
 #endif
-            
-            UpdateSpatialBlend();
-            UpdateSpatialization();
             
             if (!hasRegisteredPlayback)
             {
@@ -236,7 +280,8 @@ namespace RoyTheunissen.AudioSyntax
 
             UpdateVolumeTween();
             
-            UpdateSpatialization();
+            if (SpatializationType == SpatializationTypes.Transform)
+                UpdateSpatialization();
         }
         
         private void UpdateVolumeTween()
@@ -335,21 +380,27 @@ namespace RoyTheunissen.AudioSyntax
         protected abstract void OnCleanupInternal();
 
         protected abstract void OnCleanup();
-        
-        protected void UpdateSpatialization()
+
+        private void UpdateSpatialization()
         {
-            if (!IsLocal)
+            if (SpatializationType == SpatializationTypes.Global)
                 return;
 
-            if (Origin == null)
+            if (SpatializationType == SpatializationTypes.Transform)
             {
-                // Audio loop was started on an object but the object was destroyed. Clean up the audio loop
-                // too to prevent it from sticking around.
-                Cleanup();
+                if (Origin == null)
+                {
+                    // Audio loop was started on an object but the object was destroyed. Clean up the audio loop
+                    // too to prevent it from sticking around.
+                    Cleanup();
+                    return;
+                }
+                
+                Source.transform.position = Origin.position;
                 return;
             }
 
-            Source.transform.position = Origin.position;
+            Source.transform.position = StaticPosition;
         }
 
         public IAudioPlayback AddTimelineEventHandler(
@@ -401,6 +452,13 @@ namespace RoyTheunissen.AudioSyntax
         {
             playback.Initialize(audioEventConfig, origin, volumeFactor);
         }
+        
+        private static void InitializePlayback<PlaybackType>(PlaybackType playback, 
+            UnityAudioEventConfigAssetBase audioEventConfig, Vector3 position, float volumeFactor)
+            where PlaybackType : UnityAudioPlayback, new()
+        {
+            playback.Initialize(audioEventConfig, position, volumeFactor);
+        }
 
         public static PlaybackType Play<PlaybackType>(
             UnityAudioEventConfigAssetBase audioEventConfig, Transform origin, float volumeFactor = 1.0f)
@@ -409,6 +467,17 @@ namespace RoyTheunissen.AudioSyntax
             PlaybackType playback = new();
             
             InitializePlayback(playback, audioEventConfig, origin, volumeFactor);
+
+            return playback;
+        }
+        
+        public static PlaybackType Play<PlaybackType>(
+            UnityAudioEventConfigAssetBase audioEventConfig, Vector3 position, float volumeFactor = 1.0f)
+            where PlaybackType : UnityAudioPlayback, new()
+        {
+            PlaybackType playback = new();
+            
+            InitializePlayback(playback, audioEventConfig, position, volumeFactor);
 
             return playback;
         }
@@ -422,6 +491,19 @@ namespace RoyTheunissen.AudioSyntax
             // Config is not available yet and will finish loading later. Initialize a playback instance as best we can,
             // its initialization will be completed once the config has finished loading.
             playback.InitializeAsLoadingAsynchronously(origin, volumeFactor);
+
+            return playback;
+        }
+        
+        public static PlaybackType PlayWithAsynchronousLoading<PlaybackType>(
+            Vector3 position, float volumeFactor = 1.0f)
+            where PlaybackType : UnityAudioPlayback, new()
+        {
+            PlaybackType playback = new();
+            
+            // Config is not available yet and will finish loading later. Initialize a playback instance as best we can,
+            // its initialization will be completed once the config has finished loading.
+            playback.InitializeAsLoadingAsynchronously(position, volumeFactor);
 
             return playback;
         }

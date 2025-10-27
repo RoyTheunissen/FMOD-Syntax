@@ -50,6 +50,11 @@ namespace RoyTheunissen.AudioSyntax
         {
             return PlayGeneric(source);
         }
+        
+        IAudioPlayback IAudioConfig.Play(Vector3 position)
+        {
+            return PlayGeneric(position);
+        }
 
         public UnityAudioPlayback PlayGeneric(Transform source = null, float volumeFactor = 1.0f)
         {
@@ -63,8 +68,22 @@ namespace RoyTheunissen.AudioSyntax
             
             return PlayGenericInternal(source, volumeFactor);
         }
+        
+        public UnityAudioPlayback PlayGeneric(Vector3 position, float volumeFactor = 1.0f)
+        {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning($"Tried to play Unity Audio Event '{Path}' outside of Play mode. Ignoring.");
+                return null;
+            }
+#endif // UNITY_EDITOR
+            
+            return PlayGenericInternal(position, volumeFactor);
+        }
 
         protected abstract UnityAudioPlayback PlayGenericInternal(Transform source = null, float volumeFactor = 1.0f);
+        protected abstract UnityAudioPlayback PlayGenericInternal(Vector3 position, float volumeFactor = 1.0f);
         
 #if UNITY_EDITOR
         public UnityAudioPlayback PlayEditorPreview(List<KeyValuePair<string, object>> debugInformation)
@@ -154,10 +173,20 @@ namespace RoyTheunissen.AudioSyntax
         {
             return UnityAudioPlayback.Play<PlaybackType>(this, origin, volumeFactor);
         }
+        
+        public PlaybackType Play(Vector3 position, float volumeFactor = 1.0f)
+        {
+            return UnityAudioPlayback.Play<PlaybackType>(this, position, volumeFactor);
+        }
 
         protected override UnityAudioPlayback PlayGenericInternal(Transform source = null, float volumeFactor = 1.0f)
         {
             return Play(source, volumeFactor);
+        }
+        
+        protected override UnityAudioPlayback PlayGenericInternal(Vector3 position, float volumeFactor = 1.0f)
+        {
+            return Play(position, volumeFactor);
         }
     }
 }
