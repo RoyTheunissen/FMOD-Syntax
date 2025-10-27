@@ -65,6 +65,8 @@ namespace RoyTheunissen.AudioSyntax
                 return;
             }
 
+            this.source = source;
+
             // Events are called something like event:/ but we want to get rid of any prefix like that.
             // Also every 'folder' along the way will be treated like a sort of 'tag'
             SearchKeywords = path.Substring(path.IndexOf("/", StringComparison.Ordinal) + 1).Replace('/', ',');
