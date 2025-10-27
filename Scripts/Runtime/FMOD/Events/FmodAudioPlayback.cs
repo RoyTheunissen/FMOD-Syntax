@@ -49,6 +49,9 @@ namespace RoyTheunissen.AudioSyntax
 
         [NonSerialized] private bool hasRegisteredTimelineMarkerReachedCallback;
 
+        [NonSerialized] private bool hasRegisteredPlayback;
+        [NonSerialized] private Transform source;
+
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> timelineEventIdToHandlers;
         
         public void Play(EventDescription eventDescription, Transform source)
@@ -69,7 +72,16 @@ namespace RoyTheunissen.AudioSyntax
             Name = System.IO.Path.GetFileName(path);
 
             EventDescription = eventDescription;
-            eventDescription.createInstance(out EventInstance newInstance);
+            
+            eventDescription.isOneshot(out bool isOneshotResult);
+            IsOneshot = isOneshotResult;
+
+            CreateInstance();
+        }
+
+        private void CreateInstance()
+        {
+            EventDescription.createInstance(out EventInstance newInstance);
             Instance = newInstance;
             
             if (source != null)
@@ -77,16 +89,16 @@ namespace RoyTheunissen.AudioSyntax
                 Instance.set3DAttributes(RuntimeUtils.To3DAttributes(source));
                 RuntimeManager.AttachInstanceToGameObject(Instance, source);
             }
-            
-            // Cache properties.
-            eventDescription.isOneshot(out bool isOneshotResult);
-            IsOneshot = isOneshotResult;
 
             InitializeParameters();
 
             Instance.start();
 
-            AudioSyntaxSystem.RegisterActiveEventPlayback(this);
+            if (!hasRegisteredPlayback)
+            {
+                hasRegisteredPlayback = true;
+                AudioSyntaxSystem.RegisterActiveEventPlayback(this);
+            }
         }
 
         public void Stop()
@@ -114,7 +126,18 @@ namespace RoyTheunissen.AudioSyntax
                 }
             }
 
-            AudioSyntaxSystem.UnregisterActiveEventPlayback(this);
+            if (hasRegisteredPlayback)
+            {
+                hasRegisteredPlayback = false;
+                AudioSyntaxSystem.UnregisterActiveEventPlayback(this);
+            }
+        }
+
+        public void Restart()
+        {
+            Stop();
+            
+            CreateInstance();
         }
         
         private void UpdateTimelineMarkerCallbackState()
