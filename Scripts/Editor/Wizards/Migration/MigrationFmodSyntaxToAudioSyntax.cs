@@ -24,6 +24,7 @@ namespace RoyTheunissen.AudioSyntax
             refactors.Add(new FmodSyntaxNamespaceToAudioSyntaxNamespaceRefactor());
             refactors.Add(new FmodSyntaxOutdatedSystemReferencesRefactor());
             refactors.Add(new FmodSyntaxAudioReferencePlaybackTypeRefactor());
+            refactors.Add(new FmodSyntaxAudioFolderRenameRefactor());
         }
     }
 
@@ -187,6 +188,39 @@ namespace RoyTheunissen.AudioSyntax
                 string.Format(onFmodPlaybackUnregistrationMethod, NewPlaybackType),
                 string.Format(onFmodPlaybackUnregistrationMethod, OldFmodSpecificPlaybackType),
                 ~FileScopes.GeneratedCode);
+        }
+    }
+    
+    public sealed class FmodSyntaxAudioFolderRenameRefactor : FmodSyntaxToAudioSyntaxRefactor
+    {
+        private const string OldAudioFolderType = "FmodAudioFolder";
+        private const string NewAudioFolderType = "AudioFolder";
+
+        protected override string IsNecessaryDisplayText => $"{OldAudioFolderType} has been renamed to {NewAudioFolderType} because it is used for Unity Audio Syntax as well.";
+
+        protected override string NotNecessaryDisplayText => $"There seem to be no more references to '{OldAudioFolderType}'.";
+
+        protected override string ConfirmationDialogueText => $"Are you sure you want to automatically update references to " +
+                                                              $"'{OldAudioFolderType}' with references to '{NewAudioFolderType}' " +
+                                                              $"where possible?";
+        
+        private readonly Dictionary<string, string> replacements = new()
+        {
+            { OldAudioFolderType, NewAudioFolderType },
+        };
+
+        protected override bool CheckIfNecessaryInternal(out Migration.IssueUrgencies urgency)
+        {
+            bool isNecessary = IsReplacementNecessary(OldAudioFolderType, NewAudioFolderType, FileScopes.GeneratedCode);
+
+            urgency = Migration.IssueUrgencies.Required;
+            
+            return isNecessary;
+        }
+
+        protected override void OnPerform()
+        {
+            ReplaceInScripts(OldAudioFolderType, NewAudioFolderType, FileScopes.GeneratedCode);
         }
     }
 }
