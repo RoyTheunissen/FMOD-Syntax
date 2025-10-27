@@ -75,10 +75,6 @@ namespace RoyTheunissen.AudioSyntax
             time += DeltaTime;
             
             normalizedProgress = (time / duration).Saturate();
-
-            // Make sure the sound comes from the specified transform.
-            if (IsLocal && Origin != null)
-                Source.transform.position = Origin.position;
                 
             TryFiringRemainingEvents(timePrevious, time);
             

@@ -121,21 +121,6 @@ namespace RoyTheunissen.AudioSyntax
 
             UpdateTimeAndFireTimelineEvents();
 
-            // Make sure the sound comes from the specified transform.
-            if (IsLocal)
-            {
-                if (Origin != null)
-                {
-                    Source.transform.position = Origin.position;
-                }
-                else
-                {
-                    // Audio loop was started on an object but the object was destroyed. Clean up the audio loop
-                    // too to prevent it from sticking around.
-                    Cleanup();
-                }
-            }
-
             timePrevious = time;
         }
 

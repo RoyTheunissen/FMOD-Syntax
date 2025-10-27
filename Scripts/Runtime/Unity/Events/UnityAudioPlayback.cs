@@ -119,6 +119,8 @@ namespace RoyTheunissen.AudioSyntax
         private float volumeTweenDuration;
         private float volumeTweenVelocity;
         private bool isFadingOut;
+        
+        private bool hasRegisteredPlayback;
 
         private void InitializeInternal(Transform origin, float volumeFactorOverride)
         {
@@ -178,11 +180,45 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_EDITOR
             lastEditorUpdateTime = EditorApplication.timeSinceStartup;
 #endif
+            
+            UpdateSpatialBlend();
+            UpdateSpatialization();
+            
+            if (!hasRegisteredPlayback)
+            {
+                hasRegisteredPlayback = true;
+                AudioSyntaxSystem.RegisterActiveEventPlayback(this);
+            }
 
             OnStart();
+            
+#if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
+            Source.name = "AudioSource - " + this;
+#endif // DEBUG_AUDIO_SOURCE_POOLING
         }
 
         protected abstract void OnStart();
+
+        public void Restart()
+        {
+            Stop();
+            
+            didCleanUp = false;
+            canBeCleanedUp = false;
+
+            time = 0.0f;
+            timePrevious = 0.0f;
+            normalizedProgress = 0.0f;
+
+            isFadingOut = false;
+            isTweeningVolume = false;
+            volumeTweenTarget = 0.0f;
+            
+            if (Source == null)
+                source = UnityAudioSyntaxSystem.Instance.GetAudioSourceForPlayback();
+            
+            Start();
+        }
         
         public virtual void Update()
         {
@@ -199,6 +235,8 @@ namespace RoyTheunissen.AudioSyntax
 #endif
 
             UpdateVolumeTween();
+            
+            UpdateSpatialization();
         }
         
         private void UpdateVolumeTween()
@@ -281,7 +319,13 @@ namespace RoyTheunissen.AudioSyntax
                 Source.Stop();
 
                 UnityAudioSyntaxSystem.Instance.ReturnAudioSourceForPlayback(Source);
-                AudioSyntaxSystem.UnregisterActiveEventPlayback(this);
+                source = null;
+                
+                if (hasRegisteredPlayback)
+                {
+                    hasRegisteredPlayback = false;
+                    AudioSyntaxSystem.UnregisterActiveEventPlayback(this);
+                }
             }
 
             OnCleanupInternal();
@@ -291,6 +335,22 @@ namespace RoyTheunissen.AudioSyntax
         protected abstract void OnCleanupInternal();
 
         protected abstract void OnCleanup();
+        
+        protected void UpdateSpatialization()
+        {
+            if (!IsLocal)
+                return;
+
+            if (Origin == null)
+            {
+                // Audio loop was started on an object but the object was destroyed. Clean up the audio loop
+                // too to prevent it from sticking around.
+                Cleanup();
+                return;
+            }
+
+            Source.transform.position = Origin.position;
+        }
 
         public IAudioPlayback AddTimelineEventHandler(
             AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
@@ -340,12 +400,6 @@ namespace RoyTheunissen.AudioSyntax
             where PlaybackType : UnityAudioPlayback, new()
         {
             playback.Initialize(audioEventConfig, origin, volumeFactor);
-            
-#if DEBUG_AUDIO_SOURCE_POOLING && UNITY_EDITOR
-            audioSource.name = "AudioSource - " + playback;
-#endif // DEBUG_AUDIO_SOURCE_POOLING
-
-            AudioSyntaxSystem.RegisterActiveEventPlayback(playback);
         }
 
         public static PlaybackType Play<PlaybackType>(
