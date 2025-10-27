@@ -6,8 +6,14 @@ public ##EventName##Playback Play(Transform source, ##ParameterArgumentsWithType
     return instance;
 }
 
+public ##EventName##Playback Play(Vector3 position, ##ParameterArgumentsWithType##)
+{
+    ##EventName##Playback instance = new ##EventName##Playback();
+    instance.Play(EventDescription, position, ##ParameterArguments##);
+    return instance;
+}
+
 public ##EventName##Playback Play(##ParameterArgumentsWithType##)
 {
     return Play(null, ##ParameterArguments##);
 }
-

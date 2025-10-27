@@ -5,3 +5,10 @@ public void Play(EventDescription eventDescription, Transform source, ##Paramete
     ##ParameterInitializationsFromArguments##
 }
 
+public void Play(EventDescription eventDescription, Vector3 position, ##ParameterArgumentsWithType##)
+{
+    Play(eventDescription, position);
+    
+    ##ParameterInitializationsFromArguments##
+}
+

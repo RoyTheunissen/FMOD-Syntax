@@ -26,10 +26,16 @@ namespace RoyTheunissen.AudioSyntax
         }
 
         public abstract PlaybackType Play(Transform source = null);
+        public abstract PlaybackType Play(Vector3 position);
 
         IAudioPlayback IAudioConfig.Play(Transform source)
         {
             return Play(source);
+        }
+        
+        IAudioPlayback IAudioConfig.Play(Vector3 position)
+        {
+            return Play(position);
         }
     }
 }

@@ -8,5 +8,6 @@ namespace RoyTheunissen.AudioSyntax
         string Path { get; }
         
         IAudioPlayback Play(Transform source = null);
+        IAudioPlayback Play(Vector3 position);
     }
 }

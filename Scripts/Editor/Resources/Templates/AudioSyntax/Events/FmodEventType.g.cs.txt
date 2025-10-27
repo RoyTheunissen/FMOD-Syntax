@@ -8,6 +8,12 @@ public sealed class ##EventName##Config : ##EventConfigBaseType##
         instance.Play(EventDescription, source);
         return instance;
     }
+    public override ##EventName##Playback Play(Vector3 position)
+    {
+        ##EventName##Playback instance = new ##EventName##Playback();
+        instance.Play(EventDescription, position);
+        return instance;
+    }
     ##ConfigPlayMethodWithParameters##
 }
 ##Attributes##

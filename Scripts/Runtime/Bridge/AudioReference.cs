@@ -95,6 +95,10 @@ namespace RoyTheunissen.AudioSyntax
         {
             return FmodAudioConfig.Play(source);
         }
+        public FmodParameterlessAudioPlayback PlayFMOD(Vector3 position)
+        {
+            return FmodAudioConfig.Play(position);
+        }
 #endif // FMOD_AUDIO_SYNTAX
         
 #if UNITY_AUDIO_SYNTAX
@@ -119,6 +123,31 @@ namespace RoyTheunissen.AudioSyntax
                 case Modes.FMOD:
 #if FMOD_AUDIO_SYNTAX
                     return PlayFMOD(source);
+#else
+                    Debug.LogError("Trying to play an FMOD Audio Reference while the project is not configured for "+
+                                    "FMOD. Is the FMOD_AUDIO_SYNTAX scripting define symbol missing?");
+                    return null;
+#endif
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        
+        public IAudioPlayback Play(Vector3 position)
+        {
+            switch (Mode)
+            {
+                case Modes.Unity:
+#if UNITY_AUDIO_SYNTAX
+                    return PlayUnity(position);
+#else
+                    Debug.LogError("Trying to play a Unity Audio Reference while the project is not configured for "+
+                                   "Unity native audio. Is the UNITY_AUDIO_SYNTAX scripting define symbol missing?");
+                    return null;
+#endif
+                case Modes.FMOD:
+#if FMOD_AUDIO_SYNTAX
+                    return PlayFMOD(position);
 #else
                     Debug.LogError("Trying to play an FMOD Audio Reference while the project is not configured for "+
                                     "FMOD. Is the FMOD_AUDIO_SYNTAX scripting define symbol missing?");

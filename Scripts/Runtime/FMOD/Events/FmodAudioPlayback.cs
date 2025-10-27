@@ -19,12 +19,23 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public abstract class FmodAudioPlayback : FmodPlayablePlaybackBase, IFmodAudioPlayback
     {
+        private enum SpatializationTypes
+        {
+            Global,
+            Transform,
+            StaticPosition,
+        }
+        
         private bool isOneshot = false;
         public bool IsOneshot
         {
             get => isOneshot;
             protected set => isOneshot = value;
         }
+
+        [NonSerialized] private SpatializationTypes spatializationType;
+        [NonSerialized] private Transform spatializationTransform;
+        [NonSerialized] private Vector3 spatializationStaticPosition;
         
         public delegate void TimelineMarkerReachedHandler(FmodAudioPlayback playback, string markerName);
         private int timelineMarkerListenerCount;
@@ -50,11 +61,26 @@ namespace RoyTheunissen.AudioSyntax
         [NonSerialized] private bool hasRegisteredTimelineMarkerReachedCallback;
 
         [NonSerialized] private bool hasRegisteredPlayback;
-        [NonSerialized] private Transform source;
 
         private Dictionary<string, IAudioPlayback.AudioClipGenericEventHandler> timelineEventIdToHandlers;
         
         public void Play(EventDescription eventDescription, Transform source)
+        {
+            spatializationType = source == null ? SpatializationTypes.Global : SpatializationTypes.Transform;
+            spatializationTransform = source;
+            
+            PlayInternal(eventDescription);
+        }
+        
+        public void Play(EventDescription eventDescription, Vector3 staticPosition)
+        {
+            spatializationType = SpatializationTypes.StaticPosition;
+            spatializationStaticPosition = staticPosition;
+            
+            PlayInternal(eventDescription);
+        }
+
+        private void PlayInternal(EventDescription eventDescription)
         {
             eventDescription.getPath(out string path);
             
@@ -64,8 +90,6 @@ namespace RoyTheunissen.AudioSyntax
                 Debug.LogError($"Trying to play invalid FMOD Event guid: '{guid}' path:'{path}'");
                 return;
             }
-
-            this.source = source;
 
             // Events are called something like event:/ but we want to get rid of any prefix like that.
             // Also every 'folder' along the way will be treated like a sort of 'tag'
@@ -86,10 +110,22 @@ namespace RoyTheunissen.AudioSyntax
             EventDescription.createInstance(out EventInstance newInstance);
             Instance = newInstance;
             
-            if (source != null)
+            if (spatializationType == SpatializationTypes.Transform)
             {
-                Instance.set3DAttributes(RuntimeUtils.To3DAttributes(source));
-                RuntimeManager.AttachInstanceToGameObject(Instance, source);
+                if (spatializationTransform != null)
+                {
+                    Instance.set3DAttributes(RuntimeUtils.To3DAttributes(spatializationTransform));
+                    RuntimeManager.AttachInstanceToGameObject(Instance, spatializationTransform);
+                }
+                else
+                {
+                    Debug.LogError($"Tried to spatialize FMOD Event '{Path}' to transform " +
+                                   $"'{spatializationTransform}' which has seemingly been destroyed already.");
+                }
+            }
+            else if (spatializationType == SpatializationTypes.StaticPosition)
+            {
+                Instance.set3DAttributes(RuntimeUtils.To3DAttributes(spatializationStaticPosition));
             }
 
             InitializeParameters();
