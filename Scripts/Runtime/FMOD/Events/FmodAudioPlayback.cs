@@ -262,6 +262,27 @@ namespace RoyTheunissen.AudioSyntax
 
             return this;
         }
+        
+        public FmodAudioPlayback SetParameter(string name, float value, bool ignoreSeekSpeed = false)
+        {
+            if (Instance.isValid())
+                Instance.setParameterByName(name, value, ignoreSeekSpeed);
+            return this;
+        }
+
+        public FmodAudioPlayback SetParameter(PARAMETER_ID id, float value, bool ignoreSeekSpeed = false)
+        {
+            if (Instance.isValid())
+                Instance.setParameterByID(id, value, ignoreSeekSpeed);
+            return this;
+        }
+
+        public FmodAudioPlayback SetParameterLabel(string name, string label, bool ignoreSeekSpeed = false)
+        {
+            if (Instance.isValid())
+                Instance.setParameterByNameWithLabel(name, label, ignoreSeekSpeed);
+            return this;
+        }
     }
 }
 
