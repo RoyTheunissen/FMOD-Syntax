@@ -184,6 +184,7 @@ This system was developed for Unity 2021 and upwards, it's recommended that you 
 If you use an older version of Unity and are running into trouble, feel free to reach out and I'll see what I can do.
 
 ## Known Issues
+- **There is a feature to let you respond to timeline markers, but there seem to be problems with it in FMOD 2.03 that can result in crashes. It's being looked into.**
 - There is a setup for automatically regenerating the code when the FMOD banks update, but this would require you to modify the FMOD Unity plugin so that feature is currently disabled.
 
 
