@@ -19,6 +19,24 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public abstract class FmodAudioPlayback : FmodPlayablePlaybackBase, IFmodAudioPlayback
     {
+        // ------------------------------------------------------------------------------------------------------------
+        // Hideous timeline callback functionality
+        
+        // Variables that are modified in the callback need to be part of a seperate class.
+        // This class needs to be 'blittable' otherwise it can't be pinned in memory.
+        // NOTE: Absolutely disgusting code. I do not approve, but this is the way FMOD says it needs to be done:
+        // https://www.fmod.com/docs/2.00/unity/examples-timeline-callbacks.html
+        private class TimelineInfo
+        {
+            public int CurrentMusicBar = 0;
+            public StringWrapper LastMarker = new();
+        }
+        TimelineInfo timelineInfo;
+        GCHandle timelineHandle;
+        FMOD.Studio.EVENT_CALLBACK timelineEventCallback;
+        // ------------------------------------------------------------------------------------------------------------
+        
+        
         private bool isOneshot = false;
         public bool IsOneshot
         {
@@ -29,6 +47,8 @@ namespace RoyTheunissen.AudioSyntax
         [NonSerialized] private SpatializationTypes spatializationType;
         [NonSerialized] private Transform spatializationTransform;
         [NonSerialized] private Vector3 spatializationStaticPosition;
+
+        private readonly Queue<string> timelineMarkersReached = new();
         
         public delegate void TimelineMarkerReachedHandler(FmodAudioPlayback playback, string markerName);
         private int timelineMarkerListenerCount;
@@ -143,10 +163,10 @@ namespace RoyTheunissen.AudioSyntax
             timelineMarkerReachedEvent = null;
             timelineMarkerListenerCount = 0;
             
+            UpdateTimelineMarkerCallbackState(true);
+            
             if (Instance.isValid())
             {
-                Instance.setCallback(null, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
-                
                 Instance.stop(STOP_MODE.IMMEDIATE);
                 
                 RuntimeManager.DetachInstanceFromGameObject(Instance);
@@ -171,15 +191,37 @@ namespace RoyTheunissen.AudioSyntax
             CreateInstance();
         }
         
-        private void UpdateTimelineMarkerCallbackState()
+        private void UpdateTimelineMarkerCallbackState(bool forceRemove = false)
         {
             bool shouldRegisterTimelineMarkerReachedCallback = timelineMarkerListenerCount > 0 ||
                                             (timelineEventIdToHandlers != null && timelineEventIdToHandlers.Count > 0);
+            if (forceRemove)
+                shouldRegisterTimelineMarkerReachedCallback = false;
             
             if (!hasRegisteredTimelineMarkerReachedCallback && shouldRegisterTimelineMarkerReachedCallback)
-                Instance.setCallback(OnTimelineMarkerReached, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
-            else if (hasRegisteredTimelineMarkerReachedCallback && !hasRegisteredTimelineMarkerReachedCallback)
+            {
+                // Timeline callback code (see: https://www.fmod.com/docs/2.00/unity/examples-timeline-callbacks.html)
+                timelineInfo = new TimelineInfo();
+                
+                // Explicitly create the delegate object and assign it to a member so it doesn't get freed
+                // by the garbage collected while it's being used
+                // NOTE: The documentation of 2.00 does this but 2.03 does not, but I am finding a very nasty hard
+                // editor crash that seemingly only occurs when this delegate object is not created / used...
+                timelineEventCallback = new FMOD.Studio.EVENT_CALLBACK(OnTimelineMarkerReached);
+                
+                // Pin the class that will store the data modified during the callback
+                timelineHandle = GCHandle.Alloc(timelineInfo);
+                // Pass the object through the userdata of the instance
+                Instance.setUserData(GCHandle.ToIntPtr(timelineHandle));
+                Instance.setCallback(timelineEventCallback, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+                // -----------------------------------------------------------------------------------------------------
+            }
+            else if (hasRegisteredTimelineMarkerReachedCallback && !shouldRegisterTimelineMarkerReachedCallback)
+            {
                 Instance.setCallback(null, EVENT_CALLBACK_TYPE.TIMELINE_MARKER);
+                Instance.setUserData(IntPtr.Zero);
+                timelineHandle.Free();
+            }
 
             hasRegisteredTimelineMarkerReachedCallback = shouldRegisterTimelineMarkerReachedCallback;
         }
@@ -208,15 +250,63 @@ namespace RoyTheunissen.AudioSyntax
             return this;
         }
         
+        [AOT.MonoPInvokeCallback(typeof(FMOD.Studio.EVENT_CALLBACK))]
         private RESULT OnTimelineMarkerReached(EVENT_CALLBACK_TYPE type, IntPtr @event, IntPtr parameterPtr)
         {
-            TIMELINE_MARKER_PROPERTIES parameter = (TIMELINE_MARKER_PROPERTIES)Marshal.PtrToStructure(
-                parameterPtr, typeof(TIMELINE_MARKER_PROPERTIES));
+            // ---------------------------------------------------------------------------------------------------------
+            // Awful FMOD timeline callback code. Do not change it too much, it appears to be very fragile.
+            // See: https://www.fmod.com/docs/2.00/unity/examples-timeline-callbacks.html
+            // Retrieve the user data
+            IntPtr timelineInfoPtr;
+            RESULT result = Instance.getUserData(out timelineInfoPtr);
+            if (result != RESULT.OK)
+            {
+                Debug.LogError("Timeline Callback error: " + result);
+                return RESULT.OK;
+            }
 
-            string id = parameter.name;
+            if (timelineInfoPtr == IntPtr.Zero)
+            {
+                Debug.LogError("Bogus Timeline Marker reached: timeline info pointer was NULL.");
+                return RESULT.OK;
+            }
+            
+            // Get the object to store beat and marker details
+            GCHandle timelineHandle = GCHandle.FromIntPtr(timelineInfoPtr);
+            
+            TimelineInfo timelineInfo = (TimelineInfo)timelineHandle.Target;
+
+            if (timelineInfo == null)
+            {
+                Debug.LogError("Bogus Timeline Marker reached: timeline handle could not be cast to timeline handle.");
+                return RESULT.OK;
+            }
+
+            string id = string.Empty;
+            switch (type)
+            {
+                // Unused
+                //case FMOD.Studio.EVENT_CALLBACK_TYPE.TIMELINE_BEAT:
+                
+                case FMOD.Studio.EVENT_CALLBACK_TYPE.TIMELINE_MARKER:
+                {
+                    TIMELINE_MARKER_PROPERTIES parameter = (FMOD.Studio.TIMELINE_MARKER_PROPERTIES)Marshal.PtrToStructure(parameterPtr, typeof(FMOD.Studio.TIMELINE_MARKER_PROPERTIES));
+                    timelineInfo.LastMarker = parameter.name;
+                    
+                    id = parameter.name;
+                    break;
+                }
+                case FMOD.Studio.EVENT_CALLBACK_TYPE.DESTROYED:
+                {
+                    // Now the event has been destroyed, unpin the timeline memory so it can be garbage collected
+                    timelineHandle.Free();
+                    break;
+                }
+            }
+            // ---------------------------------------------------------------------------------------------------------
             
             timelineMarkerReachedEvent?.Invoke(this, id);
-
+            
             // If a generic event ID handler was registered for this type, then fire those now. 
             if (timelineEventIdToHandlers != null && timelineEventIdToHandlers.TryGetValue(
                     id, out IAudioPlayback.AudioClipGenericEventHandler handlers))
