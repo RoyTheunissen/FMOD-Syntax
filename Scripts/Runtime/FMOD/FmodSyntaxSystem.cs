@@ -16,11 +16,11 @@ namespace RoyTheunissen.AudioSyntax
     /// </summary>
     public sealed class FmodSyntaxSystem
     {
-        private static readonly List<IAudioPlayback> activeEventPlaybacks = new();
-        public static List<IAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
+        private static readonly List<FmodAudioPlayback> activeEventPlaybacks = new();
+        public static IReadOnlyList<FmodAudioPlayback> ActiveEventPlaybacks => activeEventPlaybacks;
         
         private static readonly List<FmodSnapshotPlayback> activeSnapshotPlaybacks = new();
-        public static List<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
+        public static IReadOnlyList<FmodSnapshotPlayback> ActiveSnapshotPlaybacks => activeSnapshotPlaybacks;
         
         private static readonly List<IOnFmodPlayback> onEventPlaybackCallbackReceivers = new();
         
@@ -56,6 +56,14 @@ namespace RoyTheunissen.AudioSyntax
             didInitialize = true;
             
             onEventPlaybackCallbackReceivers.Clear();
+        }
+        
+        public void Update()
+        {
+            for (int i = 0; i < activeEventPlaybacks.Count; i++)
+            {
+                activeEventPlaybacks[i].Update();
+            }
         }
         
         /// <summary>
