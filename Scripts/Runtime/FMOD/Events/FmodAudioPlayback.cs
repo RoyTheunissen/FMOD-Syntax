@@ -20,12 +20,19 @@ namespace RoyTheunissen.AudioSyntax
     public abstract class FmodAudioPlayback : FmodPlayablePlaybackBase, IFmodAudioPlayback
     {
         // ------------------------------------------------------------------------------------------------------------
-        // Hideous timeline callback functionality
+        // Hideous timeline callback functionality. I do not approve, but this is the way FMOD says it needs to be done:
+        // https://www.fmod.com/docs/2.03/unity/examples-timeline-callbacks.html
+        // This class exists so that it can be pinned in memory, which in turn is then passed along to a *static*
+        // callback method for timeline events *that happens on a separate thread, not the Unity main thread*. Then
+        // we grab this object, queue up the timeline markers that are reached, and then on the main thread,
+        // on the next Update, the playback instance will fire all the timeline events that were buffered, to ensure
+        // that the callbacks happen on the main Unity thread. This thing with pinning the class in memory is not
+        // necessary to get it to work in the editor, but it IS necessary to get it to work in IL2CPP builds.
+        // So while this may all look very "un-C#" and bloated and unnecessary, I assure you that every part of this
+        // is necessary for FMOD's code to work.
         
         // Variables that are modified in the callback need to be part of a seperate class.
         // This class needs to be 'blittable' otherwise it can't be pinned in memory.
-        // NOTE: Absolutely disgusting code. I do not approve, but this is the way FMOD says it needs to be done:
-        // https://www.fmod.com/docs/2.00/unity/examples-timeline-callbacks.html
         private class TimelineInfo
         {
             public readonly ConcurrentQueue<string> TimelineMarkersReached = new();
@@ -220,13 +227,15 @@ namespace RoyTheunissen.AudioSyntax
             
             if (!hasRegisteredTimelineMarkerReachedCallback && shouldRegisterTimelineMarkerReachedCallback)
             {
-                // Timeline callback code (see: https://www.fmod.com/docs/2.00/unity/examples-timeline-callbacks.html)
+                // -----------------------------------------------------------------------------------------------------
+                // Timeline callback code (see the comment section at the top of this file)
                 timelineInfo = new TimelineInfo();
                 
                 // Explicitly create the delegate object and assign it to a member so it doesn't get freed
                 // by the garbage collected while it's being used
                 // NOTE: The documentation of 2.00 does this but 2.03 does not, but I am finding a very nasty hard
-                // editor crash that seemingly only occurs when this delegate object is not created / used...
+                // editor crash that seemingly only occurs when this delegate object is not created / used,
+                // so do not remove the delegate object that wraps the method...
                 timelineEventCallback = new EVENT_CALLBACK(OnTimelineMarkerReached);
                 
                 // Pin the class that will store the data modified during the callback
@@ -271,18 +280,12 @@ namespace RoyTheunissen.AudioSyntax
             return this;
         }
         
-        // NOTE: This works in the editor but not in a build, because it's not static, which IL2CPP can't marshal
+        // -------------------------------------------------------------------------------------------------------------
+        // Awful FMOD timeline callback code. Do not change it too much, it is written in this really bizarre way
+        // for very complicated and undocumented reasons and changing small things is likely to break things.
         [AOT.MonoPInvokeCallback(typeof(FMOD.Studio.EVENT_CALLBACK))]
         private static RESULT OnTimelineMarkerReached(EVENT_CALLBACK_TYPE type, IntPtr instancePtr, IntPtr parameterPtr)
         {
-            // ---------------------------------------------------------------------------------------------------------
-            // Awful FMOD timeline callback code. Do not change it too much, it is written in this really bizarre way
-            // for very complicated and undocumented reasons and changing small things is likely to break things.
-            // See: https://www.fmod.com/docs/2.00/unity/examples-timeline-callbacks.html
-            // Note that it is quite different from 2.03:
-            // https://www.fmod.com/docs/2.03/unity/examples-timeline-callbacks.html
-            // TODO: I got this to work on 2.03 but we may have to go back and check that this still works on 2.00
-            
             EventInstance instance = new(instancePtr);
             
             // Retrieve the user data
@@ -325,19 +328,18 @@ namespace RoyTheunissen.AudioSyntax
                     break;
                 }
                 
-                // Unused
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.DESTROYED:
                     // Now the event has been destroyed, unpin the timeline memory so it can be garbage collected
                     timelineHandle.Free();
                     break;
             }
-            // ---------------------------------------------------------------------------------------------------------
             
             // Buffer the timeline marker event so we can handle it on the main thread.
             timelineInfo.TimelineMarkersReached.Enqueue(id);
             
             return RESULT.OK;
         }
+        // -------------------------------------------------------------------------------------------------------------
 
         public IAudioPlayback AddTimelineEventHandler(
             AudioTimelineEventId @event, IAudioPlayback.AudioClipGenericEventHandler handler)
