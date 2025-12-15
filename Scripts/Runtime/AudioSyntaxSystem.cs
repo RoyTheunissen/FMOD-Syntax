@@ -125,6 +125,10 @@ namespace RoyTheunissen.AudioSyntax
 #if UNITY_AUDIO_SYNTAX
             UnityAudioSyntaxSystem.Instance.Update();
 #endif // UNITY_AUDIO_SYNTAX
+            
+#if FMOD_AUDIO_SYNTAX
+            FmodSyntaxSystem.Instance.Update();
+#endif // FMOD_AUDIO_SYNTAX
         }
         
         private static void CullPlaybacksInternal()
