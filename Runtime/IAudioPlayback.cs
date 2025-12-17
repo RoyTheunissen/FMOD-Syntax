@@ -19,5 +19,7 @@ namespace RoyTheunissen.FMODSyntax
         bool IsOneshot { get; }
         float NormalizedProgress { get; }
         float Volume { get; }
+        
+        public delegate void AudioClipGenericEventHandler(IAudioPlayback audioPlayback, string eventId);
     }
 }

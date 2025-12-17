@@ -73,9 +73,17 @@ namespace RoyTheunissen.FMODSyntax
         /// <summary>
         /// Culls playbacks that are no longer necessary. You should perform this logic continuously.
         /// You can either call this or use the ActivePlaybacks list / playback callbacks to do it in your own system.
+        /// NOTE: This now does more than just cull playbacks, and functions more like an Update method.
+        /// In a newer version of the package, this method will be renamed to Update. 
         /// </summary>
         public static void CullPlaybacks()
         {
+            // Update active event playbacks (for dispatching buffered timeline marker events on the main thread)
+            for (int i = 0; i < activeEventPlaybacks.Count; i++)
+            {
+                activeEventPlaybacks[i].Update();
+            }
+            
             // Cull any events that are ready to be cleaned up.
             for (int i = activeEventPlaybacks.Count - 1; i >= 0; i--)
             {
