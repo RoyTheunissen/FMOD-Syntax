@@ -764,7 +764,9 @@ namespace RoyTheunissen.FMODSyntax
             return preDictionarySection + dictionarySection + postDictionarySection;
         }
 
+#if !AUDIO_SYNTAX_PACKAGE_DETECTED
         [MenuItem("FMOD/Generate FMOD Code %&g", false, 999999999)]
+#endif // !AUDIO_SYNTAX_PACKAGE_DETECTED
         public static void GenerateCode()
         {
             ParseMetaData();
