@@ -39,6 +39,10 @@ namespace RoyTheunissen.FMODSyntax
         [InitializeOnLoadMethod]
         private static void Initialize()
         {
+            // Automatically open the Fmod Syntax Setup Wizard if no settings file is detected.
+            // If we notice that the newer Audio Syntax package is defined, then the user is migrating away from
+            // Fmod Syntax and we can stop showing the Setup Wizard.
+#if !AUDIO_SYNTAX_PACKAGE_DETECTED
             string[] settingsAsset = AssetDatabase.FindAssets($"t:{nameof(FmodSyntaxSettings)}");
             if (settingsAsset.Length > 0)
                 return;
@@ -50,6 +54,7 @@ namespace RoyTheunissen.FMODSyntax
                 setupWizard.namespaceForGeneratedCode =
                     $"{SanitizeNamespace(Application.companyName)}.{SanitizeNamespace(Application.productName)}.FMOD";
             };
+#endif // !AUDIO_SYNTAX_PACKAGE_DETECTED
         }
 
         private static string SanitizeNamespace(string @namespace)

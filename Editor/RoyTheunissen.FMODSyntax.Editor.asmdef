@@ -20,6 +20,11 @@
             "name": "com.brunomikoski.scriptableobjectcollection",
             "expression": "2.2.1",
             "define": "SCRIPTABLE_OBJECT_COLLECTION"
+        },
+        {
+            "name": "com.roytheunissen.audio-syntax",
+            "expression": "0.2.5",
+            "define": "AUDIO_SYNTAX_PACKAGE_DETECTED"
         }
     ],
     "noEngineReferences": false

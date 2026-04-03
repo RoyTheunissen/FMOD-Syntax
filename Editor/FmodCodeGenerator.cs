@@ -1263,6 +1263,7 @@ namespace RoyTheunissen.FMODSyntax
             }
         }
 
+#if !AUDIO_SYNTAX_PACKAGE_DETECTED
         [MenuItem(RefactorOldEventReferencesMenuPath, false, 999999998)]
         private static void TryRefactoringOldEventReferences()
         {
@@ -1278,6 +1279,7 @@ namespace RoyTheunissen.FMODSyntax
         {
             return File.Exists(PreviousMetaDataFilePath);
         }
+#endif // !AUDIO_SYNTAX_PACKAGE_DETECTED
 
         private static void TryRefactoringOldEventReferencesInternal(bool isTriggeredExplicitlyViaMenu)
         {
