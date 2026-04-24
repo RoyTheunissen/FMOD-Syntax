@@ -24,6 +24,10 @@
 
 _Generates code to allow invoking FMOD events with a strongly-typed syntax._
 
+> [!WARNING]  
+> FMOD-Syntax is superceded by [Audio-Syntax](https://github.com/RoyTheunissen/Audio-Syntax), which lets you use the same workflow/feature with Unity's native audio solution as well.
+> Please transition to that package. A Migration Wizard has been created that helps transition your project automatically. [More info here](https://github.com/RoyTheunissen/Audio-Syntax/wiki/FMOD-Syntax#migrating-from-the-original-fmod-syntax-package-to-audio-syntax).
+
 ## About the Project
 
 Out-of-the-box FMOD requires you to access events and parameters via inspector references or by name.
