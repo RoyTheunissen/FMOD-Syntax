@@ -97,7 +97,7 @@ namespace RoyTheunissen.AudioSyntax
         private SnapshotConfigDropdownItem GetOrCreateChild(string guid, string name)
         {
             // Find a child with the specified name.
-            foreach (AdvancedDropdownItem child in children)
+            foreach (AdvancedDropdownItem child in childList)
             {
                 if (child.name == name)
                     return (SnapshotConfigDropdownItem)child;

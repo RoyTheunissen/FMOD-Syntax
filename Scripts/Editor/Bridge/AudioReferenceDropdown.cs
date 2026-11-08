@@ -233,7 +233,7 @@ namespace RoyTheunissen.AudioSyntax
 
         public AudioConfigDropdownItem GetChild(string name)
         {
-            foreach (AdvancedDropdownItem child in children)
+            foreach (AdvancedDropdownItem child in childList)
             {
                 if (child.name == name)
                 {
